@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { MessageCircle, Phone, Sparkles } from "lucide-react";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { mockLeads, statusClasses, statusLabels } from "@/components/admin/mock-data";
@@ -9,7 +10,11 @@ type Props = {
 
 export default async function LeadDetailPage({ params }: Props) {
   const { id } = await params;
-  const lead = mockLeads.find((item) => item.id === id) ?? mockLeads[0];
+  const lead = mockLeads.find((item) => item.id === id);
+
+  if (!lead) {
+    notFound();
+  }
 
   return (
     <AdminShell title={`Заявка #${lead.id}`}>
@@ -71,10 +76,10 @@ export default async function LeadDetailPage({ params }: Props) {
             <div className="flex gap-3">
               <Sparkles className="mt-1 h-5 w-5 text-blue-600" />
               <div>
-                <h2 className="font-semibold text-blue-950">AI-summary placeholder</h2>
+                <h2 className="font-semibold text-blue-950">Демо-резюме заявки</h2>
                 <p className="mt-1 text-sm text-blue-900">
                   Здесь будет краткое резюме заявки и черновик сообщения клиенту после
-                  подключения OpenAI API.
+                  подключения OpenAI API. Сейчас блок показывает запланированный сценарий.
                 </p>
               </div>
             </div>
@@ -93,10 +98,16 @@ export default async function LeadDetailPage({ params }: Props) {
               <option value="completed">Завершена</option>
               <option value="rejected">Отклонена</option>
             </select>
+            <p className="mt-2 text-xs text-slate-500">
+              Демо-режим: изменение статуса пока не сохраняется.
+            </p>
           </section>
           <section className="rounded-lg border bg-white p-5">
             <h2 className="font-semibold">Комментарий менеджера</h2>
             <textarea className="form-field mt-3 min-h-32" placeholder="Внутренний комментарий" />
+            <p className="mt-2 text-xs text-slate-500">
+              Демо-режим: комментарий пока не записывается в базу.
+            </p>
           </section>
         </aside>
       </div>

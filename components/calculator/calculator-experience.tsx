@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { ArrowRight, Car, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { calculateImportCost, type CalculationInput } from "@/lib/calculate";
 import { Button } from "@/components/ui/button";
+import { InfoAlert } from "@/components/ui/info-alert";
 import { CalculatorForm } from "@/components/calculator/calculator-form";
 import { CalculationResult } from "@/components/result/calculation-result";
 import { LeadForm } from "@/components/lead-form/lead-form";
@@ -72,14 +73,14 @@ export function CalculatorExperience() {
           <div className="flex flex-col justify-center">
             <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-md border bg-slate-50 px-3 py-1 text-sm text-slate-600">
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              Portfolio MVP, Supabase-ready, OpenAI-ready
+              Портфолио-MVP: готово к Supabase и OpenAI
             </div>
             <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
               Калькулятор импорта авто под ключ
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-slate-600">
               Первая версия сервиса для оценки бюджета, сбора заявок и демонстрации
-              админ-процесса менеджера. Формулы намеренно демо.
+              рабочего процесса менеджера. Формулы намеренно демонстрационные.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Button size="lg" onClick={() => document.getElementById("calculator")?.scrollIntoView({ behavior: "smooth" })}>
@@ -109,7 +110,7 @@ export function CalculatorExperience() {
               </div>
             </div>
             <p className="mt-5 text-xs leading-5 text-slate-400">
-              Визуальная структура перенесена из Figma-референса, код реализован как Next.js компоненты.
+              Визуальная структура перенесена из Figma-референса, код реализован как компоненты Next.js.
             </p>
           </div>
         </div>
@@ -123,7 +124,15 @@ export function CalculatorExperience() {
       </section>
 
       <section ref={leadRef} className="section-shell pb-8">
-        {showLeadForm ? <LeadForm input={input} result={result} /> : null}
+        {showLeadForm ? (
+          <div className="space-y-4">
+            <InfoAlert>
+              Демо-режим: данные пока не сохраняются в базу. Форма показывает будущий сценарий
+              отправки заявки в Supabase.
+            </InfoAlert>
+            <LeadForm input={input} result={result} />
+          </div>
+        ) : null}
       </section>
 
       <section id="admin-preview" className="border-t bg-white py-8">

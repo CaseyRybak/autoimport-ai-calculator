@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, Send } from "lucide-react";
 import type { CalculationBreakdown, CalculationInput } from "@/lib/calculate";
 import { Button } from "@/components/ui/button";
+import { InfoAlert } from "@/components/ui/info-alert";
 
 type Props = {
   input: CalculationInput;
@@ -17,9 +18,10 @@ export function LeadForm({ input, result }: Props) {
     return (
       <section className="rounded-lg border bg-white p-6 text-center shadow-sm">
         <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-600" />
-        <h2 className="mt-3 text-xl font-semibold text-slate-950">Заявка сохранена в демо-режиме</h2>
+        <h2 className="mt-3 text-xl font-semibold text-slate-950">Заявка принята в демо-режиме</h2>
         <p className="mt-2 text-sm text-slate-600">
-          На следующем этапе форма будет писать данные в Supabase.
+          Данные пока не сохраняются в базу. В следующей версии форма будет отправлять
+          заявку в Supabase.
         </p>
       </section>
     );
@@ -31,6 +33,10 @@ export function LeadForm({ input, result }: Props) {
         <h2 className="text-xl font-semibold text-slate-950">Оставить заявку</h2>
         <p className="text-sm text-slate-500">Менеджер проверит расчет и свяжется с клиентом</p>
       </div>
+
+      <InfoAlert className="mb-5">
+        Демо-режим: данные пока не сохраняются в базу.
+      </InfoAlert>
 
       <div className="mb-5 rounded-md border border-blue-100 bg-blue-50 p-4 text-sm text-blue-950">
         <p className="font-semibold">

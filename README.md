@@ -1,33 +1,78 @@
 # AutoImport AI Calculator
 
-Portfolio MVP for a vehicle import business. The app includes a public turnkey import
-cost calculator, lead form, demo admin screens, demo formulas and integration-ready
-structure for Supabase and OpenAI.
+Portfolio MVP for a vehicle import business. The project demonstrates a public
+turnkey import-cost calculator, lead capture flow, demo admin workspace and a clean
+foundation for Supabase/OpenAI integrations.
 
 ## Live demo
 
 https://autoimport-ai-calculator.vercel.app/
 
-## Stack
+## What I built
+
+- A responsive public calculator for estimating turnkey vehicle import costs.
+- A result breakdown with budget status, delta and demo explanation.
+- A lead form flow that is clearly marked as demo-mode.
+- A mock admin area with lead list, lead detail and calculation settings.
+- Shared calculation logic in `lib/calculate.ts` with unit tests.
+- Documentation, Supabase schema draft and deployment-ready project structure.
+
+## Business problem
+
+Vehicle import clients need a fast way to understand whether a car fits their budget
+before talking to a manager. Import teams need structured lead data, a clear calculation
+breakdown and a place to review requests. This MVP models that flow without pretending
+to be a production customs calculator.
+
+## MVP features
+
+- Calculator for Korea, China and Europe scenarios.
+- Demo formulas for price conversion, customs fee, recycle fee, logistics, company fee
+  and extra services.
+- Budget status: within budget or over budget.
+- Demo lead form with honest “not saved yet” messaging.
+- Mock admin: leads table, lead detail card, status/comment placeholders and settings.
+- Vercel deployment and GitHub-ready repository.
+
+## Tech stack
 
 - Next.js App Router
 - TypeScript
 - Tailwind CSS
 - Zod
-- shadcn/ui-ready component layout
+- node:test + tsx
+- shadcn/ui-ready component structure
 - Supabase-ready SQL schema
-- OpenAI API-ready env structure
+- OpenAI API-ready environment structure
 
-## MVP Features
+## Architecture decisions
 
-- Public calculator for Korea, China and Europe import scenarios.
-- Clean calculation logic in `lib/calculate.ts`.
-- Result breakdown with budget status and delta.
-- Demo lead form.
-- Admin draft: leads list, lead detail card and calculator settings.
-- Project docs: PRD, architecture and formulas.
+- Calculation logic is isolated in `lib/calculate.ts` so UI components do not own
+  business formulas.
+- Zod validates calculation input before producing a result.
+- App Router routes are kept small and delegate UI to `components/*`.
+- Admin data is intentionally mocked in `components/admin/mock-data.ts` until Supabase
+  persistence is connected.
+- Secrets are not committed. Environment variable names live in `.env.example`.
 
-## Local Development
+## Demo limitations
+
+- Form submissions are not saved yet.
+- Admin data is mock data, not database-backed.
+- Settings are read-only demo controls.
+- Supabase and OpenAI are prepared but not connected.
+- Formulas are demo-only and are not real customs formulas.
+
+## Roadmap
+
+- Connect Supabase and persist leads.
+- Load admin leads from Supabase.
+- Add authentication and row-level security for admin routes.
+- Replace demo formulas with verified business/legal calculation rules.
+- Add OpenAI-powered calculation explanation and manager message drafts.
+- Add screenshots and deployment metadata after the next UI pass.
+
+## How to run locally
 
 ```bash
 npm install
@@ -39,40 +84,22 @@ Open http://localhost:3000.
 Useful checks:
 
 ```bash
+npm test
 npm run typecheck
 npm run build
 ```
 
-## Project Structure
+## Project structure
 
 ```text
 app/                    Next.js routes
 components/calculator/  Calculator UI
 components/result/      Result and breakdown UI
 components/lead-form/   Lead form UI
-components/admin/       Demo admin UI
+components/admin/       Demo admin UI and mock data
 components/ui/          shadcn/ui-ready primitives
-lib/                    Business logic and utilities
+lib/                    Business logic, validation and tests
 docs/                   Product and architecture docs
 supabase/               SQL schema draft
 reference/figma/        Original Figma export reference
 ```
-
-## Environment
-
-Copy `.env.example` to `.env.local` and fill values only when integrations are added.
-Do not commit real secrets.
-
-## Demo Formulas Disclaimer
-
-The current formulas are demo-only. They are intentionally simple and are not real
-customs formulas. Replace them with verified business/legal rules before any real use.
-
-## Roadmap
-
-- Persist leads in Supabase.
-- Add admin authentication and row-level security.
-- Replace demo calculations with verified formulas.
-- Add OpenAI-powered explanation and manager message drafts.
-- Add tests for calculation logic.
-- Improve Vercel deployment metadata and add production environment variables when integrations are connected.

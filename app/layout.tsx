@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "AutoImport AI Calculator",
-  description: "Demo MVP calculator for turnkey vehicle import costs.",
+  description: "Демо-MVP калькулятора стоимости импорта авто под ключ.",
 };
 
 export default function RootLayout({

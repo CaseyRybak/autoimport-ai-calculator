@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BarChart3, Eye, Settings, Users } from "lucide-react";
 import { mockLeads, statusClasses, statusLabels } from "@/components/admin/mock-data";
 import { Button } from "@/components/ui/button";
+import { InfoAlert } from "@/components/ui/info-alert";
 
 export function AdminPreview() {
   const avgBudget = Math.round(
@@ -15,13 +16,18 @@ export function AdminPreview() {
           <p className="text-sm font-medium text-blue-600">Демо-админка</p>
           <h2 className="text-2xl font-semibold text-slate-950">Заявки и настройки расчета</h2>
           <p className="mt-1 text-sm text-slate-600">
-            Заготовка рабочего места менеджера: список заявок, карточка заявки, настройки.
+            Заготовка рабочего места менеджера: список заявок, карточка заявки и настройки.
           </p>
         </div>
         <Button asChild variant="outline">
           <Link href="/admin">Открыть админку</Link>
         </Button>
       </div>
+
+      <InfoAlert>
+        Mock admin: заявки показаны как демо-данные. Подключение Supabase запланировано
+        для следующей версии.
+      </InfoAlert>
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border bg-white p-4">
@@ -36,7 +42,7 @@ export function AdminPreview() {
         </div>
         <div className="rounded-lg border bg-white p-4">
           <Settings className="h-5 w-5 text-slate-600" />
-          <p className="mt-3 text-2xl font-semibold">Demo</p>
+          <p className="mt-3 text-2xl font-semibold">Демо</p>
           <p className="text-sm text-slate-500">Формулы и курсы</p>
         </div>
       </div>

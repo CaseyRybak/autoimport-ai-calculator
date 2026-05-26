@@ -1,6 +1,7 @@
 import { CheckCircle2, CircleAlert, Sparkles } from "lucide-react";
 import type { CalculationBreakdown, CalculationInput } from "@/lib/calculate";
 import { Button } from "@/components/ui/button";
+import { InfoAlert } from "@/components/ui/info-alert";
 
 type Props = {
   input: CalculationInput;
@@ -41,7 +42,7 @@ export function CalculationResult({ input, result, onLeadClick }: Props) {
               {input.brand} {input.model} {input.year}
             </h2>
             <p className="mt-1 text-sm text-slate-300">
-              {countryLabel[input.country]} to {input.destinationCity}
+              {countryLabel[input.country]} {"->"} {input.destinationCity}
             </p>
           </div>
           <div
@@ -84,15 +85,20 @@ export function CalculationResult({ input, result, onLeadClick }: Props) {
           <div className="flex gap-3">
             <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
             <div className="text-sm text-blue-950">
-              <p className="font-semibold">AI-ready explanation</p>
+              <p className="font-semibold">Объяснение расчета</p>
               <p className="mt-1">
                 Основная стоимость складывается из цены авто, демо-таможенных платежей,
-                логистики, комиссии и выбранных услуг. Реальная интеграция OpenAI будет
-                добавлена после подключения API.
+                логистики, комиссии и выбранных услуг. Объяснение подготовлено как демо-блок;
+                генерация через OpenAI будет подключена в следующей версии.
               </p>
             </div>
           </div>
         </div>
+
+        <InfoAlert>
+          Демо-режим: расчет использует упрощенные коэффициенты и не заменяет реальную
+          проверку менеджером.
+        </InfoAlert>
 
         <div className="rounded-md border bg-slate-50 p-4">
           <h3 className="font-semibold text-slate-950">Хотите точный расчет?</h3>
