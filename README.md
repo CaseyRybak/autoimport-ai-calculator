@@ -4,6 +4,10 @@ Portfolio MVP for a vehicle import business. The app includes a public turnkey i
 cost calculator, lead form, demo admin screens, demo formulas and integration-ready
 structure for Supabase and OpenAI.
 
+## Live demo
+
+https://autoimport-ai-calculator.vercel.app/
+
 ## Stack
 
 - Next.js App Router
@@ -71,4 +75,4 @@ customs formulas. Replace them with verified business/legal rules before any rea
 - Replace demo calculations with verified formulas.
 - Add OpenAI-powered explanation and manager message drafts.
 - Add tests for calculation logic.
-- Deploy to Vercel.
+- Improve Vercel deployment metadata and add production environment variables when integrations are connected.

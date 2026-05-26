@@ -15,6 +15,7 @@ and readiness for Supabase and OpenAI integrations.
 - Demo admin pages are available for leads, lead detail and settings.
 - Supabase schema is drafted.
 - No real API keys are present.
+- First version is deployed on Vercel: https://autoimport-ai-calculator.vercel.app/
 
 ## Next Steps
 
@@ -23,4 +24,4 @@ and readiness for Supabase and OpenAI integrations.
 - Replace demo formulas with verified business/legal calculation rules.
 - Add OpenAI-powered explanation and manager message generation.
 - Add tests for `lib/calculate.ts`.
-- Deploy to Vercel and connect a GitHub repository.
+- Add the Vercel production URL to future portfolio materials.
