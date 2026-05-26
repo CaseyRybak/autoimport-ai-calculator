@@ -1,21 +1,23 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { mockLeads, statusClasses, statusLabels } from "@/components/admin/mock-data";
+import { leadStatusClasses, leadStatusLabels, listLeads } from "@/lib/leads";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const leads = await listLeads();
+
   return (
     <AdminShell title="Заявки">
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border bg-white p-4">
           <p className="text-sm text-slate-500">Новые заявки</p>
           <p className="mt-2 text-3xl font-semibold">
-            {mockLeads.filter((lead) => lead.status === "new").length}
+            {leads.filter((lead) => lead.status === "new").length}
           </p>
         </div>
         <div className="rounded-lg border bg-white p-4">
           <p className="text-sm text-slate-500">В работе</p>
           <p className="mt-2 text-3xl font-semibold">
-            {mockLeads.filter((lead) => lead.status === "in_progress").length}
+            {leads.filter((lead) => lead.status === "in_progress").length}
           </p>
         </div>
         <div className="rounded-lg border bg-white p-4">
@@ -40,7 +42,7 @@ export default function AdminPage() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {mockLeads.map((lead) => (
+              {leads.map((lead) => (
                 <tr key={lead.id}>
                   <td className="px-4 py-3 text-slate-600">{lead.date}</td>
                   <td className="px-4 py-3 font-medium">{lead.client}</td>
@@ -49,8 +51,8 @@ export default function AdminPage() {
                   <td className="px-4 py-3">{(lead.budget / 1_000_000).toFixed(1)}М ₽</td>
                   <td className="px-4 py-3">{(lead.total / 1_000_000).toFixed(1)}М ₽</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-md px-2 py-1 text-xs font-medium ${statusClasses[lead.status]}`}>
-                      {statusLabels[lead.status]}
+                    <span className={`rounded-md px-2 py-1 text-xs font-medium ${leadStatusClasses[lead.status]}`}>
+                      {leadStatusLabels[lead.status]}
                     </span>
                   </td>
                   <td className="px-4 py-3">

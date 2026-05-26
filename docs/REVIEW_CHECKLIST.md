@@ -1,0 +1,48 @@
+# Review Checklist
+
+Use this checklist before portfolio review, Vercel deploys or major handoffs.
+
+## Local Checks
+
+- [ ] `npm install` or `npm ci` completes.
+- [ ] `npm test` passes.
+- [ ] `npm run typecheck` passes.
+- [ ] `npm run build` passes.
+- [ ] `git status` is clean or changes are intentionally staged for review.
+
+## Public Flow
+
+- [ ] `/` opens without runtime errors.
+- [ ] Hero copy is Russian and clearly states this is a portfolio/demo MVP.
+- [ ] Calculator accepts country, car, year, engine, price, currency, budget and city.
+- [ ] Changing price/currency/options changes the result.
+- [ ] Result breakdown shows car price, customs fee, recycle fee, logistics, company fee,
+      extra costs and total.
+- [ ] Demo-mode info alert is visible near the calculation result.
+- [ ] “Оставить заявку” opens the lead form.
+- [ ] Submitting the lead form shows a demo confirmation and does not imply real persistence.
+
+## Admin Flow
+
+- [ ] `/admin` opens the mock lead list.
+- [ ] Admin shell includes the mock-data warning.
+- [ ] `/admin/leads/1` opens a demo lead detail page.
+- [ ] `/admin/leads/unknown` returns 404.
+- [ ] Status and comment controls clearly state they do not persist yet.
+- [ ] `/admin/settings` opens demo calculation settings.
+- [ ] Settings save action is disabled or clearly marked as not connected.
+
+## Documentation
+
+- [ ] README has the live demo URL.
+- [ ] README states Supabase/OpenAI are prepared but not connected.
+- [ ] README states formulas are demo-only.
+- [ ] PROJECT_NOTES reflects the current status and next high-impact step.
+- [ ] AGENTS.md points to the right project files and checks.
+
+## Security
+
+- [ ] No real API keys are committed.
+- [ ] `.env.example` contains names only.
+- [ ] No client component imports a service-role key or server-only secret.
+- [ ] Git remote points to the intended GitHub repository.

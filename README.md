@@ -14,6 +14,7 @@ https://autoimport-ai-calculator.vercel.app/
 - A result breakdown with budget status, delta and demo explanation.
 - A lead form flow that is clearly marked as demo-mode.
 - A mock admin area with lead list, lead detail and calculation settings.
+- A lead data boundary in `lib/leads.ts` so Supabase can replace mock data cleanly.
 - Shared calculation logic in `lib/calculate.ts` with unit tests.
 - Documentation, Supabase schema draft and deployment-ready project structure.
 
@@ -51,8 +52,9 @@ to be a production customs calculator.
   business formulas.
 - Zod validates calculation input before producing a result.
 - App Router routes are kept small and delegate UI to `components/*`.
-- Admin data is intentionally mocked in `components/admin/mock-data.ts` until Supabase
-  persistence is connected.
+- Admin data is routed through `lib/leads.ts`, which returns mock data now and is the
+  planned Supabase boundary.
+- GitHub Actions runs tests, typecheck and build on push/PR.
 - Secrets are not committed. Environment variable names live in `.env.example`.
 
 ## Demo limitations
@@ -96,9 +98,9 @@ app/                    Next.js routes
 components/calculator/  Calculator UI
 components/result/      Result and breakdown UI
 components/lead-form/   Lead form UI
-components/admin/       Demo admin UI and mock data
+components/admin/       Demo admin UI
 components/ui/          shadcn/ui-ready primitives
-lib/                    Business logic, validation and tests
+lib/                    Business logic, data boundaries, validation and tests
 docs/                   Product and architecture docs
 supabase/               SQL schema draft
 reference/figma/        Original Figma export reference

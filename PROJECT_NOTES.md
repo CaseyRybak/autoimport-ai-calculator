@@ -14,6 +14,8 @@ and readiness for Supabase and OpenAI integrations.
 - Demo result breakdown and lead form are implemented.
 - Demo admin pages are available for leads, lead detail and settings.
 - Supabase schema is drafted.
+- `lib/leads.ts` is the current lead data boundary: mock data now, Supabase later.
+- GitHub Actions CI is prepared for tests, typecheck and build.
 - No real API keys are present.
 - First version is deployed on Vercel: https://autoimport-ai-calculator.vercel.app/
 
@@ -34,9 +36,17 @@ and readiness for Supabase and OpenAI integrations.
 - Added unit tests for `calculateImportCost`.
 - Reworked README into a portfolio-oriented presentation.
 
+## Harness Improvements
+
+- Added `.github/workflows/ci.yml` for automated verification.
+- Expanded `AGENTS.md` into a repository map for future agent work.
+- Added `docs/QUALITY.md` with quality gates and known gaps.
+- Added `docs/REVIEW_CHECKLIST.md` for manual smoke review.
+- Added `lib/leads.ts` to keep UI separated from the future Supabase implementation.
+
 ## Next Version
 
-- Connect Supabase client and persist submitted leads.
+- Connect Supabase client inside the lead data boundary and persist submitted leads.
 - Load admin lead list and lead detail from Supabase.
 - Save admin status changes and manager comments.
 - Add real admin authentication.

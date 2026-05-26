@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MessageCircle, Phone, Sparkles } from "lucide-react";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { mockLeads, statusClasses, statusLabels } from "@/components/admin/mock-data";
+import { getLeadById, leadStatusClasses, leadStatusLabels } from "@/lib/leads";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -10,7 +10,7 @@ type Props = {
 
 export default async function LeadDetailPage({ params }: Props) {
   const { id } = await params;
-  const lead = mockLeads.find((item) => item.id === id);
+  const lead = await getLeadById(id);
 
   if (!lead) {
     notFound();
@@ -89,8 +89,8 @@ export default async function LeadDetailPage({ params }: Props) {
         <aside className="space-y-5">
           <section className="rounded-lg border bg-white p-5">
             <h2 className="font-semibold">Статус</h2>
-            <span className={`mt-3 inline-flex rounded-md px-2 py-1 text-xs font-medium ${statusClasses[lead.status]}`}>
-              {statusLabels[lead.status]}
+            <span className={`mt-3 inline-flex rounded-md px-2 py-1 text-xs font-medium ${leadStatusClasses[lead.status]}`}>
+              {leadStatusLabels[lead.status]}
             </span>
             <select className="form-field mt-4" defaultValue={lead.status}>
               <option value="new">Новая</option>

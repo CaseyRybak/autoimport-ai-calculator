@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { BarChart3, Eye, Settings, Users } from "lucide-react";
-import { mockLeads, statusClasses, statusLabels } from "@/components/admin/mock-data";
 import { Button } from "@/components/ui/button";
 import { InfoAlert } from "@/components/ui/info-alert";
+import { demoLeads, leadStatusClasses, leadStatusLabels } from "@/lib/leads";
 
 export function AdminPreview() {
   const avgBudget = Math.round(
-    mockLeads.reduce((sum, lead) => sum + lead.budget, 0) / mockLeads.length,
+    demoLeads.reduce((sum, lead) => sum + lead.budget, 0) / demoLeads.length,
   );
 
   return (
@@ -32,7 +32,7 @@ export function AdminPreview() {
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border bg-white p-4">
           <Users className="h-5 w-5 text-blue-600" />
-          <p className="mt-3 text-2xl font-semibold">{mockLeads.length}</p>
+          <p className="mt-3 text-2xl font-semibold">{demoLeads.length}</p>
           <p className="text-sm text-slate-500">Демо-заявки</p>
         </div>
         <div className="rounded-lg border bg-white p-4">
@@ -62,7 +62,7 @@ export function AdminPreview() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {mockLeads.map((lead) => (
+              {demoLeads.map((lead) => (
                 <tr key={lead.id}>
                   <td className="px-4 py-3 text-slate-600">{lead.date}</td>
                   <td className="px-4 py-3 font-medium text-slate-950">{lead.client}</td>
@@ -70,8 +70,8 @@ export function AdminPreview() {
                   <td className="px-4 py-3">{(lead.budget / 1_000_000).toFixed(1)}М ₽</td>
                   <td className="px-4 py-3">{(lead.total / 1_000_000).toFixed(1)}М ₽</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-md px-2 py-1 text-xs font-medium ${statusClasses[lead.status]}`}>
-                      {statusLabels[lead.status]}
+                    <span className={`rounded-md px-2 py-1 text-xs font-medium ${leadStatusClasses[lead.status]}`}>
+                      {leadStatusLabels[lead.status]}
                     </span>
                   </td>
                   <td className="px-4 py-3">
