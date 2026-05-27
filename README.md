@@ -12,9 +12,9 @@ https://autoimport-ai-calculator.vercel.app/
 
 - A responsive public calculator for estimating turnkey vehicle import costs.
 - A result breakdown with budget status, delta and demo explanation.
-- A lead form flow that is clearly marked as demo-mode.
+- A lead form flow that can save to Supabase when environment variables are configured.
 - A mock admin area with lead list, lead detail and calculation settings.
-- A lead data boundary in `lib/leads.ts` so Supabase can replace mock data cleanly.
+- A lead data boundary in `lib/leads.ts` for Supabase insert and mock fallback.
 - Shared calculation logic in `lib/calculate.ts` with unit tests.
 - Documentation, Supabase schema draft and deployment-ready project structure.
 
@@ -31,7 +31,7 @@ to be a production customs calculator.
 - Demo formulas for price conversion, customs fee, recycle fee, logistics, company fee
   and extra services.
 - Budget status: within budget or over budget.
-- Demo lead form with honest “not saved yet” messaging.
+- Lead form with Supabase insert when configured and honest demo fallback messaging.
 - Mock admin: leads table, lead detail card, status/comment placeholders and settings.
 - Vercel deployment and GitHub-ready repository.
 
@@ -43,7 +43,7 @@ to be a production customs calculator.
 - Zod
 - node:test + tsx
 - shadcn/ui-ready component structure
-- Supabase-ready SQL schema
+- Supabase SQL schema and lead insert boundary
 - OpenAI API-ready environment structure
 
 ## Architecture decisions
@@ -52,22 +52,22 @@ to be a production customs calculator.
   business formulas.
 - Zod validates calculation input before producing a result.
 - App Router routes are kept small and delegate UI to `components/*`.
-- Admin data is routed through `lib/leads.ts`, which returns mock data now and is the
-  planned Supabase boundary.
+- Lead form submissions are routed through `lib/leads.ts`, which inserts into Supabase
+  when env vars are configured and falls back to demo success otherwise.
+- Admin data is still routed through `lib/leads.ts` and currently returns mock data.
 - GitHub Actions runs tests, typecheck and build on push/PR.
 - Secrets are not committed. Environment variable names live in `.env.example`.
 
 ## Demo limitations
 
-- Form submissions are not saved yet.
+- Form submissions are saved only when Supabase env vars and table permissions are configured.
 - Admin data is mock data, not database-backed.
 - Settings are read-only demo controls.
-- Supabase and OpenAI are prepared but not connected.
+- OpenAI is prepared but not connected.
 - Formulas are demo-only and are not real customs formulas.
 
 ## Roadmap
 
-- Connect Supabase and persist leads.
 - Load admin leads from Supabase.
 - Add authentication and row-level security for admin routes.
 - Replace demo formulas with verified business/legal calculation rules.

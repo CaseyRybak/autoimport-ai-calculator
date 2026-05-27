@@ -11,10 +11,11 @@ and readiness for Supabase and OpenAI integrations.
 - Next.js App Router project scaffolded.
 - TypeScript, Tailwind CSS, Zod and node:test-based unit tests are configured.
 - Public calculator UI implemented from the Figma wireframe as React components.
-- Demo result breakdown and lead form are implemented.
+- Demo result breakdown and Supabase-backed lead form submission are implemented.
 - Demo admin pages are available for leads, lead detail and settings.
-- Supabase schema is drafted.
-- `lib/leads.ts` is the current lead data boundary: mock data now, Supabase later.
+- Supabase schema is drafted and `lib/leads.ts` can insert submitted leads when env vars are configured.
+- `lib/leads.ts` remains the lead data boundary: Supabase insert for form submissions,
+  mock fallback when env is missing, and mock admin data for now.
 - GitHub Actions CI is prepared for tests, typecheck and build.
 - No real API keys are present.
 - First version is deployed on Vercel: https://autoimport-ai-calculator.vercel.app/
@@ -44,9 +45,16 @@ and readiness for Supabase and OpenAI integrations.
 - Added `docs/REVIEW_CHECKLIST.md` for manual smoke review.
 - Added `lib/leads.ts` to keep UI separated from the future Supabase implementation.
 
+## Supabase Lead Insert
+
+- Added `@supabase/supabase-js` and a small helper in `lib/supabase.ts`.
+- Added `createLead()` in `lib/leads.ts` to map lead form payloads into `public.leads`.
+- Added a server action so the client form does not import Supabase directly.
+- Kept demo success fallback when Supabase env vars are not configured.
+- Admin list/detail pages still use mock data.
+
 ## Next Version
 
-- Connect Supabase client inside the lead data boundary and persist submitted leads.
 - Load admin lead list and lead detail from Supabase.
 - Save admin status changes and manager comments.
 - Add real admin authentication.
@@ -55,5 +63,5 @@ and readiness for Supabase and OpenAI integrations.
 
 ## Next High-Impact Step
 
-Connect Supabase for saving lead submissions. This will turn the current demo flow into
-an end-to-end MVP while keeping the calculation logic and admin screens mostly unchanged.
+Load admin lead list and lead detail from Supabase while keeping mock fallback for local
+demo mode.

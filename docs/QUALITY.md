@@ -17,6 +17,7 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 ## Current Coverage
 
 - Unit tests cover the pure calculation flow in `lib/calculate.ts`.
+- Unit tests cover demo fallback for the lead persistence boundary in `lib/leads.ts`.
 - Next.js production build verifies routes compile and prerender correctly.
 - TypeScript strict mode is enabled.
 - Demo-mode warnings are visible where data is mocked or not persisted.
@@ -25,10 +26,10 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 
 - No end-to-end browser tests yet.
 - No visual regression tests yet.
-- Lead submissions are not persisted.
+- Lead submissions require configured Supabase env vars and compatible table permissions.
 - Admin data is mock data.
 - Settings are read-only demo controls.
-- Supabase and OpenAI are prepared but not connected.
+- Admin Supabase reads and OpenAI are prepared but not connected.
 - Calculation formulas are demo-only and not real customs formulas.
 
 ## Quality Bar Before Employer Demo
@@ -43,8 +44,8 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 
 ## Quality Bar Before Supabase Integration
 
-- Add a small data-access boundary before UI calls any persistence layer.
+- Keep UI calls routed through `lib/leads.ts` or server actions instead of Supabase imports.
 - Keep mock data available as a fallback for local demo mode.
-- Add tests around lead input normalization and persistence boundaries.
+- Add broader tests around lead input normalization and Supabase error handling.
 - Update `supabase/schema.sql` and docs together.
 - Do not expose service-role keys to client components.

@@ -20,7 +20,9 @@ Use this checklist before portfolio review, Vercel deploys or major handoffs.
       extra costs and total.
 - [ ] Demo-mode info alert is visible near the calculation result.
 - [ ] “Оставить заявку” opens the lead form.
-- [ ] Submitting the lead form shows a demo confirmation and does not imply real persistence.
+- [ ] Submitting the lead form shows loading and then success or an actionable error.
+- [ ] With Supabase env/table permissions configured, a submitted lead appears in `public.leads`.
+- [ ] Without Supabase env, the form clearly falls back to demo confirmation without persistence.
 
 ## Admin Flow
 
@@ -35,7 +37,7 @@ Use this checklist before portfolio review, Vercel deploys or major handoffs.
 ## Documentation
 
 - [ ] README has the live demo URL.
-- [ ] README states Supabase/OpenAI are prepared but not connected.
+- [ ] README states lead insert can use Supabase when configured and OpenAI is not connected.
 - [ ] README states formulas are demo-only.
 - [ ] PROJECT_NOTES reflects the current status and next high-impact step.
 - [ ] AGENTS.md points to the right project files and checks.

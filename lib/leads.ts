@@ -1,3 +1,6 @@
+import type { CalculationBreakdown, CalculationInput } from "@/lib/calculate";
+import { createSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
+
 export type LeadStatus = "new" | "in_progress" | "completed" | "rejected";
 
 export type DemoLead = {
@@ -12,6 +15,27 @@ export type DemoLead = {
   total: number;
   status: LeadStatus;
 };
+
+export type CreateLeadInput = {
+  customerName: string;
+  phone: string;
+  telegram?: string;
+  comment?: string;
+  calculationInput: CalculationInput;
+  calculationBreakdown: CalculationBreakdown;
+};
+
+export type CreateLeadResult =
+  | {
+      ok: true;
+      mode: "supabase" | "demo";
+      id: string | null;
+    }
+  | {
+      ok: false;
+      mode: "supabase";
+      error: string;
+    };
 
 export const demoLeads: DemoLead[] = [
   {
@@ -72,4 +96,67 @@ export async function listLeads(): Promise<DemoLead[]> {
 
 export async function getLeadById(id: string): Promise<DemoLead | null> {
   return demoLeads.find((lead) => lead.id === id) ?? null;
+}
+
+const cleanOptionalText = (value: string | undefined) => {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+};
+
+export async function createLead(payload: CreateLeadInput): Promise<CreateLeadResult> {
+  const calculationInput = payload.calculationInput;
+  const calculationBreakdown = payload.calculationBreakdown;
+
+  if (!isSupabaseConfigured()) {
+    return {
+      ok: true,
+      mode: "demo",
+      id: null,
+    };
+  }
+
+  const supabase = createSupabaseClient();
+
+  if (!supabase) {
+    return {
+      ok: true,
+      mode: "demo",
+      id: null,
+    };
+  }
+
+  const { error } = await supabase.from("leads").insert({
+    customer_name: payload.customerName.trim(),
+    phone: payload.phone.trim(),
+    telegram: cleanOptionalText(payload.telegram),
+    comment: cleanOptionalText(payload.comment),
+    country: calculationInput.country,
+    brand: calculationInput.brand,
+    model: calculationInput.model,
+    year: calculationInput.year,
+    engine_type: calculationInput.engineType,
+    engine_volume_liters: calculationInput.engineVolumeLiters,
+    car_price: calculationInput.carPrice,
+    currency: calculationInput.currency,
+    budget_rub: calculationInput.budgetRub,
+    destination_city: calculationInput.destinationCity,
+    calculation_input: calculationInput,
+    calculation_breakdown: calculationBreakdown,
+    total_rub: calculationBreakdown.totalRub,
+    budget_status: calculationBreakdown.budgetStatus,
+  });
+
+  if (error) {
+    return {
+      ok: false,
+      mode: "supabase",
+      error: error.message,
+    };
+  }
+
+  return {
+    ok: true,
+    mode: "supabase",
+    id: null,
+  };
 }
