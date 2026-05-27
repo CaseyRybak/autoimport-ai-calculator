@@ -18,8 +18,9 @@ and readiness for Supabase and OpenAI integrations.
   server-side service-role admin reads after demo-password access, and mock fallback
   when admin env is missing.
 - Vehicle Catalog Phase 1 is prepared as a separate Supabase SQL file and CSV import
-  template. The current calculator UI still uses manual vehicle input until catalog reads
-  are connected in a later step.
+  template.
+- Public calculator now reads Vehicle Catalog options from Supabase through a `lib/`
+  helper and uses dependent dropdowns instead of manual vehicle price entry.
 - GitHub Actions CI is prepared for tests, typecheck and build.
 - No real API keys are present.
 - First version is deployed on Vercel: https://autoimport-ai-calculator.vercel.app/
@@ -80,18 +81,21 @@ and readiness for Supabase and OpenAI integrations.
 - Added `supabase/vehicle_catalog_seed_demo.sql` with repeatable demo seed data using
   real-world brand/model taxonomy and placeholder USD prices.
 - Added `docs/VEHICLE_CATALOG.md` to document the catalog source-of-truth model.
-- Catalog base vehicle price is stored as `source_price_usd`; RUB/EUR/CNY/KRW display
+- Catalog base vehicle price is stored as `source_price_usd`; USD/RUB/EUR/CNY display
   values should be calculated in the app through exchange rates/settings.
 - CSV/Excel is only an import format. Supabase is the source of truth for the website.
-- Next step: apply the demo seed SQL in Supabase, then add catalog read helpers and
-  connect dependent calculator options to Supabase.
+- Added `lib/vehicle-catalog.ts` as the catalog data boundary for public calculator reads
+  with a local demo fallback when Supabase catalog data is unavailable.
+- Connected the calculator to dependent catalog dropdowns:
+  country -> brand -> model -> year -> engine type -> engine volume.
+- Catalog `source_price_usd` remains the source of truth. The UI displays the selected
+  currency through demo exchange-rate conversion and does not allow manual price edits.
 - Real price enrichment with source URLs, checked timestamps and update methods remains
   a separate phase.
 
 ## Next Version
 
-- Apply Vehicle Catalog demo seed SQL in Supabase.
-- Connect Vehicle Catalog reads to the calculator dropdown flow.
+- Replace demo catalog prices with sourced production price enrichment.
 - Save admin status changes and manager comments.
 - Add real admin authentication.
 - Replace demo formulas with verified business/legal calculation rules.

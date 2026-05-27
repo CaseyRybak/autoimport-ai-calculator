@@ -17,7 +17,7 @@ the calculator should read options from Supabase, not from local spreadsheets.
 The catalog stores the base vehicle price in `vehicle_variants.source_price_usd`. USD is
 the canonical price because the current calculation already converts vehicle prices through
 exchange rates, and one canonical currency avoids mixing source currencies in business
-logic. The app may display RUB, EUR, CNY or KRW values, but those values must be calculated
+logic. The app may display USD, RUB, EUR or CNY values, but those values must be calculated
 from USD using the current exchange rates/settings.
 
 `vehicle_variants.display_currency` is only a UI preference for displaying a variant. It is
@@ -105,3 +105,22 @@ Future phases can add an admin catalog screen for:
 The next application step after applying the SQL is to add server-side catalog read helpers
 and connect calculator dropdowns to Supabase without allowing the client to manually change
 the selected vehicle's source price.
+
+## Calculator Integration
+
+The public calculator reads active catalog rows through `lib/vehicle-catalog.ts`. UI
+components receive prepared catalog data and do not instantiate Supabase clients directly.
+
+The dependent dropdown flow is:
+
+```text
+country -> brand -> model -> year -> engine type -> engine volume
+```
+
+After a variant is selected, its catalog price is applied automatically. The user can switch
+the display currency, but the app derives that displayed amount from USD using the current
+demo exchange rates. The price itself is not manually editable in the calculator.
+
+If Supabase catalog reads are unavailable, the calculator uses a small local demo fallback
+and shows a clear message. The fallback is only for keeping the page usable during local
+setup and must not be treated as production catalog data.

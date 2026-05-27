@@ -51,6 +51,16 @@ describe("calculateImportCost", () => {
     assert.equal(result.carPriceRub, 2_340_000);
   });
 
+  it("supports ruble display price without extra conversion", () => {
+    const result = calculateImportCost({
+      ...baseInput,
+      carPrice: 2_000_000,
+      currency: "rub",
+    });
+
+    assert.equal(result.carPriceRub, 2_000_000);
+  });
+
   it("marks the calculation as within budget when total does not exceed budget", () => {
     const result = calculateImportCost({
       ...baseInput,

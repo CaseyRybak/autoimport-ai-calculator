@@ -14,8 +14,12 @@ Use this checklist before portfolio review, Vercel deploys or major handoffs.
 
 - [ ] `/` opens without runtime errors.
 - [ ] Hero copy is Russian and clearly states this is a portfolio/demo MVP.
-- [ ] Calculator accepts country, car, year, engine, price, currency, budget and city.
-- [ ] Changing price/currency/options changes the result.
+- [ ] Calculator loads Vehicle Catalog options or a clear fallback state.
+- [ ] Changing country updates available catalog brands.
+- [ ] Changing brand updates available catalog models.
+- [ ] Changing model updates available year, engine and volume options.
+- [ ] Selected catalog price is displayed as read-only.
+- [ ] Changing currency, budget and options changes the result.
 - [ ] Result breakdown shows car price, customs fee, recycle fee, logistics, company fee,
       extra costs and total.
 - [ ] Demo-mode info alert is visible near the calculation result.

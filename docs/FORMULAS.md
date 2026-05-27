@@ -6,9 +6,9 @@
 ## Demo Settings
 
 - USD: 95 RUB
+- RUB: 1 RUB
 - EUR: 105 RUB
 - CNY: 13 RUB
-- KRW: 0.072 RUB
 - Demo customs fee: 15% от рублевой цены авто
 - Demo recycle fee: 350 000 RUB
 - Company fee: 8% от рублевой цены авто + 50 000 RUB

@@ -3,6 +3,13 @@
 import { useMemo, useRef, useState } from "react";
 import { ArrowRight, Car, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { calculateImportCost, type CalculationInput } from "@/lib/calculate";
+import {
+  convertUsdPrice,
+  getBrandsByCountry,
+  getModelsByBrand,
+  getVehicleCatalogFallback,
+  type VehicleCatalogData,
+} from "@/lib/vehicle-catalog";
 import { Button } from "@/components/ui/button";
 import { InfoAlert } from "@/components/ui/info-alert";
 import { CalculatorForm } from "@/components/calculator/calculator-form";
@@ -10,26 +17,44 @@ import { CalculationResult } from "@/components/result/calculation-result";
 import { LeadForm } from "@/components/lead-form/lead-form";
 import { AdminPreview } from "@/components/admin/admin-preview";
 
-const initialInput: CalculationInput = {
-  country: "korea",
-  brand: "Toyota",
-  model: "Camry",
-  year: 2022,
-  engineType: "gasoline",
-  engineVolumeLiters: 2.5,
-  carPrice: 25000,
-  currency: "usd",
-  budgetRub: 3_000_000,
-  destinationCity: "Москва",
-  includeCarrier: true,
-  includeInsurance: true,
-  includeCertificates: true,
-  includeBroker: false,
-  includeDelivery: false,
+const createInitialInput = (catalog: VehicleCatalogData): CalculationInput => {
+  const country = catalog.brands[0]?.country ?? "korea";
+  const brand = getBrandsByCountry(catalog, country)[0];
+  const model = brand ? getModelsByBrand(catalog, brand.id)[0] : null;
+  const variant = model
+    ? catalog.variants
+        .filter((item) => item.modelId === model.id)
+        .sort((a, b) => b.year - a.year)[0]
+    : null;
+
+  return {
+    country,
+    brand: brand?.name ?? "",
+    model: model?.name ?? "",
+    year: variant?.year ?? 2022,
+    engineType: variant?.engineType ?? "gasoline",
+    engineVolumeLiters: variant?.engineVolumeLiters ?? 2,
+    carPrice: variant ? convertUsdPrice(variant.sourcePriceUsd, "usd") : 25_000,
+    currency: "usd",
+    catalogVariantId: variant?.id,
+    sourcePriceUsd: variant?.sourcePriceUsd,
+    budgetRub: 3_000_000,
+    destinationCity: "Москва",
+    includeCarrier: true,
+    includeInsurance: true,
+    includeCertificates: true,
+    includeBroker: false,
+    includeDelivery: false,
+  };
 };
 
-export function CalculatorExperience() {
-  const [input, setInput] = useState<CalculationInput>(initialInput);
+type Props = {
+  catalog: VehicleCatalogData;
+};
+
+export function CalculatorExperience({ catalog }: Props) {
+  const safeCatalog = catalog.brands.length > 0 ? catalog : getVehicleCatalogFallback(catalog.error);
+  const [input, setInput] = useState<CalculationInput>(() => createInitialInput(safeCatalog));
   const [showLeadForm, setShowLeadForm] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
   const leadRef = useRef<HTMLDivElement>(null);
@@ -117,7 +142,12 @@ export function CalculatorExperience() {
       </section>
 
       <section className="section-shell grid gap-6 py-8 lg:grid-cols-[minmax(0,1fr)_420px]">
-        <CalculatorForm value={input} onChange={setInput} onSubmit={scrollToResult} />
+        <CalculatorForm
+          catalog={safeCatalog}
+          value={input}
+          onChange={setInput}
+          onSubmit={scrollToResult}
+        />
         <div ref={resultRef}>
           <CalculationResult input={input} result={result} onLeadClick={openLeadForm} />
         </div>

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const countrySchema = z.enum(["korea", "china", "europe"]);
-export const currencySchema = z.enum(["usd", "eur", "cny", "krw"]);
+export const currencySchema = z.enum(["usd", "rub", "eur", "cny"]);
 export const engineTypeSchema = z.enum(["gasoline", "diesel", "hybrid", "electric"]);
 
 export const calculationInputSchema = z.object({
@@ -13,6 +13,8 @@ export const calculationInputSchema = z.object({
   engineVolumeLiters: z.coerce.number().min(0).max(8),
   carPrice: z.coerce.number().positive(),
   currency: currencySchema,
+  catalogVariantId: z.string().min(1).optional(),
+  sourcePriceUsd: z.coerce.number().positive().optional(),
   budgetRub: z.coerce.number().positive(),
   destinationCity: z.string().min(1),
   includeCarrier: z.boolean().default(false),
@@ -45,9 +47,9 @@ export const DEMO_CALCULATION_SETTINGS = {
     "Demo settings only. These are not real customs formulas and must be replaced before production use.",
   exchangeRates: {
     usd: 95,
+    rub: 1,
     eur: 105,
     cny: 13,
-    krw: 0.072,
   },
   customsDutyRate: 0.15,
   recycleFeeRub: 350_000,
