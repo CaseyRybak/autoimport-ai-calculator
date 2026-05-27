@@ -15,7 +15,7 @@ ADMIN_DEMO_PASSWORD=
 - `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL used by public/server helpers.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: public anon key used for lead form insert and active
   Vehicle Catalog reads.
-- `SUPABASE_SERVICE_ROLE_KEY`: server-only key used by admin reads and future catalog
+- `SUPABASE_SERVICE_ROLE_KEY`: server-only key used by admin reads and catalog
   management/import jobs.
 - `ADMIN_DEMO_PASSWORD`: current demo gate for `/admin`.
 
@@ -91,7 +91,7 @@ select to_regclass('public.leads_lead_number_seq') as lead_number_sequence;
 - Enables RLS for the catalog tables.
 - Adds policies allowing `anon` and `authenticated` users to select only active catalog
   rows.
-- Grants catalog write access to `service_role` for future management/import flows.
+- Grants catalog write access to `service_role` for management/import flows.
 
 After applying `vehicle_catalog.sql`, verify:
 
@@ -186,7 +186,7 @@ Catalog read:
 
 Catalog management/import:
 
-- Future CSV import and admin catalog management should use `service_role` server-side.
+- CSV import and future admin catalog management should use `service_role` server-side.
 - `service_role` may write `vehicle_brands`, `vehicle_models` and `vehicle_variants`.
 
 Recommended lead table posture:

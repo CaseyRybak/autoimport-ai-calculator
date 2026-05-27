@@ -43,6 +43,10 @@ Use this checklist before portfolio review, Vercel deploys or major handoffs.
 - [ ] Status and comment controls clearly state they do not persist yet.
 - [ ] `/admin/settings` opens demo calculation settings.
 - [ ] Settings save action is disabled or clearly marked as not connected.
+- [ ] `/admin/catalog/import` opens after admin access.
+- [ ] CSV upload preview validates rows without writing to Supabase.
+- [ ] Confirm import is available only when there are no blocking validation errors.
+- [ ] Confirm import upserts catalog rows through server-side service_role.
 
 ## Documentation
 

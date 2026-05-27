@@ -39,6 +39,7 @@ to be a production customs calculator.
   catalog price, budget, calculation breakdown, selected services and client comment.
 - Vehicle Catalog dropdown reads active catalog data and applies `source_price_usd` as
   the selected vehicle's base price.
+- Admin CSV import validates, previews and upserts Vehicle Catalog rows server-side.
 - Admin status/comment placeholders and read-only calculation settings.
 - Vercel deployment and GitHub-ready repository.
 
@@ -92,12 +93,13 @@ to be a production customs calculator.
   after the demo password gate.
 - Vehicle Catalog dropdown is implemented and applies the selected variant's
   `source_price_usd`.
+- CSV import MVP is implemented for bulk Vehicle Catalog maintenance.
 - Human-readable lead numbers are implemented as `AIC-000001` while UUID remains the
   technical id and URL key.
 
 ## Roadmap
 
-- Add CSV import/admin catalog management for Vehicle Catalog.
+- Add manual admin catalog management for Vehicle Catalog.
 - Persist admin status changes and manager comments.
 - Add real admin authentication.
 - Enrich catalog prices with real source URLs, source names and checked timestamps.

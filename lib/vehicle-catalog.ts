@@ -279,12 +279,14 @@ export function findCatalogVariant(
   year: number,
   engineType: CalculationInput["engineType"],
   engineVolumeLiters: number,
+  sourceMarket?: Country,
 ) {
   return getVariantsByModel(catalog, modelId).find(
     (variant) =>
       variant.year === year &&
       variant.engineType === engineType &&
-      variant.engineVolumeLiters === engineVolumeLiters,
+      variant.engineVolumeLiters === engineVolumeLiters &&
+      (sourceMarket === undefined || variant.sourceMarket === sourceMarket),
   );
 }
 

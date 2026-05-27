@@ -46,7 +46,9 @@
   каталога и строит зависимые dropdown.
 - Human-readable lead numbers уже входят в текущий MVP: UUID остается technical id и URL
   key, `lead_number` отображается как `AIC-000001`.
-- CSV import/catalog management остаются next phase.
+- CSV import MVP уже входит в текущий MVP: `/admin/catalog/import` валидирует CSV,
+  показывает preview и пишет в Supabase только после confirm.
+- Manual admin catalog management остается next phase.
 
 ## Acceptance Criteria для следующих фаз
 
@@ -58,6 +60,8 @@ CSV import считается готовым, когда:
 - Confirm записывает валидные строки в Supabase Vehicle Catalog через server-side
   service_role flow.
 - Import не делает CSV/Excel source of truth; Supabase остается source of truth для сайта.
+
+Текущий MVP CSV import покрывает эти критерии для bulk import без ручного catalog editor.
 
 Admin catalog management считается готовым, когда:
 

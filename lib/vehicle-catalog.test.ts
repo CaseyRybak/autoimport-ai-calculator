@@ -49,6 +49,32 @@ const catalog: VehicleCatalogData = {
       sourceUrl: null,
       lastCheckedAt: null,
     },
+    {
+      id: "variant-k5-2024",
+      modelId: "model-k5",
+      year: 2024,
+      engineType: "gasoline",
+      engineVolumeLiters: 1.8,
+      sourceMarket: "korea",
+      sourcePriceUsd: 25_000,
+      displayCurrency: "USD",
+      sourceName: "demo catalog seed",
+      sourceUrl: null,
+      lastCheckedAt: null,
+    },
+    {
+      id: "variant-k5-2025",
+      modelId: "model-k5",
+      year: 2025,
+      engineType: "gasoline",
+      engineVolumeLiters: 1.8,
+      sourceMarket: "korea",
+      sourcePriceUsd: 27_000,
+      displayCurrency: "USD",
+      sourceName: "demo catalog seed",
+      sourceUrl: null,
+      lastCheckedAt: null,
+    },
   ],
 };
 
@@ -59,7 +85,7 @@ describe("vehicle catalog selectors", () => {
   });
 
   it("returns dependent variant option dimensions", () => {
-    assert.deepEqual(getAvailableYears(catalog, "model-k5"), [2023, 2022]);
+    assert.deepEqual(getAvailableYears(catalog, "model-k5"), [2025, 2024, 2023, 2022]);
     assert.deepEqual(getAvailableEngineTypes(catalog, "model-k5", 2023), ["hybrid"]);
     assert.deepEqual(getAvailableEngineVolumes(catalog, "model-k5", 2023, "hybrid"), [1.6]);
   });
@@ -69,6 +95,15 @@ describe("vehicle catalog selectors", () => {
 
     assert.equal(variant?.id, "variant-k5-2022");
     assert.equal(variant?.sourcePriceUsd, 20_000);
+  });
+
+  it("keeps same engine and volume variants isolated by selected year", () => {
+    const variant2024 = findCatalogVariant(catalog, "model-k5", 2024, "gasoline", 1.8, "korea");
+    const variant2025 = findCatalogVariant(catalog, "model-k5", 2025, "gasoline", 1.8, "korea");
+
+    assert.equal(variant2024?.id, "variant-k5-2024");
+    assert.equal(variant2025?.id, "variant-k5-2025");
+    assert.notEqual(variant2024?.id, variant2025?.id);
   });
 
   it("converts USD source price into selected demo currency", () => {

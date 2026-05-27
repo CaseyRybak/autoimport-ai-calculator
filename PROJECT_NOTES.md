@@ -23,6 +23,8 @@ prepared but not connected.
 - Vehicle Catalog schema, demo seed and calculator dropdown are implemented.
 - Public calculator reads Vehicle Catalog options from Supabase through a `lib/` helper
   and uses dependent dropdowns instead of manual vehicle price entry.
+- CSV import MVP for Vehicle Catalog is implemented through `/admin/catalog/import`:
+  upload, validate, preview, confirm and server-side service_role upsert.
 - Human-readable lead numbers are implemented with `lead_number`, displayed as
   `AIC-000001`; UUID remains the technical id and URL key.
 - Documentation refresh done: PRD, architecture, README, Vehicle Catalog notes and
@@ -100,6 +102,8 @@ prepared but not connected.
   with a local demo fallback when Supabase catalog data is unavailable.
 - Connected the calculator to dependent catalog dropdowns:
   country -> brand -> model -> year -> engine type -> engine volume.
+- Added admin CSV import for bulk catalog maintenance. Preview validates rows without
+  writing, and confirm upserts brands, models and variants server-side through service_role.
 - Catalog `source_price_usd` remains the source of truth. The UI displays the selected
   currency through demo exchange-rate conversion and does not allow manual price edits.
 - Real price enrichment with source URLs, checked timestamps and update methods remains
@@ -107,7 +111,7 @@ prepared but not connected.
 
 ## Next Version
 
-- Add CSV import or admin catalog management for Vehicle Catalog.
+- Add manual admin catalog management for Vehicle Catalog.
 - Replace demo catalog prices with sourced production price enrichment.
 - Save admin status changes and manager comments.
 - Add real admin authentication.
@@ -116,6 +120,6 @@ prepared but not connected.
 
 ## Next High-Impact Step
 
-CSV import or admin catalog management is the next recommended implementation step.
-After that, persist admin status changes and manager comments through the same data
-boundary, then replace the demo-password gate with real authentication.
+Manual admin catalog management is the next recommended catalog step. After that, persist
+admin status changes and manager comments through the same data boundary, then replace the
+demo-password gate with real authentication.

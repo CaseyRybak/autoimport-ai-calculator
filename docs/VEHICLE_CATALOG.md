@@ -35,6 +35,52 @@ The import flow should normalize CSV rows into:
 - `vehicle_models`: model name and model slug under a brand.
 - `vehicle_variants`: year, engine, source market and canonical USD price under a model.
 
+## CSV Import Workflow
+
+CSV import is the MVP way to bulk maintain catalog rows from the admin area. Excel files
+must be exported to CSV first; the application does not read `.xlsx` files directly.
+
+The admin flow is:
+
+```text
+/admin/catalog/import -> upload CSV -> validate and preview -> confirm import -> Supabase upsert
+```
+
+Preview is read-only and does not write to Supabase. Rows are written only after the
+manager confirms the import. The write path runs server-side through the Supabase
+`service_role` key; client components must not import Supabase or see
+`SUPABASE_SERVICE_ROLE_KEY`.
+
+Expected CSV columns:
+
+```text
+country,brand,model,year,engine_type,engine_volume_liters,source_market,source_price_usd,display_currency,source_name,source_url,last_checked_at,is_active
+```
+
+Validation rules:
+
+- `country`: `korea`, `europe` or `china`.
+- `brand` and `model`: required.
+- `year`: integer from 1990 to 2030.
+- `engine_type`: required.
+- `engine_volume_liters`: numeric and `>= 0`.
+- `source_price_usd`: numeric and `> 0`.
+- `display_currency`: defaults to `USD`; allowed values are `USD`, `RUB`, `EUR`, `CNY`.
+- `source_market`: defaults to `country` when empty.
+- `is_active`: defaults to `true`.
+- `source_url`: optional.
+- `last_checked_at`: optional, but must be a valid date when present.
+
+Import behavior is repeatable:
+
+- Brands upsert by `country + slug`.
+- Models upsert by `brand_id + slug`.
+- Variants upsert by `model_id + year + engine_type + engine_volume_liters + source_market`.
+- Existing catalog rows are not deleted.
+
+Supabase remains the website source of truth after import. SQL files are for migrations
+and demo seed data, not daily catalog management.
+
 ## Demo Seed Catalog
 
 The demo seed SQL lives at `supabase/vehicle_catalog_seed_demo.sql`. It prepares a focused
@@ -98,6 +144,7 @@ catalog rows for imports, manual admin edits and future automation.
 - Schema is implemented in `supabase/vehicle_catalog.sql`.
 - Demo seed is implemented in `supabase/vehicle_catalog_seed_demo.sql`.
 - Calculator dropdown integration is implemented through `lib/vehicle-catalog.ts`.
+- CSV import MVP is implemented through `/admin/catalog/import`.
 - Dependent dropdowns are implemented for country, brand, model, year, engine type and
   engine volume.
 - `source_price_usd` is the catalog base price used by the calculator.
@@ -113,7 +160,7 @@ Future phases can add an admin catalog screen for:
 - Updating prices through APIs or market aggregators.
 - Recording source URLs and last checked timestamps for auditability.
 
-The next catalog phase is CSV import/admin catalog management and real price enrichment.
+The next catalog phase is manual admin catalog management and real price enrichment.
 
 ## Calculator Integration
 

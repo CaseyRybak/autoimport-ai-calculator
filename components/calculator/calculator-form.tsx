@@ -92,6 +92,7 @@ export function CalculatorForm({ catalog, value, onChange, onSubmit }: Props) {
           selectedYear,
           selectedEngineType,
           selectedVolume,
+          value.country,
         )
       : undefined;
   const hasCatalogOptions = Boolean(selectedVariant);
@@ -114,32 +115,44 @@ export function CalculatorForm({ catalog, value, onChange, onSubmit }: Props) {
     currency?: CalculationInput["currency"];
   }) => {
     const effectiveBrandId = brandId ?? selectedBrand?.id;
-    const nextBrand = getBrandsByCountry(catalog, country).find((brand) => brand.id === effectiveBrandId) ??
-      getBrandsByCountry(catalog, country)[0] ??
-      null;
+    const nextBrands = getBrandsByCountry(catalog, country);
+    const nextBrand =
+      nextBrands.find((brand) => brand.id === effectiveBrandId) ?? nextBrands[0] ?? null;
     const effectiveModelId = modelId ?? selectedModel?.id;
+    const nextModels = nextBrand ? getModelsByBrand(catalog, nextBrand.id) : [];
     const nextModel = nextBrand
-      ? getModelsByBrand(catalog, nextBrand.id).find((model) => model.id === effectiveModelId) ??
-        getModelsByBrand(catalog, nextBrand.id)[0] ??
-        null
+      ? nextModels.find((model) => model.id === effectiveModelId) ?? nextModels[0] ?? null
       : null;
     const nextYears = nextModel ? getAvailableYears(catalog, nextModel.id) : [];
-    const nextYear = year && nextYears.includes(year) ? year : nextYears[0];
+    const requestedYear = year ?? value.year;
+    const nextYear =
+      requestedYear && nextYears.includes(requestedYear) ? requestedYear : nextYears[0];
     const nextEngineTypes =
       nextModel && nextYear ? getAvailableEngineTypes(catalog, nextModel.id, nextYear) : [];
+    const requestedEngineType = engineType ?? value.engineType;
     const nextEngineType =
-      engineType && nextEngineTypes.includes(engineType) ? engineType : nextEngineTypes[0];
+      requestedEngineType && nextEngineTypes.includes(requestedEngineType)
+        ? requestedEngineType
+        : nextEngineTypes[0];
     const nextVolumes =
       nextModel && nextYear && nextEngineType
         ? getAvailableEngineVolumes(catalog, nextModel.id, nextYear, nextEngineType)
         : [];
+    const requestedVolume = engineVolumeLiters ?? value.engineVolumeLiters;
     const nextVolume =
-      engineVolumeLiters !== undefined && nextVolumes.includes(engineVolumeLiters)
-        ? engineVolumeLiters
+      requestedVolume !== undefined && nextVolumes.includes(requestedVolume)
+        ? requestedVolume
         : nextVolumes[0];
     const nextVariant =
       nextModel && nextYear && nextEngineType && nextVolume !== undefined
-        ? findCatalogVariant(catalog, nextModel.id, nextYear, nextEngineType, nextVolume)
+        ? findCatalogVariant(
+            catalog,
+            nextModel.id,
+            nextYear,
+            nextEngineType,
+            nextVolume,
+            country,
+          )
         : undefined;
 
     onChange({
