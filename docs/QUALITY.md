@@ -32,6 +32,12 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Admin Supabase reads and OpenAI are prepared but not connected.
 - Calculation formulas are demo-only and not real customs formulas.
 
+## Codex Project Setup
+
+- Project-scoped Codex skills live in `.codex/skills/autoimport-product/` and `.codex/skills/nextjs-supabase-mvp/`.
+- MCP servers enabled in `.codex/config.toml`: Context7 via `@upstash/context7-mcp` and Playwright via `@playwright/mcp`.
+- Supabase MCP is intentionally deferred for now and should not be added until the project is ready to expose that integration.
+
 ## Quality Bar Before Employer Demo
 
 - Live demo opens successfully.
