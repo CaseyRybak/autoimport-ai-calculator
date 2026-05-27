@@ -34,6 +34,8 @@ to be a production customs calculator.
 - Lead form with Supabase anon insert when configured and honest demo fallback messaging.
 - Admin lead list/detail can read Supabase server-side through a service-role key after
   the demo password gate.
+- Admin lead detail shows the submitted calculator/form payload: client contacts, vehicle,
+  catalog price, budget, calculation breakdown, selected services and client comment.
 - Admin status/comment placeholders and read-only calculation settings.
 - Vercel deployment and GitHub-ready repository.
 
@@ -68,6 +70,8 @@ to be a production customs calculator.
 - Form submissions are saved only when Supabase anon env vars and insert permissions are configured.
 - Admin reads require `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_DEMO_PASSWORD` in server env.
 - If admin env vars are missing, admin pages intentionally show demo/mock data.
+- Admin status changes and manager comments are visible as planned controls but are not
+  persisted yet.
 - Settings are read-only demo controls.
 - OpenAI is prepared but not connected.
 - Formulas are demo-only and are not real customs formulas.

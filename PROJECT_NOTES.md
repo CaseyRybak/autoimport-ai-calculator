@@ -71,6 +71,11 @@ and readiness for Supabase and OpenAI integrations.
 - Vercel needs `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_DEMO_PASSWORD` configured as
   server-side environment variables before the deployed admin can read real leads.
 - `/admin` is forced dynamic so new Supabase leads are not frozen at build time.
+- Admin lead detail now displays the full submitted payload: client contacts, vehicle,
+  catalog price, budget, calculation breakdown, selected services and client comment.
+- UUID remains the technical lead id and URL key. `lead_number` is the human-readable
+  admin number displayed as `AIC-000001`.
+- Admin status changes and manager comments remain demo-only and are not persisted yet.
 
 ## Vehicle Catalog
 

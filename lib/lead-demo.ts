@@ -2,6 +2,8 @@ export type LeadStatus = "new" | "in_progress" | "completed" | "rejected";
 
 export type DemoLead = {
   id: string;
+  leadNumber: number | null;
+  displayNumber: string;
   date: string;
   client: string;
   phone: string;
@@ -16,6 +18,8 @@ export type DemoLead = {
 export const demoLeads: DemoLead[] = [
   {
     id: "1",
+    leadNumber: 1,
+    displayNumber: "AIC-000001",
     date: "26.05.2026",
     client: "Иван Петров",
     phone: "+7 (999) 123-45-67",
@@ -28,6 +32,8 @@ export const demoLeads: DemoLead[] = [
   },
   {
     id: "2",
+    leadNumber: 2,
+    displayNumber: "AIC-000002",
     date: "25.05.2026",
     client: "Мария Сидорова",
     phone: "+7 (999) 222-10-10",
@@ -40,6 +46,8 @@ export const demoLeads: DemoLead[] = [
   },
   {
     id: "3",
+    leadNumber: 3,
+    displayNumber: "AIC-000003",
     date: "24.05.2026",
     client: "Алексей Смирнов",
     phone: "+7 (999) 333-11-22",

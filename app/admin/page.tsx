@@ -89,6 +89,7 @@ export default async function AdminPage({ searchParams }: Props) {
           <table className="w-full min-w-[760px] text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
               <tr>
+                <th className="px-4 py-3">Номер</th>
                 <th className="px-4 py-3">Дата</th>
                 <th className="px-4 py-3">Клиент</th>
                 <th className="px-4 py-3">Авто</th>
@@ -102,6 +103,7 @@ export default async function AdminPage({ searchParams }: Props) {
             <tbody className="divide-y">
               {leads.map((lead) => (
                 <tr key={lead.id}>
+                  <td className="px-4 py-3 font-medium text-slate-950">{lead.displayNumber}</td>
                   <td className="px-4 py-3 text-slate-600">{lead.date}</td>
                   <td className="px-4 py-3 font-medium">{lead.client}</td>
                   <td className="px-4 py-3 text-slate-600">{lead.car}</td>

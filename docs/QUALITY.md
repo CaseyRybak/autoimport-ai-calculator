@@ -29,6 +29,8 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Lead submissions require configured anon Supabase env vars and compatible insert permissions.
 - Admin reads use Supabase server-side through `SUPABASE_SERVICE_ROLE_KEY` after
   `ADMIN_DEMO_PASSWORD` access, with mock fallback when admin env is missing.
+- Lead UUID remains the technical id and route key; `lead_number` is used for
+  human-readable admin display numbers like `AIC-000001`.
 - Vercel must provide `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_DEMO_PASSWORD` as server
   environment variables for real admin reads.
 - Supabase must grant `service_role` usage on the `public` schema and `SELECT` on the
