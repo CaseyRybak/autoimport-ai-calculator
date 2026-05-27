@@ -15,8 +15,9 @@ https://autoimport-ai-calculator.vercel.app/
 - A lead form flow that can save to Supabase when environment variables are configured.
 - An admin area with demo-password access, server-side Supabase reads and mock fallback.
 - A lead data boundary in `lib/leads.ts` for Supabase insert, admin read and mock fallback.
+- A Supabase Vehicle Catalog for calculator dropdown options and catalog base prices.
 - Shared calculation logic in `lib/calculate.ts` with unit tests.
-- Documentation, Supabase schema draft and deployment-ready project structure.
+- Documentation, Supabase schema files and deployment-ready project structure.
 
 ## Business problem
 
@@ -36,6 +37,8 @@ to be a production customs calculator.
   the demo password gate.
 - Admin lead detail shows the submitted calculator/form payload: client contacts, vehicle,
   catalog price, budget, calculation breakdown, selected services and client comment.
+- Vehicle Catalog dropdown reads active catalog data and applies `source_price_usd` as
+  the selected vehicle's base price.
 - Admin status/comment placeholders and read-only calculation settings.
 - Vercel deployment and GitHub-ready repository.
 
@@ -47,7 +50,8 @@ to be a production customs calculator.
 - Zod
 - node:test + tsx
 - shadcn/ui-ready component structure
-- Supabase SQL schema, lead insert boundary and server-side admin read helper
+- Supabase SQL schema, lead insert boundary, server-side admin read helper and Vehicle
+  Catalog read model
 - OpenAI API-ready environment structure
 
 ## Architecture decisions
@@ -60,8 +64,11 @@ to be a production customs calculator.
   when env vars are configured and falls back to demo success otherwise.
 - Admin data is routed through `lib/leads.ts` and reads Supabase only on the server via
   `SUPABASE_SERVICE_ROLE_KEY` after `ADMIN_DEMO_PASSWORD` access.
-- The public anon key is used only for lead creation. Do not add anon `SELECT` access to
-  `public.leads` for this portfolio admin.
+- The public anon key is used for lead creation and public Vehicle Catalog reads.
+- Lead form needs anon `INSERT` on `public.leads`; anon `SELECT` on `public.leads` is not
+  needed and should not be granted.
+- Public catalog reads may grant anon/authenticated `SELECT` only for active catalog rows.
+- Admin lead reads use the server-side `SUPABASE_SERVICE_ROLE_KEY`, not the public anon key.
 - GitHub Actions runs tests, typecheck and build on push/PR.
 - Secrets are not committed. Environment variable names live in `.env.example`.
 
@@ -70,19 +77,32 @@ to be a production customs calculator.
 - Form submissions are saved only when Supabase anon env vars and insert permissions are configured.
 - Admin reads require `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_DEMO_PASSWORD` in server env.
 - If admin env vars are missing, admin pages intentionally show demo/mock data.
+- If catalog reads are unavailable, the calculator uses a local demo catalog fallback.
 - Admin status changes and manager comments are visible as planned controls but are not
   persisted yet.
 - Settings are read-only demo controls.
 - OpenAI is prepared but not connected.
 - Formulas are demo-only and are not real customs formulas.
 
+## Current MVP status
+
+- Lead persistence is implemented through Supabase anon insert when env vars and table
+  permissions are configured.
+- Admin real lead read is implemented server-side through `SUPABASE_SERVICE_ROLE_KEY`
+  after the demo password gate.
+- Vehicle Catalog dropdown is implemented and applies the selected variant's
+  `source_price_usd`.
+- Human-readable lead numbers are implemented as `AIC-000001` while UUID remains the
+  technical id and URL key.
+
 ## Roadmap
 
-- Add authentication and row-level security for admin routes.
+- Add CSV import/admin catalog management for Vehicle Catalog.
 - Persist admin status changes and manager comments.
+- Add real admin authentication.
+- Enrich catalog prices with real source URLs, source names and checked timestamps.
 - Replace demo formulas with verified business/legal calculation rules.
 - Add OpenAI-powered calculation explanation and manager message drafts.
-- Add screenshots and deployment metadata after the next UI pass.
 
 ## How to run locally
 
@@ -105,6 +125,9 @@ ADMIN_DEMO_PASSWORD=
 Keep `SUPABASE_SERVICE_ROLE_KEY` only in `.env.local` or Vercel server env. It must not
 use a `NEXT_PUBLIC_` prefix.
 
+Supabase setup order, grants and verification steps are documented in
+[`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md).
+
 Useful checks:
 
 ```bash
@@ -124,6 +147,6 @@ components/admin/       Demo admin UI
 components/ui/          shadcn/ui-ready primitives
 lib/                    Business logic, data boundaries, validation and tests
 docs/                   Product and architecture docs
-supabase/               SQL schema draft
+supabase/               SQL schema, lead numbering and Vehicle Catalog setup
 reference/figma/        Original Figma export reference
 ```

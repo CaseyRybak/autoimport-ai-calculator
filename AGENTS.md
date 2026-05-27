@@ -18,23 +18,42 @@ AutoImport AI Calculator.
 - `app/` - Next.js App Router routes.
 - `components/calculator/` - public calculator experience.
 - `components/result/` - calculation result and breakdown UI.
-- `components/lead-form/` - demo lead form.
-- `components/admin/` - mock admin UI and demo data presentation.
+- `components/lead-form/` - lead form UI; saves to Supabase when env and permissions are configured, with demo/mock fallback.
+- `components/admin/` - admin UI; reads real leads server-side through service_role after the demo password gate, with demo/mock fallback.
 - `components/ui/` - small shadcn/ui-ready primitives.
 - `lib/calculate.ts` - calculation input schema, demo settings and pure calculation logic.
 - `lib/calculate.test.ts` - unit tests for calculation logic.
-- `lib/leads.ts` - lead data boundary: mock implementation now, Supabase later.
+- `lib/leads.ts` - lead data boundary: Supabase anon insert, server-side service_role admin reads and mock fallback.
+- `lib/vehicle-catalog.ts` - Vehicle Catalog data boundary for Supabase catalog reads and local fallback.
 - `docs/` - product, architecture, formula and quality documents.
-- `supabase/schema.sql` - planned database schema.
+- `supabase/schema.sql` - lead, calculation settings and lead comments schema.
+- `supabase/lead_number.sql` - human-readable lead number migration and sequence.
+- `supabase/vehicle_catalog.sql` - implemented Vehicle Catalog schema, RLS policies and grants.
+- `supabase/vehicle_catalog_seed_demo.sql` - repeatable demo catalog seed.
 
 ## Architecture Rules
 
 - Keep business logic in `lib/`.
 - Keep calculation formulas in `lib/calculate.ts` or related `lib/` modules.
 - UI should not import Supabase directly. Route data access through `lib/leads.ts`
-  or a future adjacent data-access module.
+  or `lib/vehicle-catalog.ts`/server actions.
+- Lead form submissions save to `public.leads` through anon insert when Supabase env and
+  permissions are configured; otherwise the app uses demo/mock fallback.
+- `/admin` reads `public.leads` server-side through `SUPABASE_SERVICE_ROLE_KEY` after
+  `ADMIN_DEMO_PASSWORD`.
+- Never grant anon `SELECT` on `public.leads`; anon only needs lead insert and active
+  Vehicle Catalog reads.
+- Keep `SUPABASE_SERVICE_ROLE_KEY` server-side only. Never expose it in client components
+  or with a `NEXT_PUBLIC_` prefix.
+- Vehicle Catalog is implemented in Supabase and drives calculator dropdowns. CSV/Excel is
+  an import/catalog maintenance format, not the website source of truth.
+- `vehicle_variants.source_price_usd` is the catalog base price. Demo seed prices are
+  placeholders, not market prices.
+- UUID remains the technical lead id and URL key. `lead_number` is the human-readable
+  admin number displayed as `AIC-000001`.
 - Real customs formulas are not implemented. Current formulas are demo-only.
-- Demo-mode UX must be honest when data is mocked or not persisted.
+- Demo-mode UX must be honest when mock fallback is used or a planned control is not
+  persisted yet.
 
 ## Required Checks
 
@@ -53,4 +72,6 @@ CI runs the same checks on GitHub Actions for pushes and pull requests to `main`
 - Update `PROJECT_NOTES.md` after major changes.
 - Update `docs/QUALITY.md` when quality gates or known gaps change.
 - Update `docs/REVIEW_CHECKLIST.md` when routes or manual demo flows change.
-- Keep README truthful: Supabase/OpenAI are prepared but not connected until code proves otherwise.
+- Keep README truthful: Supabase is connected for lead insert, admin read and Vehicle
+  Catalog; OpenAI is prepared but not connected until code proves otherwise.
+- Update `docs/SUPABASE_SETUP.md` when SQL order, grants, policies or required env vars change.

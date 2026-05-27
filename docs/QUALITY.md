@@ -20,7 +20,8 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Unit tests cover demo fallback for the lead persistence boundary in `lib/leads.ts`.
 - Next.js production build verifies routes compile and prerender correctly.
 - TypeScript strict mode is enabled.
-- Demo-mode warnings are visible where data is mocked or not persisted.
+- Demo-mode warnings are visible where data uses mock fallback or planned controls are
+  not persisted yet.
 
 ## Known Gaps
 
@@ -57,7 +58,7 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Settings page clearly communicates read-only demo behavior.
 - `npm test`, `npm run typecheck` and `npm run build` pass locally or in CI.
 
-## Quality Bar Before Supabase Integration
+## Quality Bar For Supabase Changes
 
 - Keep UI calls routed through `lib/leads.ts` or server actions instead of Supabase imports.
 - Keep mock data available as a fallback for local demo mode.
@@ -65,5 +66,5 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Update `supabase/schema.sql` and docs together.
 - Do not expose service-role keys to client components.
 - Keep `SUPABASE_SERVICE_ROLE_KEY` only in `.env.local` and Vercel server env.
-- Keep anon access limited to public insert/read paths; anon `SELECT` on `public.leads`
-  is intentionally not granted for admin.
+- Keep anon access limited to public lead insert and active Vehicle Catalog reads; anon
+  `SELECT` on `public.leads` is intentionally not granted for admin.

@@ -8,7 +8,7 @@
 - Zod
 - node:test + tsx
 - shadcn/ui-ready component structure
-- Supabase-ready SQL schema
+- Supabase lead insert, server-side admin read and Vehicle Catalog SQL
 - OpenAI-ready environment setup
 
 ## Key Directories
@@ -30,9 +30,35 @@
 
 ## Data Boundary
 
-Заявки проходят через `lib/leads.ts`. Сейчас файл возвращает demo data, но это
-будущая точка замены на Supabase-backed реализацию. UI и маршруты не должны импортировать
-Supabase напрямую.
+Заявки проходят через `lib/leads.ts`. Это текущая Supabase-backed граница данных:
+форма заявки вызывает `createLead()`, helper вставляет запись в `public.leads` через
+anon Supabase client при настроенных env-переменных и разрешениях. Если env/Supabase
+недоступны, включается demo/mock fallback, чтобы локальная демонстрация оставалась
+работоспособной.
+
+Admin routes также проходят через `lib/leads.ts`. После `ADMIN_DEMO_PASSWORD` gate
+серверный helper использует `SUPABASE_SERVICE_ROLE_KEY` для чтения `public.leads`.
+Service-role ключ не должен попадать в client components и не должен иметь
+`NEXT_PUBLIC_` prefix.
+
+Vehicle Catalog проходит через `lib/vehicle-catalog.ts`. Калькулятор читает активные
+бренды, модели и варианты из Supabase и строит зависимые dropdown:
+
+```text
+country -> brand -> model -> year -> engine type -> engine volume
+```
+
+UI и маршруты не должны импортировать Supabase напрямую; доступ к данным остается в
+`lib/` helpers или server actions.
+
+## Current Data Flow
+
+- Lead form -> `createLead()` -> Supabase anon insert -> `public.leads`.
+- Admin -> server-side service-role read -> `public.leads`.
+- Calculator -> Vehicle Catalog read -> dependent dropdown -> selected
+  `source_price_usd`.
+- Fallback mode -> mock/demo leads or local demo catalog when env vars, permissions or
+  Supabase are unavailable.
 
 ## Harness
 
@@ -43,5 +69,9 @@ Supabase напрямую.
 
 ## Integrations
 
-Supabase и OpenAI пока не подключены. Переменные окружения описаны в `.env.example`.
-Реальные секреты нельзя коммитить в репозиторий.
+Supabase подключен для lead insert, admin lead read и Vehicle Catalog read при наличии
+переменных окружения и нужных grants/policies. OpenAI подготовлен на уровне env/documentation,
+но реальные OpenAI-запросы не подключены.
+
+Переменные окружения описаны в `.env.example` и `docs/SUPABASE_SETUP.md`. Реальные
+секреты нельзя коммитить в репозиторий.

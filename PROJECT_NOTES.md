@@ -4,7 +4,8 @@
 
 AutoImport AI Calculator is a portfolio MVP for a vehicle import business. It demonstrates
 a public import-cost calculator, lead capture flow, admin workflow draft, demo formulas,
-and readiness for Supabase and OpenAI integrations.
+and implemented Supabase integration for leads and Vehicle Catalog, with OpenAI still
+prepared but not connected.
 
 ## Current Status
 
@@ -13,14 +14,20 @@ and readiness for Supabase and OpenAI integrations.
 - Public calculator UI implemented from the Figma wireframe as React components.
 - Demo result breakdown and Supabase-backed lead form submission are implemented.
 - Demo admin pages are available for leads, lead detail and settings.
-- Supabase schema is drafted and `lib/leads.ts` can insert and read submitted leads when env vars are configured.
+- Supabase insert/read is implemented: `lib/leads.ts` can insert submitted leads through
+  anon Supabase access and read admin leads server-side through service_role when env vars
+  and permissions are configured.
 - `lib/leads.ts` remains the lead data boundary: anon Supabase insert for form submissions,
   server-side service-role admin reads after demo-password access, and mock fallback
   when admin env is missing.
-- Vehicle Catalog Phase 1 is prepared as a separate Supabase SQL file and CSV import
-  template.
-- Public calculator now reads Vehicle Catalog options from Supabase through a `lib/`
-  helper and uses dependent dropdowns instead of manual vehicle price entry.
+- Vehicle Catalog schema, demo seed and calculator dropdown are implemented.
+- Public calculator reads Vehicle Catalog options from Supabase through a `lib/` helper
+  and uses dependent dropdowns instead of manual vehicle price entry.
+- Human-readable lead numbers are implemented with `lead_number`, displayed as
+  `AIC-000001`; UUID remains the technical id and URL key.
+- Documentation refresh done: PRD, architecture, README, Vehicle Catalog notes and
+  Supabase setup now describe the current Supabase-backed MVP instead of the older
+  demo-only state.
 - GitHub Actions CI is prepared for tests, typecheck and build.
 - No real API keys are present.
 - First version is deployed on Vercel: https://autoimport-ai-calculator.vercel.app/
@@ -48,7 +55,7 @@ and readiness for Supabase and OpenAI integrations.
 - Expanded `AGENTS.md` into a repository map for future agent work.
 - Added `docs/QUALITY.md` with quality gates and known gaps.
 - Added `docs/REVIEW_CHECKLIST.md` for manual smoke review.
-- Added `lib/leads.ts` to keep UI separated from the future Supabase implementation.
+- Added `lib/leads.ts` to keep UI separated from direct Supabase access.
 
 ## Supabase Lead Insert
 
@@ -100,6 +107,7 @@ and readiness for Supabase and OpenAI integrations.
 
 ## Next Version
 
+- Add CSV import or admin catalog management for Vehicle Catalog.
 - Replace demo catalog prices with sourced production price enrichment.
 - Save admin status changes and manager comments.
 - Add real admin authentication.
@@ -108,5 +116,6 @@ and readiness for Supabase and OpenAI integrations.
 
 ## Next High-Impact Step
 
-Persist admin status changes and manager comments through the same data boundary, then
-replace the demo-password gate with real authentication.
+CSV import or admin catalog management is the next recommended implementation step.
+After that, persist admin status changes and manager comments through the same data
+boundary, then replace the demo-password gate with real authentication.

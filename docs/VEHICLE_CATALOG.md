@@ -1,8 +1,8 @@
 # Vehicle Catalog
 
-Vehicle Catalog is the planned source for selectable vehicle options in the calculator.
-It will replace manual entry of brand, model, year, engine and vehicle price with a
-controlled catalog flow:
+Vehicle Catalog is the implemented source for selectable vehicle options in the
+calculator. It replaces manual entry of brand, model, year, engine and vehicle price with
+a controlled catalog flow:
 
 ```text
 country -> brand -> model -> year -> engine type -> engine volume -> source_price_usd
@@ -12,7 +12,7 @@ country -> brand -> model -> year -> engine type -> engine volume -> source_pric
 
 Supabase is the source of truth for catalog data used by the website. CSV or Excel files
 are only an import and maintenance format for managers or scripts. After data is imported,
-the calculator should read options from Supabase, not from local spreadsheets.
+the calculator reads options from Supabase, not from local spreadsheets.
 
 The catalog stores the base vehicle price in `vehicle_variants.source_price_usd`. USD is
 the canonical price because the current calculation already converts vehicle prices through
@@ -39,7 +39,8 @@ The import flow should normalize CSV rows into:
 
 The demo seed SQL lives at `supabase/vehicle_catalog_seed_demo.sql`. It prepares a focused
 catalog for UI testing across 3 countries, 15 brands, up to 60 models and up to 180
-variants. The current seed contains 15 brands, 60 models and 180 variants.
+variants. The current seed contains 15 brands, 60 models and 180 variants and is applied
+after `supabase/vehicle_catalog.sql`.
 
 Brand/model/variant taxonomy uses real-world vehicle names, but demo seed prices are
 placeholders and must not be treated as market prices.
@@ -92,6 +93,16 @@ active brands and active variants under active models/brands.
 Management actions use the server-side service role. The service role can read and manage
 catalog rows for imports, manual admin edits and future automation.
 
+## Implementation Status
+
+- Schema is implemented in `supabase/vehicle_catalog.sql`.
+- Demo seed is implemented in `supabase/vehicle_catalog_seed_demo.sql`.
+- Calculator dropdown integration is implemented through `lib/vehicle-catalog.ts`.
+- Dependent dropdowns are implemented for country, brand, model, year, engine type and
+  engine volume.
+- `source_price_usd` is the catalog base price used by the calculator.
+- Demo prices are placeholders for UX/calculation testing and are not market prices.
+
 ## Future Admin Workflow
 
 Future phases can add an admin catalog screen for:
@@ -102,9 +113,7 @@ Future phases can add an admin catalog screen for:
 - Updating prices through APIs or market aggregators.
 - Recording source URLs and last checked timestamps for auditability.
 
-The next application step after applying the SQL is to add server-side catalog read helpers
-and connect calculator dropdowns to Supabase without allowing the client to manually change
-the selected vehicle's source price.
+The next catalog phase is CSV import/admin catalog management and real price enrichment.
 
 ## Calculator Integration
 
