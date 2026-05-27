@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BarChart3, Eye, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InfoAlert } from "@/components/ui/info-alert";
-import { demoLeads, leadStatusClasses, leadStatusLabels } from "@/lib/leads";
+import { demoLeads, leadStatusClasses, leadStatusLabels } from "@/lib/lead-demo";
 
 export function AdminPreview() {
   const avgBudget = Math.round(
@@ -25,8 +25,8 @@ export function AdminPreview() {
       </div>
 
       <InfoAlert>
-        Mock admin: заявки показаны как демо-данные. Подключение Supabase запланировано
-        для следующей версии.
+        Admin demo: страница админки читает реальные заявки на сервере через service
+        role после demo-пароля. На этом превью оставлены демо-данные.
       </InfoAlert>
 
       <div className="grid gap-4 md:grid-cols-3">

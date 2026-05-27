@@ -26,10 +26,16 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 
 - No end-to-end browser tests yet.
 - No visual regression tests yet.
-- Lead submissions require configured Supabase env vars and compatible table permissions.
-- Admin data is mock data.
+- Lead submissions require configured anon Supabase env vars and compatible insert permissions.
+- Admin reads use Supabase server-side through `SUPABASE_SERVICE_ROLE_KEY` after
+  `ADMIN_DEMO_PASSWORD` access, with mock fallback when admin env is missing.
+- Vercel must provide `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_DEMO_PASSWORD` as server
+  environment variables for real admin reads.
+- Supabase must grant `service_role` usage on the `public` schema and `SELECT` on the
+  admin-read tables used by the app.
+- Do not add anon `SELECT` policy for `public.leads`.
 - Settings are read-only demo controls.
-- Admin Supabase reads and OpenAI are prepared but not connected.
+- OpenAI is prepared but not connected.
 - Calculation formulas are demo-only and not real customs formulas.
 
 ## Codex Project Setup
@@ -43,7 +49,8 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Live demo opens successfully.
 - Main calculator updates result from user input.
 - Lead form clearly communicates demo-mode.
-- Admin list and detail routes load demo data.
+- Admin list and detail routes load Supabase leads through server-side service-role reads
+  after demo-password access, with demo fallback when admin env is missing.
 - Unknown admin lead ids return 404.
 - Settings page clearly communicates read-only demo behavior.
 - `npm test`, `npm run typecheck` and `npm run build` pass locally or in CI.
@@ -55,3 +62,6 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Add broader tests around lead input normalization and Supabase error handling.
 - Update `supabase/schema.sql` and docs together.
 - Do not expose service-role keys to client components.
+- Keep `SUPABASE_SERVICE_ROLE_KEY` only in `.env.local` and Vercel server env.
+- Keep anon access limited to public insert/read paths; anon `SELECT` on `public.leads`
+  is intentionally not granted for admin.

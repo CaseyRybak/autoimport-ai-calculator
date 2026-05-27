@@ -13,9 +13,10 @@ and readiness for Supabase and OpenAI integrations.
 - Public calculator UI implemented from the Figma wireframe as React components.
 - Demo result breakdown and Supabase-backed lead form submission are implemented.
 - Demo admin pages are available for leads, lead detail and settings.
-- Supabase schema is drafted and `lib/leads.ts` can insert submitted leads when env vars are configured.
-- `lib/leads.ts` remains the lead data boundary: Supabase insert for form submissions,
-  mock fallback when env is missing, and mock admin data for now.
+- Supabase schema is drafted and `lib/leads.ts` can insert and read submitted leads when env vars are configured.
+- `lib/leads.ts` remains the lead data boundary: anon Supabase insert for form submissions,
+  server-side service-role admin reads after demo-password access, and mock fallback
+  when admin env is missing.
 - GitHub Actions CI is prepared for tests, typecheck and build.
 - No real API keys are present.
 - First version is deployed on Vercel: https://autoimport-ai-calculator.vercel.app/
@@ -51,11 +52,24 @@ and readiness for Supabase and OpenAI integrations.
 - Added `createLead()` in `lib/leads.ts` to map lead form payloads into `public.leads`.
 - Added a server action so the client form does not import Supabase directly.
 - Kept demo success fallback when Supabase env vars are not configured.
-- Admin list/detail pages still use mock data.
+
+## Supabase Admin Reads
+
+- Added `getLeads()` and `getLeadById()` in `lib/leads.ts`.
+- Admin list/detail pages read `public.leads` through the data boundary with a server-only
+  service-role helper.
+- Added a simple `ADMIN_DEMO_PASSWORD` gate before real admin reads.
+- Mock fallback remains for local demo mode or missing admin env vars.
+- Anon SELECT on `public.leads` is intentionally not required and should not be added
+  for the portfolio admin.
+- Supabase admin reads require manual grants for `service_role`: usage on the `public`
+  schema and `SELECT` on the app's admin-read tables.
+- Vercel needs `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_DEMO_PASSWORD` configured as
+  server-side environment variables before the deployed admin can read real leads.
+- `/admin` is forced dynamic so new Supabase leads are not frozen at build time.
 
 ## Next Version
 
-- Load admin lead list and lead detail from Supabase.
 - Save admin status changes and manager comments.
 - Add real admin authentication.
 - Replace demo formulas with verified business/legal calculation rules.
@@ -63,5 +77,5 @@ and readiness for Supabase and OpenAI integrations.
 
 ## Next High-Impact Step
 
-Load admin lead list and lead detail from Supabase while keeping mock fallback for local
-demo mode.
+Persist admin status changes and manager comments through the same data boundary, then
+replace the demo-password gate with real authentication.

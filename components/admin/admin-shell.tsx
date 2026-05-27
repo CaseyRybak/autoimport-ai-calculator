@@ -18,7 +18,8 @@ export function AdminShell({ title, children }: Props) {
           </div>
           <div className="border-b p-3">
             <InfoAlert className="p-2 text-xs">
-              Mock admin: заявки показаны как демо-данные.
+              Admin demo: реальные заявки читаются на сервере через service role после
+              demo-пароля; иначе показываются демо-данные.
             </InfoAlert>
           </div>
           <nav className="space-y-1 p-3 text-sm">

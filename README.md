@@ -13,8 +13,8 @@ https://autoimport-ai-calculator.vercel.app/
 - A responsive public calculator for estimating turnkey vehicle import costs.
 - A result breakdown with budget status, delta and demo explanation.
 - A lead form flow that can save to Supabase when environment variables are configured.
-- A mock admin area with lead list, lead detail and calculation settings.
-- A lead data boundary in `lib/leads.ts` for Supabase insert and mock fallback.
+- An admin area with demo-password access, server-side Supabase reads and mock fallback.
+- A lead data boundary in `lib/leads.ts` for Supabase insert, admin read and mock fallback.
 - Shared calculation logic in `lib/calculate.ts` with unit tests.
 - Documentation, Supabase schema draft and deployment-ready project structure.
 
@@ -31,8 +31,10 @@ to be a production customs calculator.
 - Demo formulas for price conversion, customs fee, recycle fee, logistics, company fee
   and extra services.
 - Budget status: within budget or over budget.
-- Lead form with Supabase insert when configured and honest demo fallback messaging.
-- Mock admin: leads table, lead detail card, status/comment placeholders and settings.
+- Lead form with Supabase anon insert when configured and honest demo fallback messaging.
+- Admin lead list/detail can read Supabase server-side through a service-role key after
+  the demo password gate.
+- Admin status/comment placeholders and read-only calculation settings.
 - Vercel deployment and GitHub-ready repository.
 
 ## Tech stack
@@ -43,7 +45,7 @@ to be a production customs calculator.
 - Zod
 - node:test + tsx
 - shadcn/ui-ready component structure
-- Supabase SQL schema and lead insert boundary
+- Supabase SQL schema, lead insert boundary and server-side admin read helper
 - OpenAI API-ready environment structure
 
 ## Architecture decisions
@@ -54,22 +56,26 @@ to be a production customs calculator.
 - App Router routes are kept small and delegate UI to `components/*`.
 - Lead form submissions are routed through `lib/leads.ts`, which inserts into Supabase
   when env vars are configured and falls back to demo success otherwise.
-- Admin data is still routed through `lib/leads.ts` and currently returns mock data.
+- Admin data is routed through `lib/leads.ts` and reads Supabase only on the server via
+  `SUPABASE_SERVICE_ROLE_KEY` after `ADMIN_DEMO_PASSWORD` access.
+- The public anon key is used only for lead creation. Do not add anon `SELECT` access to
+  `public.leads` for this portfolio admin.
 - GitHub Actions runs tests, typecheck and build on push/PR.
 - Secrets are not committed. Environment variable names live in `.env.example`.
 
 ## Demo limitations
 
-- Form submissions are saved only when Supabase env vars and table permissions are configured.
-- Admin data is mock data, not database-backed.
+- Form submissions are saved only when Supabase anon env vars and insert permissions are configured.
+- Admin reads require `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_DEMO_PASSWORD` in server env.
+- If admin env vars are missing, admin pages intentionally show demo/mock data.
 - Settings are read-only demo controls.
 - OpenAI is prepared but not connected.
 - Formulas are demo-only and are not real customs formulas.
 
 ## Roadmap
 
-- Load admin leads from Supabase.
 - Add authentication and row-level security for admin routes.
+- Persist admin status changes and manager comments.
 - Replace demo formulas with verified business/legal calculation rules.
 - Add OpenAI-powered calculation explanation and manager message drafts.
 - Add screenshots and deployment metadata after the next UI pass.
@@ -82,6 +88,18 @@ npm run dev
 ```
 
 Open http://localhost:3000.
+
+Optional local env names:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+ADMIN_DEMO_PASSWORD=
+```
+
+Keep `SUPABASE_SERVICE_ROLE_KEY` only in `.env.local` or Vercel server env. It must not
+use a `NEXT_PUBLIC_` prefix.
 
 Useful checks:
 

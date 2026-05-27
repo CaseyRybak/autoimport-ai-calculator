@@ -1,16 +1,38 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MessageCircle, Phone, Sparkles } from "lucide-react";
+import { AdminPasswordGate } from "@/components/admin/admin-password-gate";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { hasAdminAccess, isAdminPasswordConfigured } from "@/lib/admin-access";
+import { getDemoLeadById } from "@/lib/lead-demo";
 import { getLeadById, leadStatusClasses, leadStatusLabels } from "@/lib/leads";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type Props = {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{
+    error?: string;
+  }>;
 };
 
-export default async function LeadDetailPage({ params }: Props) {
+export default async function LeadDetailPage({ params, searchParams }: Props) {
   const { id } = await params;
-  const lead = await getLeadById(id);
+  const query = await searchParams;
+  const isPasswordConfigured = isAdminPasswordConfigured();
+  const hasAccess = isPasswordConfigured ? await hasAdminAccess() : false;
+
+  if (isPasswordConfigured && !hasAccess) {
+    return (
+      <AdminPasswordGate
+        hasError={query?.error === "1"}
+        returnTo={`/admin/leads/${encodeURIComponent(id)}`}
+      />
+    );
+  }
+
+  const lead = isPasswordConfigured ? await getLeadById(id) : getDemoLeadById(id);
 
   if (!lead) {
     notFound();

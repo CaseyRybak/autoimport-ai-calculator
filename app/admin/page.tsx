@@ -1,12 +1,70 @@
 import Link from "next/link";
+import { AdminPasswordGate } from "@/components/admin/admin-password-gate";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { leadStatusClasses, leadStatusLabels, listLeads } from "@/lib/leads";
+import { InfoAlert } from "@/components/ui/info-alert";
+import { hasAdminAccess, isAdminPasswordConfigured } from "@/lib/admin-access";
+import { demoLeads } from "@/lib/lead-demo";
+import {
+  getLeadsWithDebug,
+  leadStatusClasses,
+  leadStatusLabels,
+  type LeadReadDebug,
+} from "@/lib/leads";
 
-export default async function AdminPage() {
-  const leads = await listLeads();
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+type Props = {
+  searchParams?: Promise<{
+    error?: string;
+    returnTo?: string;
+  }>;
+};
+
+export default async function AdminPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const isPasswordConfigured = isAdminPasswordConfigured();
+  const hasAccess = isPasswordConfigured ? await hasAdminAccess() : false;
+
+  if (isPasswordConfigured && !hasAccess) {
+    return (
+      <AdminPasswordGate
+        hasError={params?.error === "1"}
+        returnTo={params?.returnTo?.startsWith("/admin") ? params.returnTo : "/admin"}
+      />
+    );
+  }
+
+  const readResult = isPasswordConfigured
+    ? await getLeadsWithDebug()
+    : {
+        leads: demoLeads,
+        debug: {
+          serviceRoleClientAvailable: false,
+          adminClientUsesServiceRoleEnv: false,
+          adminClientKeyPrefix: null,
+          adminReadFunction: "admin-page:demoFallbackNoPassword",
+          getLeadsSource: "mock",
+          supabaseRowsCount: null,
+          supabaseErrorCode: null,
+          supabaseErrorMessage: null,
+        } satisfies LeadReadDebug,
+      };
+  const leads = readResult.leads;
+  const avgBudget =
+    leads.length > 0
+      ? leads.reduce((sum, lead) => sum + lead.budget, 0) / leads.length
+      : 0;
 
   return (
     <AdminShell title="Заявки">
+      {!isPasswordConfigured ? (
+        <InfoAlert className="mb-5">
+          Demo mode: `ADMIN_DEMO_PASSWORD` не задан, поэтому админка показывает только
+          демо-заявки и не читает реальные данные из Supabase.
+        </InfoAlert>
+      ) : null}
+
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border bg-white p-4">
           <p className="text-sm text-slate-500">Новые заявки</p>
@@ -22,7 +80,7 @@ export default async function AdminPage() {
         </div>
         <div className="rounded-lg border bg-white p-4">
           <p className="text-sm text-slate-500">Средний бюджет</p>
-          <p className="mt-2 text-3xl font-semibold">4.0М ₽</p>
+          <p className="mt-2 text-3xl font-semibold">{(avgBudget / 1_000_000).toFixed(1)}М ₽</p>
         </div>
       </div>
 

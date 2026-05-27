@@ -1,20 +1,21 @@
 import type { CalculationBreakdown, CalculationInput } from "@/lib/calculate";
+import {
+  demoLeads,
+  getDemoLeadById,
+  leadStatusLabels,
+  type DemoLead,
+  type LeadStatus,
+} from "@/lib/lead-demo";
 import { createSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
 
-export type LeadStatus = "new" | "in_progress" | "completed" | "rejected";
-
-export type DemoLead = {
-  id: string;
-  date: string;
-  client: string;
-  phone: string;
-  telegram: string;
-  car: string;
-  country: string;
-  budget: number;
-  total: number;
-  status: LeadStatus;
-};
+export {
+  demoLeads,
+  getDemoLeadById,
+  leadStatusClasses,
+  leadStatusLabels,
+  type DemoLead,
+  type LeadStatus,
+} from "@/lib/lead-demo";
 
 export type CreateLeadInput = {
   customerName: string;
@@ -37,65 +38,184 @@ export type CreateLeadResult =
       error: string;
     };
 
-export const demoLeads: DemoLead[] = [
-  {
-    id: "1",
-    date: "26.05.2026",
-    client: "Иван Петров",
-    phone: "+7 (999) 123-45-67",
-    telegram: "@ivan_petrov",
-    car: "Toyota Camry 2022",
-    country: "Корея",
-    budget: 3_000_000,
-    total: 2_978_000,
-    status: "new",
-  },
-  {
-    id: "2",
-    date: "25.05.2026",
-    client: "Мария Сидорова",
-    phone: "+7 (999) 222-10-10",
-    telegram: "@maria_auto",
-    car: "BMW X5 2021",
-    country: "Европа",
-    budget: 5_500_000,
-    total: 5_720_000,
-    status: "in_progress",
-  },
-  {
-    id: "3",
-    date: "24.05.2026",
-    client: "Алексей Смирнов",
-    phone: "+7 (999) 333-11-22",
-    telegram: "@smirnov",
-    car: "Haval H9 2023",
-    country: "Китай",
-    budget: 3_500_000,
-    total: 3_310_000,
-    status: "completed",
-  },
-];
-
-export const leadStatusLabels: Record<LeadStatus, string> = {
-  new: "Новая",
-  in_progress: "В работе",
-  completed: "Завершена",
-  rejected: "Отклонена",
+export type LeadReadDebug = {
+  serviceRoleClientAvailable: boolean;
+  adminClientUsesServiceRoleEnv: boolean;
+  adminClientKeyPrefix: string | null;
+  adminReadFunction: string;
+  getLeadsSource: "supabase" | "mock";
+  supabaseRowsCount: number | null;
+  supabaseErrorCode: string | null;
+  supabaseErrorMessage: string | null;
 };
 
-export const leadStatusClasses: Record<LeadStatus, string> = {
-  new: "bg-blue-50 text-blue-700",
-  in_progress: "bg-amber-50 text-amber-700",
-  completed: "bg-emerald-50 text-emerald-700",
-  rejected: "bg-red-50 text-red-700",
+export type LeadReadResult = {
+  leads: DemoLead[];
+  debug: LeadReadDebug;
 };
+
+type LeadRow = {
+  id: string;
+  created_at: string;
+  status: string;
+  customer_name: string;
+  phone: string;
+  telegram: string | null;
+  country: CalculationInput["country"];
+  brand: string;
+  model: string;
+  year: number;
+  budget_rub: number;
+  total_rub: number;
+};
+
+const countryLabels: Record<CalculationInput["country"], string> = {
+  korea: "Корея",
+  china: "Китай",
+  europe: "Европа",
+};
+
+const leadColumns =
+  "id, created_at, status, customer_name, phone, telegram, country, brand, model, year, budget_rub, total_rub";
+
+const formatLeadDate = (value: string) =>
+  new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(value));
+
+const toLeadStatus = (status: string): LeadStatus =>
+  status in leadStatusLabels ? (status as LeadStatus) : "new";
+
+const mapLeadRow = (row: LeadRow): DemoLead => ({
+  id: row.id,
+  date: formatLeadDate(row.created_at),
+  client: row.customer_name,
+  phone: row.phone,
+  telegram: row.telegram ?? "Не указан",
+  car: `${row.brand} ${row.model} ${row.year}`.trim(),
+  country: countryLabels[row.country] ?? row.country,
+  budget: Number(row.budget_rub),
+  total: Number(row.total_rub),
+  status: toLeadStatus(row.status),
+});
+
+const mockReadDebug = ({
+  serviceRoleClientAvailable,
+  adminClientUsesServiceRoleEnv,
+  adminClientKeyPrefix,
+  adminReadFunction,
+  supabaseErrorCode = null,
+  supabaseErrorMessage = null,
+}: Omit<
+  LeadReadDebug,
+  "getLeadsSource" | "supabaseRowsCount" | "supabaseErrorCode" | "supabaseErrorMessage"
+> &
+  Pick<Partial<LeadReadDebug>, "supabaseErrorCode" | "supabaseErrorMessage">) => ({
+  serviceRoleClientAvailable,
+  adminClientUsesServiceRoleEnv,
+  adminClientKeyPrefix,
+  adminReadFunction,
+  getLeadsSource: "mock" as const,
+  supabaseRowsCount: null,
+  supabaseErrorCode,
+  supabaseErrorMessage,
+});
+
+async function createAdminClient() {
+  const {
+    createSupabaseAdminClient,
+    getSupabaseAdminClientDebug,
+    isSupabaseAdminConfigured,
+  } = await import(
+    "@/lib/supabase-admin"
+  );
+
+  return {
+    client: isSupabaseAdminConfigured() ? createSupabaseAdminClient() : null,
+    debug: getSupabaseAdminClientDebug(),
+  };
+}
+
+export async function getLeadsWithDebug(): Promise<LeadReadResult> {
+  const { client: supabase, debug: adminDebug } = await createAdminClient();
+  const adminReadFunction = "getLeadsWithDebug:serviceRoleSelect";
+
+  if (!supabase) {
+    return {
+      leads: demoLeads,
+      debug: mockReadDebug({
+        serviceRoleClientAvailable: false,
+        adminClientUsesServiceRoleEnv: adminDebug.adminClientUsesServiceRoleEnv,
+        adminClientKeyPrefix: adminDebug.adminClientKeyPrefix,
+        adminReadFunction,
+      }),
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("leads")
+    .select(leadColumns)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return {
+      leads: demoLeads,
+      debug: mockReadDebug({
+        serviceRoleClientAvailable: true,
+        adminClientUsesServiceRoleEnv: adminDebug.adminClientUsesServiceRoleEnv,
+        adminClientKeyPrefix: adminDebug.adminClientKeyPrefix,
+        adminReadFunction,
+        supabaseErrorCode: error.code ?? null,
+        supabaseErrorMessage: error.message,
+      }),
+    };
+  }
+
+  return {
+    leads: (data ?? []).map((lead) => mapLeadRow(lead as LeadRow)),
+    debug: {
+      serviceRoleClientAvailable: true,
+      adminClientUsesServiceRoleEnv: adminDebug.adminClientUsesServiceRoleEnv,
+      adminClientKeyPrefix: adminDebug.adminClientKeyPrefix,
+      adminReadFunction,
+      getLeadsSource: "supabase",
+      supabaseRowsCount: data?.length ?? 0,
+      supabaseErrorCode: null,
+      supabaseErrorMessage: null,
+    },
+  };
+}
+
+export async function getLeads(): Promise<DemoLead[]> {
+  const { leads } = await getLeadsWithDebug();
+
+  return leads;
+}
 
 export async function listLeads(): Promise<DemoLead[]> {
-  return demoLeads;
+  return getLeads();
 }
 
 export async function getLeadById(id: string): Promise<DemoLead | null> {
-  return demoLeads.find((lead) => lead.id === id) ?? null;
+  const { client: supabase } = await createAdminClient();
+
+  if (!supabase) {
+    return getDemoLeadById(id);
+  }
+
+  const { data, error } = await supabase
+    .from("leads")
+    .select(leadColumns)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    return getDemoLeadById(id);
+  }
+
+  return data ? mapLeadRow(data as LeadRow) : null;
 }
 
 const cleanOptionalText = (value: string | undefined) => {

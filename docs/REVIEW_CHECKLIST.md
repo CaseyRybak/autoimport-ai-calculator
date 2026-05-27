@@ -26,9 +26,12 @@ Use this checklist before portfolio review, Vercel deploys or major handoffs.
 
 ## Admin Flow
 
-- [ ] `/admin` opens the mock lead list.
-- [ ] Admin shell includes the mock-data warning.
-- [ ] `/admin/leads/1` opens a demo lead detail page.
+- [ ] With `ADMIN_DEMO_PASSWORD` set, `/admin` requires the demo password.
+- [ ] With admin access and `SUPABASE_SERVICE_ROLE_KEY` set, `/admin` opens the real lead list.
+- [ ] Without `ADMIN_DEMO_PASSWORD`, `/admin` falls back to the demo lead list.
+- [ ] Admin shell explains server-side service-role reads with demo fallback.
+- [ ] `/admin/leads/[id]` opens a Supabase lead detail page after admin access when that id exists.
+- [ ] `/admin/leads/1` opens a demo lead detail page in fallback/demo mode.
 - [ ] `/admin/leads/unknown` returns 404.
 - [ ] Status and comment controls clearly state they do not persist yet.
 - [ ] `/admin/settings` opens demo calculation settings.
