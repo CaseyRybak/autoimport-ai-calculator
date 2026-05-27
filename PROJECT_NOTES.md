@@ -17,6 +17,9 @@ and readiness for Supabase and OpenAI integrations.
 - `lib/leads.ts` remains the lead data boundary: anon Supabase insert for form submissions,
   server-side service-role admin reads after demo-password access, and mock fallback
   when admin env is missing.
+- Vehicle Catalog Phase 1 is prepared as a separate Supabase SQL file and CSV import
+  template. The current calculator UI still uses manual vehicle input until catalog reads
+  are connected in a later step.
 - GitHub Actions CI is prepared for tests, typecheck and build.
 - No real API keys are present.
 - First version is deployed on Vercel: https://autoimport-ai-calculator.vercel.app/
@@ -68,8 +71,22 @@ and readiness for Supabase and OpenAI integrations.
   server-side environment variables before the deployed admin can read real leads.
 - `/admin` is forced dynamic so new Supabase leads are not frozen at build time.
 
+## Vehicle Catalog
+
+- Added `supabase/vehicle_catalog.sql` for `vehicle_brands`, `vehicle_models` and
+  `vehicle_variants`.
+- Added `data/vehicle-catalog-template.csv` as an import template with demo placeholder
+  rows only.
+- Added `docs/VEHICLE_CATALOG.md` to document the catalog source-of-truth model.
+- Catalog base vehicle price is stored as `source_price_usd`; RUB/EUR/CNY/KRW display
+  values should be calculated in the app through exchange rates/settings.
+- CSV/Excel is only an import format. Supabase is the source of truth for the website.
+- Next step after applying the SQL in Supabase: add catalog read helpers and connect
+  dependent calculator options to Supabase.
+
 ## Next Version
 
+- Connect Vehicle Catalog reads to the calculator dropdown flow.
 - Save admin status changes and manager comments.
 - Add real admin authentication.
 - Replace demo formulas with verified business/legal calculation rules.
