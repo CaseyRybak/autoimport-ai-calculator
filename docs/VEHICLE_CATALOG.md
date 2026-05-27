@@ -35,6 +35,26 @@ The import flow should normalize CSV rows into:
 - `vehicle_models`: model name and model slug under a brand.
 - `vehicle_variants`: year, engine, source market and canonical USD price under a model.
 
+## Demo Seed Catalog
+
+The demo seed SQL lives at `supabase/vehicle_catalog_seed_demo.sql`. It prepares a focused
+catalog for UI testing across 3 countries, 15 brands, up to 60 models and up to 180
+variants. The current seed contains 15 brands, 60 models and 180 variants.
+
+Brand/model/variant taxonomy uses real-world vehicle names, but demo seed prices are
+placeholders and must not be treated as market prices.
+
+Every demo variant uses:
+
+- `source_price_usd` as an approximate placeholder value for testing.
+- `display_currency = 'USD'`.
+- `source_name = 'demo catalog seed'`.
+- `source_url = null`.
+- `last_checked_at = null`.
+
+The seed is repeatable: it upserts catalog rows and does not drop, truncate or delete
+existing catalog data.
+
 ## Real Data Requirements
 
 Production catalog rows need enough source context for review:
@@ -55,6 +75,13 @@ Production catalog rows need enough source context for review:
 Real prices should have a non-empty `source_url` and a meaningful `last_checked_at` timestamp.
 Rows without source proof should be treated as draft/demo data and not marketed as reliable
 commercial prices.
+
+Production price enrichment should add:
+
+- `source_url`: the listing, auction, aggregator or data provider URL.
+- `source_name`: the source/provider name.
+- `last_checked_at`: when the price was verified.
+- Price update method: manual manager update, CSV/Excel import, API sync or aggregator sync.
 
 ## Public Read Model
 

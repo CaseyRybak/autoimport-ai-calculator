@@ -77,15 +77,20 @@ and readiness for Supabase and OpenAI integrations.
   `vehicle_variants`.
 - Added `data/vehicle-catalog-template.csv` as an import template with demo placeholder
   rows only.
+- Added `supabase/vehicle_catalog_seed_demo.sql` with repeatable demo seed data using
+  real-world brand/model taxonomy and placeholder USD prices.
 - Added `docs/VEHICLE_CATALOG.md` to document the catalog source-of-truth model.
 - Catalog base vehicle price is stored as `source_price_usd`; RUB/EUR/CNY/KRW display
   values should be calculated in the app through exchange rates/settings.
 - CSV/Excel is only an import format. Supabase is the source of truth for the website.
-- Next step after applying the SQL in Supabase: add catalog read helpers and connect
-  dependent calculator options to Supabase.
+- Next step: apply the demo seed SQL in Supabase, then add catalog read helpers and
+  connect dependent calculator options to Supabase.
+- Real price enrichment with source URLs, checked timestamps and update methods remains
+  a separate phase.
 
 ## Next Version
 
+- Apply Vehicle Catalog demo seed SQL in Supabase.
 - Connect Vehicle Catalog reads to the calculator dropdown flow.
 - Save admin status changes and manager comments.
 - Add real admin authentication.
