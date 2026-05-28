@@ -4,4 +4,9 @@ args = ["-y", "@upstash/context7-mcp"]
 
 [mcp_servers.playwright]
 command = "npx"
-args = ["-y", "@playwright/mcp"]
+args = [
+  "-y",
+  "@playwright/mcp",
+  "--executable-path",
+  "/home/enzomonro/.local/bin/google-chrome",
+]

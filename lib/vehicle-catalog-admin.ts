@@ -488,7 +488,10 @@ export async function listCatalogAdminItems(
     );
   }
 
-  const options = await listCatalogFilterOptions(supabase, filters);
+  const [options, resolvedModels] = await Promise.all([
+    listCatalogFilterOptions(supabase, filters),
+    resolveFilteredModelIds(supabase, filters),
+  ]);
 
   if (options.error) {
     return {
@@ -498,8 +501,6 @@ export async function listCatalogAdminItems(
       models: options.models,
     };
   }
-
-  const resolvedModels = await resolveFilteredModelIds(supabase, filters);
 
   if (resolvedModels.error) {
     return {
@@ -586,16 +587,18 @@ export async function listCatalogAdminItems(
   const items = ((result.data ?? []) as CatalogVariantJoinedRow[])
     .map(toCatalogAdminItem)
     .filter((item): item is CatalogAdminItem => item !== null);
-  const activeCountResult = await applyVariantFilters(
-    supabase.from("vehicle_variants").select("id", { count: "exact", head: true }),
-    "active",
-    resolvedModels.modelIds,
-  );
-  const inactiveCountResult = await applyVariantFilters(
-    supabase.from("vehicle_variants").select("id", { count: "exact", head: true }),
-    "inactive",
-    resolvedModels.modelIds,
-  );
+  const [activeCountResult, inactiveCountResult] = await Promise.all([
+    applyVariantFilters(
+      supabase.from("vehicle_variants").select("id", { count: "exact", head: true }),
+      "active",
+      resolvedModels.modelIds,
+    ),
+    applyVariantFilters(
+      supabase.from("vehicle_variants").select("id", { count: "exact", head: true }),
+      "inactive",
+      resolvedModels.modelIds,
+    ),
+  ]);
   const summary = {
     totalVariants: (activeCountResult.count ?? 0) + (inactiveCountResult.count ?? 0),
     activeVariants: activeCountResult.count ?? 0,
@@ -628,7 +631,10 @@ export async function listCatalogAdminItemsForExport(
     );
   }
 
-  const options = await listCatalogFilterOptions(supabase, filters);
+  const [options, resolvedModels] = await Promise.all([
+    listCatalogFilterOptions(supabase, filters),
+    resolveFilteredModelIds(supabase, filters),
+  ]);
 
   if (options.error) {
     return omitPagination({
@@ -638,8 +644,6 @@ export async function listCatalogAdminItemsForExport(
       models: options.models,
     });
   }
-
-  const resolvedModels = await resolveFilteredModelIds(supabase, filters);
 
   if (resolvedModels.error) {
     return omitPagination({
