@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Car, Settings, Upload, Users } from "lucide-react";
+import { BarChart3, Car, Database, Settings, Users } from "lucide-react";
 import { InfoAlert } from "@/components/ui/info-alert";
 
 type Props = {
@@ -31,9 +31,9 @@ export function AdminShell({ title, children }: Props) {
               <Settings className="h-4 w-4" />
               Настройки
             </Link>
-            <Link href="/admin/catalog/import" className="flex items-center gap-3 rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100">
-              <Upload className="h-4 w-4" />
-              Импорт каталога
+            <Link href="/admin/catalog" className="flex items-center gap-3 rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100">
+              <Database className="h-4 w-4" />
+              Каталог авто
             </Link>
             <span className="flex items-center gap-3 rounded-md px-3 py-2 text-slate-400">
               <BarChart3 className="h-4 w-4" />
@@ -41,7 +41,7 @@ export function AdminShell({ title, children }: Props) {
             </span>
           </nav>
         </aside>
-        <section>
+        <section className="min-w-0">
           <header className="flex h-16 items-center justify-between border-b bg-white px-5">
             <h1 className="text-xl font-semibold text-slate-950">{title}</h1>
             <Link href="/" className="text-sm text-blue-600">

@@ -1,4 +1,5 @@
 import type { Country } from "@/lib/calculate";
+import { normalizeSourceUrl } from "@/lib/source-url";
 
 export const vehicleCatalogImportColumns = [
   "country",
@@ -9,7 +10,6 @@ export const vehicleCatalogImportColumns = [
   "engine_volume_liters",
   "source_market",
   "source_price_usd",
-  "display_currency",
   "source_name",
   "source_url",
   "last_checked_at",
@@ -17,7 +17,6 @@ export const vehicleCatalogImportColumns = [
 ] as const;
 
 export type VehicleCatalogImportColumn = (typeof vehicleCatalogImportColumns)[number];
-export type VehicleCatalogImportCurrency = "USD" | "RUB" | "EUR" | "CNY";
 
 export type VehicleCatalogImportRow = {
   rowNumber: number;
@@ -31,7 +30,6 @@ export type VehicleCatalogImportRow = {
   engineVolumeLiters: number;
   sourceMarket: Country;
   sourcePriceUsd: number;
-  displayCurrency: VehicleCatalogImportCurrency;
   sourceName: string | null;
   sourceUrl: string | null;
   lastCheckedAt: string | null;
@@ -48,7 +46,6 @@ export type VehicleCatalogImportPreviewRow = {
   engineVolumeLiters: string;
   sourceMarket: string;
   sourcePriceUsd: string;
-  displayCurrency: string;
   sourceName: string;
   sourceUrl: string;
   lastCheckedAt: string;
@@ -69,7 +66,6 @@ export type VehicleCatalogImportPreview = {
 type CsvRecord = Record<VehicleCatalogImportColumn, string>;
 
 const countries = new Set(["korea", "europe", "china"]);
-const currencies = new Set(["USD", "RUB", "EUR", "CNY"]);
 
 const trimCell = (value: string | undefined) => value?.trim() ?? "";
 
@@ -187,9 +183,9 @@ function validateRecord(rowNumber: number, record: CsvRecord): {
   const year = Number(record.year);
   const engineVolumeLiters = Number(record.engine_volume_liters);
   const sourcePriceUsd = Number(record.source_price_usd);
-  const displayCurrency = (record.display_currency || "USD").toUpperCase();
   const isActive = getBoolean(record.is_active);
   const lastCheckedAt = getValidDate(record.last_checked_at);
+  const sourceUrl = normalizeSourceUrl(record.source_url);
   const brandSlug = slugifyCatalogValue(record.brand);
   const modelSlug = slugifyCatalogValue(record.model);
 
@@ -225,12 +221,12 @@ function validateRecord(rowNumber: number, record: CsvRecord): {
     errors.push("source_price_usd must be numeric and > 0");
   }
 
-  if (!currencies.has(displayCurrency)) {
-    errors.push("display_currency must be one of USD/RUB/EUR/CNY");
-  }
-
   if (!countries.has(sourceMarket)) {
     errors.push("source_market must be one of korea/europe/china");
+  }
+
+  if (!sourceUrl.ok) {
+    errors.push(sourceUrl.error);
   }
 
   if (isActive === null) {
@@ -251,7 +247,6 @@ function validateRecord(rowNumber: number, record: CsvRecord): {
     engineVolumeLiters: record.engine_volume_liters,
     sourceMarket: record.source_market || country,
     sourcePriceUsd: record.source_price_usd,
-    displayCurrency,
     sourceName: record.source_name,
     sourceUrl: record.source_url,
     lastCheckedAt: record.last_checked_at,
@@ -280,9 +275,8 @@ function validateRecord(rowNumber: number, record: CsvRecord): {
       engineVolumeLiters,
       sourceMarket: sourceMarket as Country,
       sourcePriceUsd,
-      displayCurrency: displayCurrency as VehicleCatalogImportCurrency,
       sourceName: record.source_name || null,
-      sourceUrl: record.source_url || null,
+      sourceUrl: sourceUrl.value,
       lastCheckedAt: lastCheckedAt ?? null,
       isActive: isActive ?? true,
     },

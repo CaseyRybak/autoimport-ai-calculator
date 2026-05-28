@@ -131,7 +131,6 @@ insert into public.vehicle_variants (
   engine_volume_liters,
   source_market,
   source_price_usd,
-  display_currency,
   source_name,
   source_url,
   last_checked_at,
@@ -145,7 +144,6 @@ select
   catalog_models.engine_volume_liters,
   catalog_models.country,
   catalog_models.base_price_usd + variant_years.price_delta_usd,
-  'USD',
   'demo catalog seed',
   null::text,
   null::timestamptz,
@@ -160,7 +158,6 @@ cross join (
 ) as variant_years(year, price_delta_usd)
 on conflict on constraint vehicle_variants_model_year_engine_market_key do update
   set source_price_usd = excluded.source_price_usd,
-      display_currency = 'USD',
       source_name = 'demo catalog seed',
       source_url = null,
       last_checked_at = null,

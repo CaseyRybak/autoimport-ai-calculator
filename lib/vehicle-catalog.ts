@@ -24,7 +24,6 @@ export type VehicleCatalogVariant = {
   engineVolumeLiters: number;
   sourceMarket: Country;
   sourcePriceUsd: number;
-  displayCurrency: "USD";
   sourceName: string | null;
   sourceUrl: string | null;
   lastCheckedAt: string | null;
@@ -60,7 +59,6 @@ type VariantRow = {
   engine_volume_liters: number | string;
   source_market: Country;
   source_price_usd: number | string;
-  display_currency: string | null;
   source_name: string | null;
   source_url: string | null;
   last_checked_at: string | null;
@@ -88,7 +86,6 @@ const fallbackCatalog: VehicleCatalogData = {
       engineVolumeLiters: 2,
       sourceMarket: "korea",
       sourcePriceUsd: 20_000,
-      displayCurrency: "USD",
       sourceName: "demo fallback catalog",
       sourceUrl: null,
       lastCheckedAt: null,
@@ -101,7 +98,6 @@ const fallbackCatalog: VehicleCatalogData = {
       engineVolumeLiters: 1.5,
       sourceMarket: "europe",
       sourcePriceUsd: 24_500,
-      displayCurrency: "USD",
       sourceName: "demo fallback catalog",
       sourceUrl: null,
       lastCheckedAt: null,
@@ -114,7 +110,6 @@ const fallbackCatalog: VehicleCatalogData = {
       engineVolumeLiters: 0,
       sourceMarket: "china",
       sourcePriceUsd: 23_500,
-      displayCurrency: "USD",
       sourceName: "demo fallback catalog",
       sourceUrl: null,
       lastCheckedAt: null,
@@ -160,7 +155,7 @@ export async function getVehicleCatalog(): Promise<VehicleCatalogData> {
     supabase
       .from("vehicle_variants")
       .select(
-        "id, model_id, year, engine_type, engine_volume_liters, source_market, source_price_usd, display_currency, source_name, source_url, last_checked_at",
+        "id, model_id, year, engine_type, engine_volume_liters, source_market, source_price_usd, source_name, source_url, last_checked_at",
       )
       .eq("is_active", true)
       .order("year", { ascending: false }),
@@ -172,26 +167,15 @@ export async function getVehicleCatalog(): Promise<VehicleCatalogData> {
     return getVehicleCatalogFallback(error.message);
   }
 
-  const brands = ((brandsResult.data ?? []) as BrandRow[]).map((brand) => ({
-    id: brand.id,
-    country: brand.country,
-    name: brand.name,
-    slug: brand.slug,
-  }));
-  const brandIds = new Set(brands.map((brand) => brand.id));
+  const brandRows = (brandsResult.data ?? []) as BrandRow[];
+  const modelRows = (modelsResult.data ?? []) as ModelRow[];
+  const variantRows = (variantsResult.data ?? []) as VariantRow[];
+  const activeBrandIds = new Set(brandRows.map((brand) => brand.id));
+  const activeModels = modelRows.filter((model) => activeBrandIds.has(model.brand_id));
+  const activeModelIds = new Set(activeModels.map((model) => model.id));
 
-  const models = ((modelsResult.data ?? []) as ModelRow[])
-    .filter((model) => brandIds.has(model.brand_id))
-    .map((model) => ({
-      id: model.id,
-      brandId: model.brand_id,
-      name: model.name,
-      slug: model.slug,
-    }));
-  const modelIds = new Set(models.map((model) => model.id));
-
-  const variants = ((variantsResult.data ?? []) as VariantRow[])
-    .filter((variant) => modelIds.has(variant.model_id))
+  const variants = variantRows
+    .filter((variant) => activeModelIds.has(variant.model_id))
     .map((variant) => ({
       id: variant.id,
       modelId: variant.model_id,
@@ -200,10 +184,29 @@ export async function getVehicleCatalog(): Promise<VehicleCatalogData> {
       engineVolumeLiters: Number(variant.engine_volume_liters),
       sourceMarket: variant.source_market,
       sourcePriceUsd: Number(variant.source_price_usd),
-      displayCurrency: "USD" as const,
       sourceName: variant.source_name,
       sourceUrl: variant.source_url,
       lastCheckedAt: variant.last_checked_at,
+    }));
+  const modelIdsWithVariants = new Set(variants.map((variant) => variant.modelId));
+
+  const models = activeModels
+    .filter((model) => modelIdsWithVariants.has(model.id))
+    .map((model) => ({
+      id: model.id,
+      brandId: model.brand_id,
+      name: model.name,
+      slug: model.slug,
+    }));
+  const brandIdsWithModels = new Set(models.map((model) => model.brandId));
+
+  const brands = brandRows
+    .filter((brand) => brandIdsWithModels.has(brand.id))
+    .map((brand) => ({
+      id: brand.id,
+      country: brand.country,
+      name: brand.name,
+      slug: brand.slug,
     }));
 
   if (brands.length === 0 || models.length === 0 || variants.length === 0) {
@@ -227,11 +230,27 @@ export function getCatalogCountries(catalog: VehicleCatalogData): Country[] {
 }
 
 export function getBrandsByCountry(catalog: VehicleCatalogData, country: Country) {
-  return sortByName(catalog.brands.filter((brand) => brand.country === country));
+  const brandIdsWithVariants = new Set(
+    catalog.variants
+      .map((variant) => catalog.models.find((model) => model.id === variant.modelId)?.brandId)
+      .filter((brandId): brandId is string => Boolean(brandId)),
+  );
+
+  return sortByName(
+    catalog.brands.filter(
+      (brand) => brand.country === country && brandIdsWithVariants.has(brand.id),
+    ),
+  );
 }
 
 export function getModelsByBrand(catalog: VehicleCatalogData, brandId: string) {
-  return sortByName(catalog.models.filter((model) => model.brandId === brandId));
+  const modelIdsWithVariants = new Set(catalog.variants.map((variant) => variant.modelId));
+
+  return sortByName(
+    catalog.models.filter(
+      (model) => model.brandId === brandId && modelIdsWithVariants.has(model.id),
+    ),
+  );
 }
 
 export function getVariantsByModel(catalog: VehicleCatalogData, modelId: string) {

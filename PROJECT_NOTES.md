@@ -25,6 +25,9 @@ prepared but not connected.
   and uses dependent dropdowns instead of manual vehicle price entry.
 - CSV import MVP for Vehicle Catalog is implemented through `/admin/catalog/import`:
   upload, validate, preview, confirm and server-side service_role upsert.
+- Admin Vehicle Catalog management MVP is implemented through `/admin/catalog`: managers
+  can review variants, filter/search, edit price/source/active fields and deactivate rows
+  without hard delete.
 - Human-readable lead numbers are implemented with `lead_number`, displayed as
   `AIC-000001`; UUID remains the technical id and URL key.
 - Documentation refresh done: PRD, architecture, README, Vehicle Catalog notes and
@@ -97,6 +100,8 @@ prepared but not connected.
 - Added `docs/VEHICLE_CATALOG.md` to document the catalog source-of-truth model.
 - Catalog base vehicle price is stored as `source_price_usd`; USD/RUB/EUR/CNY display
   values should be calculated in the app through exchange rates/settings.
+- Catalog display currency is not stored in Vehicle Catalog or CSV imports. Client-selected
+  display currency belongs to calculator sessions and submitted leads.
 - CSV/Excel is only an import format. Supabase is the source of truth for the website.
 - Added `lib/vehicle-catalog.ts` as the catalog data boundary for public calculator reads
   with a local demo fallback when Supabase catalog data is unavailable.
@@ -104,6 +109,16 @@ prepared but not connected.
   country -> brand -> model -> year -> engine type -> engine volume.
 - Added admin CSV import for bulk catalog maintenance. Preview validates rows without
   writing, and confirm upserts brands, models and variants server-side through service_role.
+- Added filtered CSV export for `/admin/catalog`; it exports the current country/brand/
+  activity/search selection with the same columns as the import template.
+- Admin catalog row saves now return inline per-row feedback instead of redirecting the
+  page after each update.
+- Admin catalog availability is managed with a single activate/deactivate row action
+  instead of an `is_active` selector.
+- Public calculator catalog options include only brands and models that still have active
+  variants.
+- Catalog `source_url` accepts short domains such as `aaa.com` and normalizes them to HTTPS;
+  invalid domains such as `aaa_com` or values with spaces are rejected.
 - Catalog `source_price_usd` remains the source of truth. The UI displays the selected
   currency through demo exchange-rate conversion and does not allow manual price edits.
 - Real price enrichment with source URLs, checked timestamps and update methods remains
@@ -111,7 +126,6 @@ prepared but not connected.
 
 ## Next Version
 
-- Add manual admin catalog management for Vehicle Catalog.
 - Replace demo catalog prices with sourced production price enrichment.
 - Save admin status changes and manager comments.
 - Add real admin authentication.
@@ -120,6 +134,5 @@ prepared but not connected.
 
 ## Next High-Impact Step
 
-Manual admin catalog management is the next recommended catalog step. After that, persist
-admin status changes and manager comments through the same data boundary, then replace the
-demo-password gate with real authentication.
+Persisting admin status changes and manager comments is the next recommended CRM step.
+Real admin authentication is the next security step after that.

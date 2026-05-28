@@ -1,9 +1,9 @@
-country,brand,model,year,engine_type,engine_volume_liters,source_market,source_price_usd,display_currency,source_name,source_url,last_checked_at,is_active
-korea,Hyundai,Sonata,2022,gasoline,2.0,korea,18500,USD,demo placeholder,demo,,true
-korea,Kia,K5,2022,gasoline,2.0,korea,19000,USD,demo placeholder,demo,,true
-korea,Genesis,G70,2021,gasoline,2.0,korea,28500,USD,demo placeholder,demo,,true
-china,Geely,Monjaro,2023,gasoline,2.0,china,25500,USD,demo placeholder,demo,,true
-china,Changan,Uni-K,2023,gasoline,2.0,china,24000,USD,demo placeholder,demo,,true
-china,BYD,Song Plus,2023,hybrid,1.5,china,23000,USD,demo placeholder,demo,,true
-europe,Volkswagen,Passat,2021,diesel,2.0,europe,26500,USD,demo placeholder,demo,,true
-europe,BMW,320i,2020,gasoline,2.0,europe,31000,USD,demo placeholder,demo,,true
+country,brand,model,year,engine_type,engine_volume_liters,source_market,source_price_usd,source_name,source_url,last_checked_at,is_active
+korea,Hyundai,Sonata,2022,gasoline,2.0,korea,18500,demo placeholder,demo.com,,true
+korea,Kia,K5,2022,gasoline,2.0,korea,19000,demo placeholder,demo.com,,true
+korea,Genesis,G70,2021,gasoline,2.0,korea,28500,demo placeholder,demo.com,,true
+china,Geely,Monjaro,2023,gasoline,2.0,china,25500,demo placeholder,demo.com,,true
+china,Changan,Uni-K,2023,gasoline,2.0,china,24000,demo placeholder,demo.com,,true
+china,BYD,Song Plus,2023,hybrid,1.5,china,23000,demo placeholder,demo.com,,true
+europe,Volkswagen,Passat,2021,diesel,2.0,europe,26500,demo placeholder,demo.com,,true
+europe,BMW,320i,2020,gasoline,2.0,europe,31000,demo placeholder,demo.com,,true

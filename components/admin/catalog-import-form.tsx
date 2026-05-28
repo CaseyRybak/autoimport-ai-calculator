@@ -111,7 +111,7 @@ export function CatalogImportForm() {
 
           <div className="overflow-hidden rounded-lg border">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1200px] text-sm">
+              <table className="w-full min-w-[1100px] text-sm">
                 <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                   <tr>
                     <th className="px-3 py-2">Row</th>
@@ -123,7 +123,6 @@ export function CatalogImportForm() {
                     <th className="px-3 py-2">Volume</th>
                     <th className="px-3 py-2">Market</th>
                     <th className="px-3 py-2">Price USD</th>
-                    <th className="px-3 py-2">Currency</th>
                     <th className="px-3 py-2">Active</th>
                     <th className="px-3 py-2">Errors</th>
                   </tr>
@@ -140,7 +139,6 @@ export function CatalogImportForm() {
                       <td className="px-3 py-2">{row.engineVolumeLiters}</td>
                       <td className="px-3 py-2">{row.sourceMarket}</td>
                       <td className="px-3 py-2">{row.sourcePriceUsd}</td>
-                      <td className="px-3 py-2">{row.displayCurrency}</td>
                       <td className="px-3 py-2">{row.isActive}</td>
                       <td className="px-3 py-2 text-red-700">{row.errors.join("; ")}</td>
                     </tr>

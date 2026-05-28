@@ -3,12 +3,12 @@ import { describe, it } from "node:test";
 import { parseVehicleCatalogCsv, slugifyCatalogValue } from "./vehicle-catalog-import";
 
 const header =
-  "country,brand,model,year,engine_type,engine_volume_liters,source_market,source_price_usd,display_currency,source_name,source_url,last_checked_at,is_active";
+  "country,brand,model,year,engine_type,engine_volume_liters,source_market,source_price_usd,source_name,source_url,last_checked_at,is_active";
 
 describe("vehicle catalog CSV import parsing", () => {
   it("validates and normalizes valid rows", () => {
     const preview = parseVehicleCatalogCsv(`${header}
-korea,Kia,K5,2024,gasoline,2.0,,21000,,market source,https://example.com/k5,2026-05-01,true`);
+korea,Kia,K5,2024,gasoline,2.0,,21000,market source,https://example.com/k5,2026-05-01,true`);
 
     assert.equal(preview.totalRows, 1);
     assert.equal(preview.validRows, 1);
@@ -26,7 +26,6 @@ korea,Kia,K5,2024,gasoline,2.0,,21000,,market source,https://example.com/k5,2026
       engineVolumeLiters: 2,
       sourceMarket: "korea",
       sourcePriceUsd: 21000,
-      displayCurrency: "USD",
       sourceName: "market source",
       sourceUrl: "https://example.com/k5",
       lastCheckedAt: "2026-05-01T00:00:00.000Z",
@@ -36,7 +35,7 @@ korea,Kia,K5,2024,gasoline,2.0,,21000,,market source,https://example.com/k5,2026
 
   it("reports blocking validation errors by CSV row number", () => {
     const preview = parseVehicleCatalogCsv(`${header}
-usa,,K5,1980,,not-a-number,korea,0,GBP,,,,maybe`);
+usa,,K5,1980,,not-a-number,korea,0,,aaa_com,,maybe`);
 
     assert.equal(preview.totalRows, 1);
     assert.equal(preview.validRows, 0);
@@ -45,7 +44,16 @@ usa,,K5,1980,,not-a-number,korea,0,GBP,,,,maybe`);
     assert.ok(preview.errors.some((error) => error.startsWith("Row 2: country")));
     assert.ok(preview.errors.some((error) => error.startsWith("Row 2: brand")));
     assert.ok(preview.errors.some((error) => error.startsWith("Row 2: year")));
+    assert.ok(preview.errors.some((error) => error.startsWith("Row 2: source_url")));
     assert.ok(preview.errors.some((error) => error.startsWith("Row 2: is_active")));
+  });
+
+  it("accepts short source URLs and normalizes them", () => {
+    const preview = parseVehicleCatalogCsv(`${header}
+korea,Kia,K5,2024,gasoline,2.0,,21000,market source,aaa.com,2026-05-01,true`);
+
+    assert.equal(preview.validRows, 1);
+    assert.equal(preview.validCatalogRows[0].sourceUrl, "https://aaa.com/");
   });
 
   it("detects missing required columns", () => {

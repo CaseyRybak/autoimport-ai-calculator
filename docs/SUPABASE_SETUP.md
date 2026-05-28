@@ -41,7 +41,9 @@ Apply these files manually in the Supabase SQL editor in this order:
 1. `supabase/schema.sql`
 2. `supabase/lead_number.sql`
 3. `supabase/vehicle_catalog.sql`
-4. `supabase/vehicle_catalog_seed_demo.sql`
+4. `supabase/drop_vehicle_catalog_display_currency.sql` for existing projects that still
+   have the old catalog display-currency column.
+5. `supabase/vehicle_catalog_seed_demo.sql`
 
 ## What Each File Does
 
@@ -113,6 +115,12 @@ order by tablename, policyname;
 - Seeds 15 brands, 60 models and 180 variants.
 - Uses real-world taxonomy with placeholder `source_price_usd` values.
 - Does not delete existing catalog data.
+
+`supabase/drop_vehicle_catalog_display_currency.sql`
+
+- Removes the old `public.vehicle_variants.display_currency` column when it exists.
+- Keeps catalog currency canonical: `source_price_usd` remains the only catalog price
+  currency, while client display currency belongs to calculator sessions and leads.
 
 After applying `vehicle_catalog_seed_demo.sql`, verify:
 

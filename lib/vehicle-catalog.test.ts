@@ -31,7 +31,6 @@ const catalog: VehicleCatalogData = {
       engineVolumeLiters: 2,
       sourceMarket: "korea",
       sourcePriceUsd: 20_000,
-      displayCurrency: "USD",
       sourceName: "demo catalog seed",
       sourceUrl: null,
       lastCheckedAt: null,
@@ -44,7 +43,6 @@ const catalog: VehicleCatalogData = {
       engineVolumeLiters: 1.6,
       sourceMarket: "korea",
       sourcePriceUsd: 23_000,
-      displayCurrency: "USD",
       sourceName: "demo catalog seed",
       sourceUrl: null,
       lastCheckedAt: null,
@@ -57,7 +55,6 @@ const catalog: VehicleCatalogData = {
       engineVolumeLiters: 1.8,
       sourceMarket: "korea",
       sourcePriceUsd: 25_000,
-      displayCurrency: "USD",
       sourceName: "demo catalog seed",
       sourceUrl: null,
       lastCheckedAt: null,
@@ -70,7 +67,6 @@ const catalog: VehicleCatalogData = {
       engineVolumeLiters: 1.8,
       sourceMarket: "korea",
       sourcePriceUsd: 27_000,
-      displayCurrency: "USD",
       sourceName: "demo catalog seed",
       sourceUrl: null,
       lastCheckedAt: null,
@@ -82,6 +78,11 @@ describe("vehicle catalog selectors", () => {
   it("returns dependent brand and model options", () => {
     assert.deepEqual(getBrandsByCountry(catalog, "korea"), [catalog.brands[0]]);
     assert.deepEqual(getModelsByBrand(catalog, "brand-kia"), [catalog.models[0]]);
+  });
+
+  it("hides brands and models that have no active variants", () => {
+    assert.deepEqual(getBrandsByCountry(catalog, "china"), []);
+    assert.deepEqual(getModelsByBrand(catalog, "brand-byd"), []);
   });
 
   it("returns dependent variant option dimensions", () => {

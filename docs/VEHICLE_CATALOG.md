@@ -20,8 +20,8 @@ exchange rates, and one canonical currency avoids mixing source currencies in bu
 logic. The app may display USD, RUB, EUR or CNY values, but those values must be calculated
 from USD using the current exchange rates/settings.
 
-`vehicle_variants.display_currency` is only a UI preference for displaying a variant. It is
-not the source of truth and must not replace `source_price_usd`.
+Display currency is not part of the catalog. It belongs to a concrete calculator session
+or submitted lead, because it is the client's selected display preference for that request.
 
 ## Import Template
 
@@ -37,8 +37,14 @@ The import flow should normalize CSV rows into:
 
 ## CSV Import Workflow
 
+`/admin/catalog` is the primary admin screen for daily catalog management. Managers can
+review variants, filter by country/brand/activity, search by brand or model, update price
+source fields and deactivate variants without using the SQL Editor.
+
 CSV import is the MVP way to bulk maintain catalog rows from the admin area. Excel files
 must be exported to CSV first; the application does not read `.xlsx` files directly.
+The admin catalog can also export the currently filtered catalog view to CSV for review
+or spreadsheet editing.
 
 The admin flow is:
 
@@ -54,7 +60,7 @@ manager confirms the import. The write path runs server-side through the Supabas
 Expected CSV columns:
 
 ```text
-country,brand,model,year,engine_type,engine_volume_liters,source_market,source_price_usd,display_currency,source_name,source_url,last_checked_at,is_active
+country,brand,model,year,engine_type,engine_volume_liters,source_market,source_price_usd,source_name,source_url,last_checked_at,is_active
 ```
 
 Validation rules:
@@ -65,10 +71,9 @@ Validation rules:
 - `engine_type`: required.
 - `engine_volume_liters`: numeric and `>= 0`.
 - `source_price_usd`: numeric and `> 0`.
-- `display_currency`: defaults to `USD`; allowed values are `USD`, `RUB`, `EUR`, `CNY`.
 - `source_market`: defaults to `country` when empty.
 - `is_active`: defaults to `true`.
-- `source_url`: optional.
+- `source_url`: optional; short domains like `aaa.com` are accepted and normalized to HTTPS.
 - `last_checked_at`: optional, but must be a valid date when present.
 
 Import behavior is repeatable:
@@ -80,6 +85,41 @@ Import behavior is repeatable:
 
 Supabase remains the website source of truth after import. SQL files are for migrations
 and demo seed data, not daily catalog management.
+
+`/admin/catalog/export` downloads CSV for the current `/admin/catalog` filters:
+country, brand, activity and search. The export uses the same columns as the import
+template and does not include display currency.
+
+Daily catalog changes should not be made through the Supabase SQL Editor when the admin UI
+can handle them. Use SQL only for migrations, grants, policies, diagnostics or controlled
+seed/demo data.
+
+## Admin Catalog Management
+
+The admin catalog MVP lives at `/admin/catalog`. It lists vehicle variants from Supabase
+through the server-side service role and does not expose `SUPABASE_SERVICE_ROLE_KEY` to
+client components.
+
+Managers can edit these variant fields:
+
+- `source_price_usd`
+- `source_name`
+- `source_url`
+- `last_checked_at`
+
+Managers can change availability through the row action button:
+
+- `Деактивировать` for active variants.
+- `Активировать` for inactive variants.
+
+The MVP intentionally does not edit brand, model, year, engine type or engine volume in
+the row editor. Those fields participate in relationships and unique constraints, so
+structural changes should go through import or a later dedicated workflow.
+
+Hard delete is not part of the admin workflow. To remove a row from the public calculator,
+set `vehicle_variants.is_active = false` by using the “Деактивировать” action. Public
+catalog reads filter active rows and only expose brands/models that still have active
+variants, so inactive-only models disappear from the calculator.
 
 ## Demo Seed Catalog
 
@@ -94,7 +134,6 @@ placeholders and must not be treated as market prices.
 Every demo variant uses:
 
 - `source_price_usd` as an approximate placeholder value for testing.
-- `display_currency = 'USD'`.
 - `source_name = 'demo catalog seed'`.
 - `source_url = null`.
 - `last_checked_at = null`.
@@ -145,22 +184,23 @@ catalog rows for imports, manual admin edits and future automation.
 - Demo seed is implemented in `supabase/vehicle_catalog_seed_demo.sql`.
 - Calculator dropdown integration is implemented through `lib/vehicle-catalog.ts`.
 - CSV import MVP is implemented through `/admin/catalog/import`.
+- Filtered CSV export is implemented through `/admin/catalog/export`.
+- Admin catalog management MVP is implemented through `/admin/catalog`.
 - Dependent dropdowns are implemented for country, brand, model, year, engine type and
   engine volume.
 - `source_price_usd` is the catalog base price used by the calculator.
 - Demo prices are placeholders for UX/calculation testing and are not market prices.
 
-## Future Admin Workflow
+## Future Catalog Workflow
 
-Future phases can add an admin catalog screen for:
+Future phases can add:
 
-- Manual price updates.
-- Activating or disabling brands, models and variants.
-- Uploading CSV/Excel imports.
+- Activating or disabling brands and models, not only variants.
 - Updating prices through APIs or market aggregators.
-- Recording source URLs and last checked timestamps for auditability.
+- Recording price update methods and richer source audit metadata.
 
-The next catalog phase is manual admin catalog management and real price enrichment.
+The next catalog phase is real price enrichment and, if needed, richer structural editing
+for brands/models/variants.
 
 ## Calculator Integration
 

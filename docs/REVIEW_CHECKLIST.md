@@ -45,8 +45,12 @@ Use this checklist before portfolio review, Vercel deploys or major handoffs.
 - [ ] Settings save action is disabled or clearly marked as not connected.
 - [ ] `/admin/catalog/import` opens after admin access.
 - [ ] CSV upload preview validates rows without writing to Supabase.
+- [ ] CSV template/import does not include catalog display currency.
+- [ ] CSV source URLs accept short domains like `aaa.com` and reject invalid domains like `aaa_com`.
 - [ ] Confirm import is available only when there are no blocking validation errors.
 - [ ] Confirm import upserts catalog rows through server-side service_role.
+- [ ] `/admin/catalog` CSV export downloads the current filtered country/brand/activity/search view.
+- [ ] `/admin/catalog` row save shows inline success without a visible page refresh.
 
 ## Documentation
 
@@ -60,7 +64,8 @@ Use this checklist before portfolio review, Vercel deploys or major handoffs.
 ## Supabase Setup
 
 - [ ] Supabase SQL order was applied: `schema.sql`, `lead_number.sql`,
-      `vehicle_catalog.sql`, `vehicle_catalog_seed_demo.sql`.
+      `vehicle_catalog.sql`, `drop_vehicle_catalog_display_currency.sql`,
+      `vehicle_catalog_seed_demo.sql`.
 - [ ] Anon `INSERT` on `public.leads` exists.
 - [ ] Anon `SELECT` on `public.leads` is absent.
 - [ ] `service_role` has `SELECT` grants on `public.leads`, `public.lead_comments` and

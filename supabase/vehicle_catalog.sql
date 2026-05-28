@@ -30,7 +30,6 @@ create table if not exists public.vehicle_variants (
   engine_volume_liters numeric not null,
   source_market text not null,
   source_price_usd numeric not null,
-  display_currency text not null default 'USD',
   source_name text,
   source_url text,
   last_checked_at timestamptz,
@@ -50,9 +49,6 @@ create table if not exists public.vehicle_variants (
 
 comment on column public.vehicle_variants.source_price_usd is
   'Canonical catalog vehicle price in USD. RUB/EUR/CNY/KRW display values must be calculated in the application from exchange rates.';
-
-comment on column public.vehicle_variants.display_currency is
-  'Preferred UI display currency only. This is not the source of truth for vehicle price.';
 
 create index if not exists vehicle_brands_country_idx
   on public.vehicle_brands(country);
