@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Database, Download, FileUp, Search, TriangleAlert } from "lucide-react";
+import { Database, Download, FileUp, TriangleAlert } from "lucide-react";
 import { AdminPasswordGate } from "@/components/admin/admin-password-gate";
+import { CatalogFilters } from "@/components/admin/catalog-filters";
 import { CatalogVariantCard } from "@/components/admin/catalog-variant-card";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { Button } from "@/components/ui/button";
@@ -19,16 +20,19 @@ type Props = {
   searchParams?: Promise<{
     country?: string;
     brand?: string;
+    model?: string;
     active?: CatalogAdminActiveFilter;
     search?: string;
+    page?: string;
+    pageSize?: string;
     error?: string;
     returnTo?: string;
   }>;
 };
 
 const activeOptions: Array<{ value: CatalogAdminActiveFilter; label: string }> = [
-  { value: "active", label: "Активные" },
   { value: "all", label: "Все" },
+  { value: "active", label: "Активные" },
   { value: "inactive", label: "Неактивные" },
 ];
 
@@ -38,13 +42,15 @@ const countryLabels: Record<string, string> = {
   europe: "Европа",
 };
 
+const pageSizeOptions = [10, 50, 100] as const;
+
 function getCatalogExportHref(
   params: Awaited<Props["searchParams"]>,
   active: CatalogAdminActiveFilter,
 ) {
   const searchParams = new URLSearchParams();
 
-  for (const key of ["country", "brand", "search"] as const) {
+  for (const key of ["country", "brand", "model", "search"] as const) {
     const value = params?.[key];
 
     if (value) {
@@ -55,6 +61,68 @@ function getCatalogExportHref(
   searchParams.set("active", active);
 
   return `/admin/catalog/export?${searchParams.toString()}`;
+}
+
+function getCatalogPageHref(
+  params: Awaited<Props["searchParams"]>,
+  active: CatalogAdminActiveFilter,
+  page: number,
+  pageSize: number,
+) {
+  const searchParams = new URLSearchParams();
+
+  for (const key of ["country", "brand", "model", "search"] as const) {
+    const value = params?.[key];
+
+    if (value) {
+      searchParams.set(key, value);
+    }
+  }
+
+  searchParams.set("active", active);
+  searchParams.set("page", String(page));
+  searchParams.set("pageSize", String(pageSize));
+
+  return `/admin/catalog?${searchParams.toString()}`;
+}
+
+function getPaginationPages(currentPage: number, totalPages: number) {
+  const maxButtons = 9;
+
+  if (totalPages <= maxButtons) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const halfWindow = Math.floor(maxButtons / 2);
+  const start = Math.max(1, Math.min(currentPage - halfWindow, totalPages - maxButtons + 1));
+
+  return Array.from({ length: maxButtons }, (_, index) => start + index);
+}
+
+function getAppliedFilterLabels({
+  country,
+  brand,
+  model,
+  active,
+  search,
+  catalog,
+}: {
+  country: string;
+  brand: string;
+  model: string;
+  active: CatalogAdminActiveFilter;
+  search: string;
+  catalog: CatalogAdminListResult;
+}) {
+  const labels = [
+    country ? countryLabels[country] ?? country : null,
+    brand ? catalog.brands.find((item) => item.id === brand)?.name ?? null : null,
+    model ? catalog.models.find((item) => item.id === model)?.name ?? null : null,
+    active === "active" ? "Активные" : active === "inactive" ? "Неактивные" : null,
+    search ? `Поиск: ${search}` : null,
+  ].filter((item): item is string => Boolean(item));
+
+  return labels.length > 0 ? `Фильтры: ${labels.join(" · ")}` : "Фильтры не применены";
 }
 
 function Metric({ label, value }: { label: string; value: number }) {
@@ -81,18 +149,27 @@ export default async function CatalogAdminPage({ searchParams }: Props) {
   }
 
   const active =
-    params?.active === "all" || params?.active === "inactive" ? params.active : "active";
+    params?.active === "active" || params?.active === "inactive" ? params.active : "all";
+  const requestedPage = Number(params?.page);
+  const requestedPageSize = Number(params?.pageSize);
   const catalog: CatalogAdminListResult = isPasswordConfigured
     ? await listCatalogAdminItems({
         country: params?.country,
         brand: params?.brand,
+        model: params?.model,
         active,
         search: params?.search,
+        page: requestedPage,
+        pageSize: requestedPageSize,
       })
     : {
         source: "unconfigured",
         error: "Управление каталогом недоступно: не настроен доступ администратора.",
         items: [],
+        totalCount: 0,
+        page: 1,
+        pageSize: 10,
+        totalPages: 1,
         summary: {
           totalVariants: 0,
           activeVariants: 0,
@@ -100,8 +177,32 @@ export default async function CatalogAdminPage({ searchParams }: Props) {
         },
         countries: [],
         brands: [],
+        models: [],
       };
   const exportHref = getCatalogExportHref(params, active);
+  const totalItems = catalog.totalCount;
+  const currentPage = catalog.page;
+  const pageSize = catalog.pageSize;
+  const totalPages = catalog.totalPages;
+  const pageStart = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const pageEnd = Math.min(currentPage * pageSize, totalItems);
+  const paginationPages = getPaginationPages(currentPage, totalPages);
+  const selectedCountry = params?.country ?? "";
+  const selectedBrand = catalog.brands.some((item) => item.id === params?.brand)
+    ? (params?.brand ?? "")
+    : "";
+  const selectedModel = catalog.models.some((item) => item.id === params?.model)
+    ? (params?.model ?? "")
+    : "";
+  const selectedSearch = params?.search ?? "";
+  const appliedFiltersLabel = getAppliedFilterLabels({
+    country: selectedCountry,
+    brand: selectedBrand,
+    model: selectedModel,
+    active,
+    search: selectedSearch,
+    catalog,
+  });
 
   return (
     <AdminShell title="Каталог авто">
@@ -150,63 +251,25 @@ export default async function CatalogAdminPage({ searchParams }: Props) {
           <Metric label="Неактивные варианты" value={catalog.summary.inactiveVariants} />
         </div>
 
+        <CatalogFilters
+          countries={catalog.countries}
+          brands={catalog.brands}
+          models={catalog.models}
+          countryLabels={countryLabels}
+          activeOptions={activeOptions}
+          selected={{
+            country: selectedCountry,
+            brand: selectedBrand,
+            model: selectedModel,
+            active,
+            search: selectedSearch,
+            pageSize,
+          }}
+        />
+
         <section className="rounded-lg border bg-white p-4">
-          <form className="grid gap-3 lg:grid-cols-[180px_220px_180px_1fr_auto]" action="/admin/catalog">
-            <label className="space-y-1 text-sm font-medium text-slate-700">
-              Страна
-              <select className="form-field" name="country" defaultValue={params?.country ?? ""}>
-                <option value="">Все страны</option>
-                {catalog.countries.map((country) => (
-                  <option key={country} value={country}>
-                    {countryLabels[country] ?? country}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="space-y-1 text-sm font-medium text-slate-700">
-              Марка
-              <select className="form-field" name="brand" defaultValue={params?.brand ?? ""}>
-                <option value="">Все марки</option>
-                {catalog.brands.map((brand) => (
-                  <option key={brand.id} value={brand.id}>
-                    {brand.name} · {countryLabels[brand.country] ?? brand.country}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="space-y-1 text-sm font-medium text-slate-700">
-              Активность
-              <select className="form-field" name="active" defaultValue={active}>
-                {activeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="space-y-1 text-sm font-medium text-slate-700">
-              Поиск
-              <input
-                className="form-field"
-                name="search"
-                placeholder="Марка или модель"
-                defaultValue={params?.search ?? ""}
-              />
-            </label>
-
-            <div className="flex items-end gap-2">
-              <Button type="submit">
-                <Search className="h-4 w-4" />
-                Найти
-              </Button>
-              <Button asChild type="button" variant="ghost">
-                <Link href="/admin/catalog">Сбросить</Link>
-              </Button>
-            </div>
-          </form>
+          <p className="text-sm font-medium text-slate-950">Показано {catalog.items.length} из {totalItems} авто</p>
+          <p className="mt-1 text-sm text-slate-600">{appliedFiltersLabel}</p>
         </section>
 
         {catalog.items.length === 0 ? (
@@ -221,15 +284,75 @@ export default async function CatalogAdminPage({ searchParams }: Props) {
             </Button>
           </section>
         ) : (
-          <section className="space-y-3">
-            {catalog.items.map((item) => (
-              <CatalogVariantCard
-                key={item.id}
-                item={item}
-                isManagementEnabled={isPasswordConfigured}
-              />
-            ))}
-          </section>
+          <>
+            <section className="space-y-3">
+              {catalog.items.map((item) => (
+                <CatalogVariantCard
+                  key={item.id}
+                  item={item}
+                  isManagementEnabled={isPasswordConfigured}
+                />
+              ))}
+            </section>
+
+            <section className="flex flex-col gap-4 rounded-lg border bg-white p-4 xl:flex-row xl:items-center xl:justify-between">
+              <p className="text-sm text-slate-600">
+                Показано {pageStart}-{pageEnd} из {totalItems}. Страница {currentPage} из{" "}
+                {totalPages}
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm text-slate-600">На странице</span>
+                  {pageSizeOptions.map((option) => (
+                    <Button
+                      key={option}
+                      asChild
+                      size="sm"
+                      variant={option === pageSize ? "default" : "outline"}
+                    >
+                      <Link href={getCatalogPageHref(params, active, 1, option)}>{option}</Link>
+                    </Button>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {currentPage <= 1 ? (
+                    <Button type="button" variant="outline" disabled>
+                      Назад
+                    </Button>
+                  ) : (
+                    <Button asChild variant="outline">
+                      <Link href={getCatalogPageHref(params, active, currentPage - 1, pageSize)}>
+                        Назад
+                      </Link>
+                    </Button>
+                  )}
+                  {paginationPages.map((page) => (
+                    <Button
+                      key={page}
+                      asChild
+                      variant={page === currentPage ? "default" : "outline"}
+                    >
+                      <Link href={getCatalogPageHref(params, active, page, pageSize)}>
+                        {page}
+                      </Link>
+                    </Button>
+                  ))}
+                  {currentPage >= totalPages ? (
+                    <Button type="button" variant="outline" disabled>
+                      Вперед
+                    </Button>
+                  ) : (
+                    <Button asChild variant="outline">
+                      <Link href={getCatalogPageHref(params, active, currentPage + 1, pageSize)}>
+                        Вперед
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </section>
+          </>
         )}
       </div>
     </AdminShell>

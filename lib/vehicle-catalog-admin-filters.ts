@@ -3,8 +3,11 @@ export type CatalogAdminActiveFilter = "all" | "active" | "inactive";
 export type CatalogAdminFilters = {
   country?: string;
   brand?: string;
+  model?: string;
   active?: CatalogAdminActiveFilter;
   search?: string;
+  page?: number;
+  pageSize?: number;
 };
 
 export type CatalogAdminFilterableItem = {
@@ -16,7 +19,7 @@ export type CatalogAdminFilterableItem = {
 };
 
 const normalizeActiveFilter = (active: CatalogAdminFilters["active"]): CatalogAdminActiveFilter =>
-  active === "inactive" || active === "all" ? active : "active";
+  active === "active" || active === "inactive" ? active : "all";
 
 const normalizeText = (value: string | null | undefined) => value?.trim().toLowerCase() ?? "";
 
@@ -27,6 +30,7 @@ export function filterCatalogAdminItems<T extends CatalogAdminFilterableItem>(
   const activeFilter = normalizeActiveFilter(filters.active);
   const country = normalizeText(filters.country);
   const brand = normalizeText(filters.brand);
+  const model = normalizeText(filters.model);
   const search = normalizeText(filters.search);
 
   return items.filter((item) => {
@@ -43,6 +47,10 @@ export function filterCatalogAdminItems<T extends CatalogAdminFilterableItem>(
     }
 
     if (brand && item.brandId.toLowerCase() !== brand) {
+      return false;
+    }
+
+    if (model && !item.model.toLowerCase().includes(model)) {
       return false;
     }
 

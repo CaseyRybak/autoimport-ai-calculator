@@ -121,6 +121,8 @@ for future AI-assisted workflows.
   page after each update.
 - Admin catalog availability is managed with a single activate/deactivate row action
   instead of an `is_active` selector.
+- Admin catalog list now uses Supabase server-side pagination with dependent
+  country -> brand -> model filters and 10, 50 and 100 cards per page.
 - Public calculator catalog options include only brands and models that still have active
   variants.
 - Catalog `source_url` accepts short domains such as `aaa.com` and normalizes them to HTTPS;

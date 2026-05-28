@@ -2,14 +2,14 @@ import { NextRequest } from "next/server";
 import { hasAdminAccess, isAdminPasswordConfigured } from "@/lib/admin-access";
 import {
   formatCatalogAdminItemsCsv,
-  listCatalogAdminItems,
+  listCatalogAdminItemsForExport,
   type CatalogAdminActiveFilter,
 } from "@/lib/vehicle-catalog-admin";
 
 export const dynamic = "force-dynamic";
 
 const getActiveFilter = (value: string | null): CatalogAdminActiveFilter =>
-  value === "all" || value === "inactive" ? value : "active";
+  value === "active" || value === "inactive" ? value : "all";
 
 const getFilename = () => {
   const date = new Date().toISOString().slice(0, 10);
@@ -28,9 +28,10 @@ export async function GET(request: NextRequest) {
   }
 
   const params = request.nextUrl.searchParams;
-  const catalog = await listCatalogAdminItems({
+  const catalog = await listCatalogAdminItemsForExport({
     country: params.get("country") ?? undefined,
     brand: params.get("brand") ?? undefined,
+    model: params.get("model") ?? undefined,
     active: getActiveFilter(params.get("active")),
     search: params.get("search") ?? undefined,
   });

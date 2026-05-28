@@ -1,10 +1,9 @@
 import "server-only";
 
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
-import {
-  filterCatalogAdminItems,
-  type CatalogAdminActiveFilter,
-  type CatalogAdminFilters,
+import type {
+  CatalogAdminActiveFilter,
+  CatalogAdminFilters,
 } from "@/lib/vehicle-catalog-admin-filters";
 import type { VehicleCatalogImportRow } from "@/lib/vehicle-catalog-import";
 
@@ -15,6 +14,7 @@ export type CatalogAdminItem = {
   country: string;
   brandId: string;
   brand: string;
+  modelId: string;
   model: string;
   year: number;
   engineType: string;
@@ -37,9 +37,14 @@ export type CatalogAdminListResult = {
   source: "supabase" | "unconfigured" | "error";
   error: string | null;
   items: CatalogAdminItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
   summary: CatalogAdminSummary;
   countries: string[];
   brands: Array<{ id: string; name: string; country: string }>;
+  models: Array<{ id: string; name: string; brandId: string; country: string }>;
 };
 
 export type CatalogAdminUpdateInput = {
@@ -102,6 +107,7 @@ type ModelResultRow = {
 };
 
 type CatalogVariantJoinedRow = {
+  model_id: string;
   id: string;
   year: number;
   engine_type: string;
@@ -148,6 +154,24 @@ type CatalogVariantJoinedRow = {
     | null;
 };
 
+type CatalogModelJoinedRow = {
+  id: string;
+  name: string;
+  brand_id: string;
+  vehicle_brands:
+    | {
+        id: string;
+        country: string;
+        name: string;
+      }
+    | Array<{
+        id: string;
+        country: string;
+        name: string;
+      }>
+    | null;
+};
+
 const uniqueBy = <T>(items: T[], getKey: (item: T) => string) => {
   const map = new Map<string, T>();
 
@@ -163,6 +187,88 @@ const emptySummary: CatalogAdminSummary = {
   activeVariants: 0,
   inactiveVariants: 0,
 };
+
+const pageSizeOptions = [10, 50, 100] as const;
+
+const normalizeText = (value: string | null | undefined) => value?.trim() ?? "";
+
+const normalizeActiveFilter = (active: CatalogAdminFilters["active"]): CatalogAdminActiveFilter =>
+  active === "active" || active === "inactive" ? active : "all";
+
+const normalizePageSize = (value: number | undefined) => {
+  const pageSize = Number(value);
+
+  return pageSizeOptions.includes(pageSize as (typeof pageSizeOptions)[number])
+    ? pageSize
+    : 10;
+};
+
+const normalizePage = (value: number | undefined) => {
+  const page = Number(value);
+
+  return Number.isInteger(page) && page > 0 ? page : 1;
+};
+
+const emptyListResult = (
+  source: CatalogAdminListResult["source"],
+  error: string | null,
+  page = 1,
+  pageSize = 10,
+): CatalogAdminListResult => ({
+  source,
+  error,
+  items: [],
+  totalCount: 0,
+  page,
+  pageSize,
+  totalPages: 1,
+  summary: emptySummary,
+  countries: [],
+  brands: [],
+  models: [],
+});
+
+type FilterableVariantQuery = {
+  eq: (column: string, value: unknown) => FilterableVariantQuery;
+  in: (column: string, values: string[]) => FilterableVariantQuery;
+};
+
+const applyVariantFilters = <T>(
+  // Supabase's fluent query builder has very deep generated types for joined selects.
+  // Keeping this helper structurally typed avoids type-instantiation blowups in tsc.
+  query: T,
+  activeFilter: CatalogAdminActiveFilter,
+  modelIds: string[] | null,
+) => {
+  let nextQuery = query as unknown as FilterableVariantQuery;
+
+  if (activeFilter === "active") {
+    nextQuery = nextQuery.eq("is_active", true);
+  }
+
+  if (activeFilter === "inactive") {
+    nextQuery = nextQuery.eq("is_active", false);
+  }
+
+  if (modelIds) {
+    nextQuery = nextQuery.in("model_id", modelIds);
+  }
+
+  return nextQuery as unknown as T;
+};
+
+const omitPagination = (
+  result: CatalogAdminListResult,
+): Omit<CatalogAdminListResult, "page" | "pageSize" | "totalPages"> => ({
+  source: result.source,
+  error: result.error,
+  items: result.items,
+  totalCount: result.totalCount,
+  summary: result.summary,
+  countries: result.countries,
+  brands: result.brands,
+  models: result.models,
+});
 
 const getSingle = <T>(value: T | T[] | null | undefined) =>
   Array.isArray(value) ? (value[0] ?? null) : (value ?? null);
@@ -180,6 +286,7 @@ function toCatalogAdminItem(row: CatalogVariantJoinedRow): CatalogAdminItem | nu
     country: brand.country,
     brandId: brand.id,
     brand: brand.name,
+    modelId: model.id,
     model: model.name,
     year: Number(row.year),
     engineType: row.engine_type,
@@ -193,27 +300,253 @@ function toCatalogAdminItem(row: CatalogVariantJoinedRow): CatalogAdminItem | nu
   };
 }
 
+function toCatalogModelOption(row: CatalogModelJoinedRow) {
+  const brand = getSingle(row.vehicle_brands);
+
+  if (!brand) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    name: row.name,
+    brandId: row.brand_id,
+    country: brand.country,
+    brandName: brand.name,
+  };
+}
+
+async function listCatalogFilterOptions(
+  supabase: NonNullable<ReturnType<typeof createSupabaseAdminClient>>,
+  filters: CatalogAdminFilters,
+) {
+  const country = normalizeText(filters.country);
+  const brand = normalizeText(filters.brand);
+
+  const brandsResult = await supabase
+    .from("vehicle_brands")
+    .select("id, country, name")
+    .order("name", { ascending: true });
+
+  if (brandsResult.error) {
+    return {
+      error: brandsResult.error.message,
+      countries: [],
+      brands: [],
+      models: [],
+    };
+  }
+
+  const allBrands = (brandsResult.data ?? []) as Array<{
+    id: string;
+    country: string;
+    name: string;
+  }>;
+  const countries = [...new Set(allBrands.map((item) => item.country))].sort((a, b) =>
+    a.localeCompare(b, "ru"),
+  );
+  const brands = allBrands
+    .filter((item) => !country || item.country === country)
+    .sort((a, b) => a.name.localeCompare(b.name, "ru"));
+
+  let modelsQuery = supabase
+    .from("vehicle_models")
+    .select(
+      `
+      id,
+      name,
+      brand_id,
+      vehicle_brands!inner (
+        id,
+        country,
+        name
+      )
+    `,
+    )
+    .order("name", { ascending: true });
+
+  if (country) {
+    modelsQuery = modelsQuery.eq("vehicle_brands.country", country);
+  }
+
+  if (brand) {
+    modelsQuery = modelsQuery.eq("brand_id", brand);
+  }
+
+  const modelsResult = await modelsQuery;
+
+  if (modelsResult.error) {
+    return {
+      error: modelsResult.error.message,
+      countries,
+      brands,
+      models: [],
+    };
+  }
+
+  const models = ((modelsResult.data ?? []) as CatalogModelJoinedRow[])
+    .map(toCatalogModelOption)
+    .filter((item): item is NonNullable<ReturnType<typeof toCatalogModelOption>> => item !== null)
+    .map((item) => ({
+      id: item.id,
+      name: item.name,
+      brandId: item.brandId,
+      country: item.country,
+    }));
+
+  return {
+    error: null,
+    countries,
+    brands,
+    models,
+  };
+}
+
+async function resolveFilteredModelIds(
+  supabase: NonNullable<ReturnType<typeof createSupabaseAdminClient>>,
+  filters: CatalogAdminFilters,
+) {
+  const country = normalizeText(filters.country);
+  const brand = normalizeText(filters.brand);
+  const model = normalizeText(filters.model);
+  const search = normalizeText(filters.search).toLowerCase();
+
+  if (!country && !brand && !model && !search) {
+    return {
+      error: null,
+      modelIds: null,
+    };
+  }
+
+  let query = supabase
+    .from("vehicle_models")
+    .select(
+      `
+      id,
+      name,
+      brand_id,
+      vehicle_brands!inner (
+        id,
+        country,
+        name
+      )
+    `,
+    );
+
+  if (country) {
+    query = query.eq("vehicle_brands.country", country);
+  }
+
+  if (brand) {
+    query = query.eq("brand_id", brand);
+  }
+
+  if (model) {
+    query = query.eq("id", model);
+  }
+
+  const result = await query;
+
+  if (result.error) {
+    return {
+      error: result.error.message,
+      modelIds: [],
+    };
+  }
+
+  const modelIds = ((result.data ?? []) as CatalogModelJoinedRow[])
+    .map(toCatalogModelOption)
+    .filter((item): item is NonNullable<ReturnType<typeof toCatalogModelOption>> => item !== null)
+    .filter((item) => {
+      if (!search) {
+        return true;
+      }
+
+      return `${item.brandName} ${item.name}`.toLowerCase().includes(search);
+    })
+    .map((item) => item.id);
+
+  return {
+    error: null,
+    modelIds,
+  };
+}
+
 export async function listCatalogAdminItems(
   filters: CatalogAdminFilters = {},
 ): Promise<CatalogAdminListResult> {
   const supabase = createSupabaseAdminClient();
+  const pageSize = normalizePageSize(filters.pageSize);
+  const requestedPage = normalizePage(filters.page);
 
   if (!supabase) {
+    return emptyListResult(
+      "unconfigured",
+      "Supabase admin client is not configured.",
+      requestedPage,
+      pageSize,
+    );
+  }
+
+  const options = await listCatalogFilterOptions(supabase, filters);
+
+  if (options.error) {
     return {
-      source: "unconfigured",
-      error: "Supabase admin client is not configured.",
-      items: [],
-      summary: emptySummary,
-      countries: [],
-      brands: [],
+      ...emptyListResult("error", options.error, requestedPage, pageSize),
+      countries: options.countries,
+      brands: options.brands,
+      models: options.models,
     };
   }
 
-  const result = await supabase
+  const resolvedModels = await resolveFilteredModelIds(supabase, filters);
+
+  if (resolvedModels.error) {
+    return {
+      ...emptyListResult("error", resolvedModels.error, requestedPage, pageSize),
+      countries: options.countries,
+      brands: options.brands,
+      models: options.models,
+    };
+  }
+
+  if (resolvedModels.modelIds?.length === 0) {
+    return {
+      ...emptyListResult("supabase", null, 1, pageSize),
+      countries: options.countries,
+      brands: options.brands,
+      models: options.models,
+    };
+  }
+
+  const activeFilter = normalizeActiveFilter(filters.active);
+  const countResult = await applyVariantFilters(
+    supabase.from("vehicle_variants").select("id", { count: "exact", head: true }),
+    activeFilter,
+    resolvedModels.modelIds,
+  );
+
+  if (countResult.error) {
+    return {
+      ...emptyListResult("error", countResult.error.message, requestedPage, pageSize),
+      countries: options.countries,
+      brands: options.brands,
+      models: options.models,
+    };
+  }
+
+  const totalCount = countResult.count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const page = Math.min(requestedPage, totalPages);
+  const from = totalCount === 0 ? 0 : (page - 1) * pageSize;
+  const to = totalCount === 0 ? 0 : from + pageSize - 1;
+  const query = applyVariantFilters(
+    supabase
     .from("vehicle_variants")
     .select(
       `
       id,
+      model_id,
       year,
       engine_type,
       engine_volume_liters,
@@ -233,48 +566,162 @@ export async function listCatalogAdminItems(
         )
       )
     `,
-    )
+    ),
+    activeFilter,
+    resolvedModels.modelIds,
+  )
     .order("updated_at", { ascending: false })
     .order("year", { ascending: false });
+  const result = totalCount === 0 ? { data: [], error: null } : await query.range(from, to);
 
   if (result.error) {
     return {
-      source: "error",
-      error: result.error.message,
-      items: [],
-      summary: emptySummary,
-      countries: [],
-      brands: [],
+      ...emptyListResult("error", result.error.message, page, pageSize),
+      countries: options.countries,
+      brands: options.brands,
+      models: options.models,
     };
   }
 
   const items = ((result.data ?? []) as CatalogVariantJoinedRow[])
     .map(toCatalogAdminItem)
     .filter((item): item is CatalogAdminItem => item !== null);
-  const summary = {
-    totalVariants: items.length,
-    activeVariants: items.filter((item) => item.isActive).length,
-    inactiveVariants: items.filter((item) => !item.isActive).length,
-  };
-  const countries = [...new Set(items.map((item) => item.country))].sort((a, b) =>
-    a.localeCompare(b, "ru"),
+  const activeCountResult = await applyVariantFilters(
+    supabase.from("vehicle_variants").select("id", { count: "exact", head: true }),
+    "active",
+    resolvedModels.modelIds,
   );
-  const brands = uniqueBy(
-    items.map((item) => ({
-      id: item.brandId,
-      name: item.brand,
-      country: item.country,
-    })),
-    (brand) => brand.id,
-  ).sort((a, b) => a.name.localeCompare(b.name, "ru"));
+  const inactiveCountResult = await applyVariantFilters(
+    supabase.from("vehicle_variants").select("id", { count: "exact", head: true }),
+    "inactive",
+    resolvedModels.modelIds,
+  );
+  const summary = {
+    totalVariants: (activeCountResult.count ?? 0) + (inactiveCountResult.count ?? 0),
+    activeVariants: activeCountResult.count ?? 0,
+    inactiveVariants: inactiveCountResult.count ?? 0,
+  };
 
   return {
     source: "supabase",
     error: null,
-    items: filterCatalogAdminItems(items, filters),
+    items,
+    totalCount,
+    page,
+    pageSize,
+    totalPages,
     summary,
-    countries,
-    brands,
+    countries: options.countries,
+    brands: options.brands,
+    models: options.models,
+  };
+}
+
+export async function listCatalogAdminItemsForExport(
+  filters: CatalogAdminFilters = {},
+): Promise<Omit<CatalogAdminListResult, "page" | "pageSize" | "totalPages">> {
+  const supabase = createSupabaseAdminClient();
+
+  if (!supabase) {
+    return omitPagination(
+      emptyListResult("unconfigured", "Supabase admin client is not configured."),
+    );
+  }
+
+  const options = await listCatalogFilterOptions(supabase, filters);
+
+  if (options.error) {
+    return omitPagination({
+      ...emptyListResult("error", options.error),
+      countries: options.countries,
+      brands: options.brands,
+      models: options.models,
+    });
+  }
+
+  const resolvedModels = await resolveFilteredModelIds(supabase, filters);
+
+  if (resolvedModels.error) {
+    return omitPagination({
+      ...emptyListResult("error", resolvedModels.error),
+      countries: options.countries,
+      brands: options.brands,
+      models: options.models,
+    });
+  }
+
+  if (resolvedModels.modelIds?.length === 0) {
+    return omitPagination({
+      ...emptyListResult("supabase", null),
+      countries: options.countries,
+      brands: options.brands,
+      models: options.models,
+    });
+  }
+
+  const activeFilter = normalizeActiveFilter(filters.active);
+  const query = applyVariantFilters(
+    supabase
+      .from("vehicle_variants")
+      .select(
+        `
+        id,
+        model_id,
+        year,
+        engine_type,
+        engine_volume_liters,
+        source_market,
+        source_price_usd,
+        source_name,
+        source_url,
+        last_checked_at,
+        is_active,
+        vehicle_models!inner (
+          id,
+          name,
+          vehicle_brands!inner (
+            id,
+            country,
+            name
+          )
+        )
+      `,
+        { count: "exact" },
+      ),
+    activeFilter,
+    resolvedModels.modelIds,
+  )
+    .order("updated_at", { ascending: false })
+    .order("year", { ascending: false });
+  const queryResult = await query;
+
+  if (queryResult.error) {
+    return omitPagination({
+      ...emptyListResult("error", queryResult.error.message),
+      countries: options.countries,
+      brands: options.brands,
+      models: options.models,
+    });
+  }
+
+  const items = ((queryResult.data ?? []) as CatalogVariantJoinedRow[])
+    .map(toCatalogAdminItem)
+    .filter((item): item is CatalogAdminItem => item !== null);
+  const summary = {
+    totalVariants: queryResult.count ?? items.length,
+    activeVariants: items.filter((item) => item.isActive).length,
+    inactiveVariants: items.filter((item) => !item.isActive).length,
+  };
+
+  return {
+    source: "supabase",
+    error: null,
+    items,
+    totalCount: queryResult.count ?? items.length,
+    summary,
+    countries: options.countries,
+    brands: options.brands,
+    models: options.models,
   };
 }
 

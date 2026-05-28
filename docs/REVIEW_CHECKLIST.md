@@ -51,6 +51,8 @@ Use this checklist before portfolio review, Vercel deploys or major handoffs.
 - [ ] Confirm import upserts catalog rows through server-side service_role.
 - [ ] `/admin/catalog` CSV export downloads the current filtered country/brand/activity/search view.
 - [ ] `/admin/catalog` row save shows inline success without a visible page refresh.
+- [ ] `/admin/catalog` paginates filtered catalog rows server-side and supports 10, 50 and 100 cards per page.
+- [ ] `/admin/catalog` filters are dependent: country limits brands, brand limits models, and changes reset to page 1.
 
 ## Documentation
 

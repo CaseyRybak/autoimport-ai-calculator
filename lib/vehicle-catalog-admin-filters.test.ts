@@ -27,9 +27,16 @@ const items = [
 ];
 
 describe("filterCatalogAdminItems", () => {
-  it("shows active rows by default", () => {
+  it("shows all rows by default", () => {
     assert.deepEqual(
       filterCatalogAdminItems(items, {}).map((item) => item.model),
+      ["Sonata", "Atto 3", "Golf"],
+    );
+  });
+
+  it("filters active rows when requested", () => {
+    assert.deepEqual(
+      filterCatalogAdminItems(items, { active: "active" }).map((item) => item.model),
       ["Sonata", "Atto 3"],
     );
   });
