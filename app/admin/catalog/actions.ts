@@ -35,11 +35,11 @@ const actionFailure = (
 
 async function requireCatalogManagementAccess() {
   if (!isAdminPasswordConfigured()) {
-    return "ADMIN_DEMO_PASSWORD is not configured. Catalog management is disabled.";
+    return "Управление каталогом недоступно: не настроен доступ администратора.";
   }
 
   if (!(await hasAdminAccess())) {
-    return "Admin access is required before managing catalog rows.";
+    return "Перед управлением каталогом необходимо войти в админку.";
   }
 
   return null;
@@ -62,11 +62,11 @@ export async function updateCatalogVariantAction(
   const lastCheckedAt = formData.get("lastCheckedAt");
 
   if (typeof id !== "string" || !id) {
-    return actionFailure("Variant id is missing.");
+    return actionFailure("Не найден идентификатор варианта.");
   }
 
   if (!Number.isFinite(sourcePriceUsd) || sourcePriceUsd <= 0) {
-    return actionFailure("source_price_usd must be greater than 0.", id);
+    return actionFailure("source_price_usd должен быть больше 0.", id);
   }
 
   const normalizedSourceUrl = normalizeSourceUrl(
@@ -81,7 +81,7 @@ export async function updateCatalogVariantAction(
     typeof lastCheckedAt === "string" && lastCheckedAt ? new Date(lastCheckedAt) : null;
 
   if (parsedLastCheckedAt && Number.isNaN(parsedLastCheckedAt.getTime())) {
-    return actionFailure("last_checked_at must be a valid date.", id);
+    return actionFailure("last_checked_at должен быть корректной датой.", id);
   }
 
   const result = await updateCatalogVariant({
@@ -98,7 +98,7 @@ export async function updateCatalogVariantAction(
 
   return {
     ok: result.ok,
-    message: result.ok ? "Вариант каталога обновлен" : (result.error ?? "Catalog update failed."),
+    message: result.ok ? "Вариант каталога обновлен" : (result.error ?? "Каталог не обновлен."),
     variantId: id,
     isActive: null,
     sourcePriceUsd: result.ok ? sourcePriceUsd : null,
@@ -122,7 +122,7 @@ export async function toggleCatalogVariantActiveAction(
   const isActive = formData.get("isActive") === "true";
 
   if (typeof id !== "string" || !id) {
-    return actionFailure("Variant id is missing.");
+    return actionFailure("Не найден идентификатор варианта.");
   }
 
   const result = await setCatalogVariantActive(id, isActive);
@@ -137,7 +137,7 @@ export async function toggleCatalogVariantActiveAction(
       ? isActive
         ? "Вариант активирован"
         : "Вариант деактивирован"
-      : (result.error ?? "Catalog status update failed."),
+      : (result.error ?? "Статус каталога не обновлен."),
     variantId: id,
     isActive: result.ok ? isActive : null,
     sourcePriceUsd: null,

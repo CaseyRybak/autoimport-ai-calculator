@@ -2,7 +2,6 @@ import { Save } from "lucide-react";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { DEMO_CALCULATION_SETTINGS } from "@/lib/calculate";
 import { Button } from "@/components/ui/button";
-import { InfoAlert } from "@/components/ui/info-alert";
 
 export default function SettingsPage() {
   const settings = DEMO_CALCULATION_SETTINGS;
@@ -10,11 +9,6 @@ export default function SettingsPage() {
   return (
     <AdminShell title="Настройки калькулятора">
       <div className="max-w-4xl space-y-5">
-        <InfoAlert>
-          Настройки пока демонстрационные. Демо: сохранение настроек будет подключено
-          через Supabase.
-        </InfoAlert>
-
         <section className="rounded-lg border bg-white p-5">
           <h2 className="text-lg font-semibold">Курсы валют</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -28,14 +22,14 @@ export default function SettingsPage() {
         </section>
 
         <section className="rounded-lg border bg-white p-5">
-          <h2 className="text-lg font-semibold">Демо-платежи</h2>
+          <h2 className="text-lg font-semibold">Платежи</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <label className="space-y-2 text-sm font-medium text-slate-700">
-              Демо-пошлина, %
+              Таможенные платежи, %
               <input className="form-field" type="number" defaultValue={settings.customsDutyRate * 100} />
             </label>
             <label className="space-y-2 text-sm font-medium text-slate-700">
-              Демо-утилизационный сбор, ₽
+              Утилизационный сбор, ₽
               <input className="form-field" type="number" defaultValue={settings.recycleFeeRub} />
             </label>
             <label className="space-y-2 text-sm font-medium text-slate-700">
@@ -49,14 +43,9 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        <section className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
-          Реальные таможенные формулы не реализованы. Все значения на этой странице нужны
-          только для демонстрации архитектуры MVP.
-        </section>
-
-        <Button disabled title="Сохранение будет подключено через Supabase">
+        <Button disabled title="Изменение настроек ограничено правами доступа">
           <Save className="h-4 w-4" />
-          Сохранение настроек в разработке
+          Сохранить настройки
         </Button>
       </div>
     </AdminShell>

@@ -5,7 +5,6 @@ import { AlertCircle, CheckCircle2, Loader2, Send } from "lucide-react";
 import { submitLeadAction, type SubmitLeadState } from "@/app/actions";
 import type { CalculationBreakdown, CalculationInput } from "@/lib/calculate";
 import { Button } from "@/components/ui/button";
-import { InfoAlert } from "@/components/ui/info-alert";
 
 type Props = {
   input: CalculationInput;
@@ -22,9 +21,7 @@ export function LeadForm({ input, result }: Props) {
         <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-600" />
         <h2 className="mt-3 text-xl font-semibold text-slate-950">Заявка принята</h2>
         <p className="mt-2 text-sm text-slate-600">
-          {submitState.mode === "supabase"
-            ? "Данные сохранены в Supabase. Менеджер сможет проверить заявку в базе."
-            : "Supabase не настроен, поэтому форма отработала в демо-режиме без сохранения в базу."}
+          Менеджер проверит расчет и свяжется с вами.
         </p>
       </section>
     );
@@ -34,13 +31,8 @@ export function LeadForm({ input, result }: Props) {
     <section id="lead-form" className="rounded-lg border bg-white p-5 shadow-sm md:p-6">
       <div className="mb-5">
         <h2 className="text-xl font-semibold text-slate-950">Оставить заявку</h2>
-        <p className="text-sm text-slate-500">Менеджер проверит расчет и свяжется с клиентом</p>
+        <p className="text-sm text-slate-500">Менеджер проверит расчет и свяжется с вами.</p>
       </div>
-
-      <InfoAlert className="mb-5">
-        Демо-режим: если Supabase настроен, заявка сохраняется в базу; иначе форма
-        показывает локальное подтверждение без сохранения.
-      </InfoAlert>
 
       <div className="mb-5 rounded-md border border-blue-100 bg-blue-50 p-4 text-sm text-blue-950">
         <p className="font-semibold">

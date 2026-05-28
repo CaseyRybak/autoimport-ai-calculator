@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { BarChart3, Eye, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { InfoAlert } from "@/components/ui/info-alert";
 import { demoLeads, leadStatusClasses, leadStatusLabels } from "@/lib/lead-demo";
 
 export function AdminPreview() {
@@ -13,10 +12,10 @@ export function AdminPreview() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">Демо-админка</p>
+          <p className="text-sm font-medium text-blue-600">Рабочее место менеджера</p>
           <h2 className="text-2xl font-semibold text-slate-950">Заявки и настройки расчета</h2>
           <p className="mt-1 text-sm text-slate-600">
-            Заготовка рабочего места менеджера: список заявок, карточка заявки и настройки.
+            Список заявок, карточка клиента и параметры расчета.
           </p>
         </div>
         <Button asChild variant="outline">
@@ -24,16 +23,11 @@ export function AdminPreview() {
         </Button>
       </div>
 
-      <InfoAlert>
-        Admin demo: страница админки читает реальные заявки на сервере через service
-        role после demo-пароля. На этом превью оставлены демо-данные.
-      </InfoAlert>
-
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border bg-white p-4">
           <Users className="h-5 w-5 text-blue-600" />
           <p className="mt-3 text-2xl font-semibold">{demoLeads.length}</p>
-          <p className="text-sm text-slate-500">Демо-заявки</p>
+          <p className="text-sm text-slate-500">Заявки</p>
         </div>
         <div className="rounded-lg border bg-white p-4">
           <BarChart3 className="h-5 w-5 text-emerald-600" />
@@ -42,7 +36,7 @@ export function AdminPreview() {
         </div>
         <div className="rounded-lg border bg-white p-4">
           <Settings className="h-5 w-5 text-slate-600" />
-          <p className="mt-3 text-2xl font-semibold">Демо</p>
+          <p className="mt-3 text-2xl font-semibold">Базовые</p>
           <p className="text-sm text-slate-500">Формулы и курсы</p>
         </div>
       </div>

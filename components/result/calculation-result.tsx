@@ -25,8 +25,8 @@ export function CalculationResult({ input, result, onLeadClick }: Props) {
   const isWithinBudget = result.budgetStatus === "within_budget";
   const rows = [
     ["Стоимость авто в рублях", result.carPriceRub],
-    ["Демо-пошлина", result.customsFeeRub],
-    ["Демо-утилизационный сбор", result.recycleFeeRub],
+    ["Таможенные платежи", result.customsFeeRub],
+    ["Утилизационный сбор", result.recycleFeeRub],
     ["Логистика", result.logisticsRub],
     ["Комиссия компании", result.companyFeeRub],
     ["Дополнительные расходы", result.extraCostsRub],
@@ -87,24 +87,22 @@ export function CalculationResult({ input, result, onLeadClick }: Props) {
             <div className="text-sm text-blue-950">
               <p className="font-semibold">Объяснение расчета</p>
               <p className="mt-1">
-                Основная стоимость складывается из цены авто, демо-таможенных платежей,
-                логистики, комиссии и выбранных услуг. Объяснение подготовлено как демо-блок;
-                генерация через OpenAI будет подключена в следующей версии.
+                Основная стоимость складывается из цены авто, таможенных платежей,
+                логистики, комиссии и выбранных услуг.
               </p>
             </div>
           </div>
         </div>
 
         <InfoAlert>
-          Демо-режим: расчет использует упрощенные коэффициенты и не заменяет реальную
-          проверку менеджером.
+          Расчет предварительный. Финальная стоимость уточняется менеджером по актуальным ставкам.
         </InfoAlert>
 
         <div className="rounded-md border bg-slate-50 p-4">
           <h3 className="font-semibold text-slate-950">Хотите точный расчет?</h3>
           <p className="mt-1 text-sm text-slate-600">
-            Это портфолио-демо с приблизительными коэффициентами. Для реального проекта
-            нужны актуальные ставки и ручная проверка менеджером.
+            Оставьте заявку, и менеджер проверит параметры автомобиля, актуальные ставки
+            и доступные варианты поставки.
           </p>
           <Button className="mt-4" onClick={onLeadClick}>
             Оставить заявку

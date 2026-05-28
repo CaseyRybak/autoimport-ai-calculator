@@ -261,8 +261,8 @@ const mapLeadDetailRow = (row: LeadDetailRow): AdminLeadDetail => {
   }));
   const breakdown: LeadCalculationRow[] = [
     ["Стоимость авто", calculationBreakdown.carPriceRub],
-    ["Демо-пошлина", calculationBreakdown.customsFeeRub],
-    ["Демо-утилизационный сбор", calculationBreakdown.recycleFeeRub],
+    ["Таможенные платежи", calculationBreakdown.customsFeeRub],
+    ["Утилизационный сбор", calculationBreakdown.recycleFeeRub],
     ["Логистика", calculationBreakdown.logisticsRub],
     ["Комиссия компании", calculationBreakdown.companyFeeRub],
     ["Дополнительные расходы", calculationBreakdown.extraCostsRub],

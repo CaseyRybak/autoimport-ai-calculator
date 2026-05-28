@@ -179,7 +179,7 @@ export function CalculatorForm({ catalog, value, onChange, onSubmit }: Props) {
           </div>
           <div>
             <h2 className="text-xl font-semibold text-slate-950">Калькулятор стоимости</h2>
-            <p className="text-sm text-slate-500">Демо-оценка импорта под ключ</p>
+            <p className="text-sm text-slate-500">Предварительная оценка импорта под ключ</p>
           </div>
         </div>
         <CheckSquare className="hidden h-5 w-5 text-emerald-600 sm:block" />
@@ -359,13 +359,11 @@ export function CalculatorForm({ catalog, value, onChange, onSubmit }: Props) {
           <p className="font-semibold">Каталог авто</p>
           <p className="mt-1">
             {catalog.source === "supabase"
-              ? "Список авто загружен из Supabase Vehicle Catalog."
-              : "Supabase catalog недоступен, поэтому показан локальный demo fallback."}
+              ? "Список авто загружен из каталога."
+              : "Показан базовый набор автомобилей для предварительного расчета."}
           </p>
-          {catalog.error ? <p className="mt-1">Причина fallback: {catalog.error}</p> : null}
           <p className="mt-1">
-            Demo catalog prices are placeholders. Реальные коммерческие цены требуют
-            источника, даты проверки и проверки менеджером.
+            Финальная стоимость уточняется менеджером по актуальным источникам и ставкам.
           </p>
           {!hasCatalogOptions ? (
             <p className="mt-2 font-medium">Для выбранной комбинации нет активного варианта.</p>

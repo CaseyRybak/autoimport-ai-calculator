@@ -1,19 +1,19 @@
 # AutoImport AI Calculator
 
-Portfolio MVP for a vehicle import business. The project demonstrates a public
-turnkey import-cost calculator, lead capture flow, demo admin workspace and a clean
-foundation for Supabase/OpenAI integrations.
+Working MVP for a vehicle import business. The project includes a public turnkey
+import-cost calculator, lead capture flow, manager workspace and Vehicle Catalog
+maintenance tools.
 
-## Live demo
+## Live app
 
 https://autoimport-ai-calculator.vercel.app/
 
 ## What I built
 
 - A responsive public calculator for estimating turnkey vehicle import costs.
-- A result breakdown with budget status, delta and demo explanation.
+- A result breakdown with budget status, delta and manager-facing explanation.
 - A lead form flow that can save to Supabase when environment variables are configured.
-- An admin area with demo-password access, server-side Supabase reads and mock fallback.
+- An admin area with password access, server-side Supabase reads and local fallback.
 - A lead data boundary in `lib/leads.ts` for Supabase insert, admin read and mock fallback.
 - A Supabase Vehicle Catalog for calculator dropdown options and catalog base prices.
 - Shared calculation logic in `lib/calculate.ts` with unit tests.
@@ -29,18 +29,18 @@ to be a production customs calculator.
 ## MVP features
 
 - Calculator for Korea, China and Europe scenarios.
-- Demo formulas for price conversion, customs fee, recycle fee, logistics, company fee
+- Calculation formulas for price conversion, customs fee, recycle fee, logistics, company fee
   and extra services.
 - Budget status: within budget or over budget.
-- Lead form with Supabase anon insert when configured and honest demo fallback messaging.
+- Lead form with Supabase anon insert when configured and neutral fallback confirmation.
 - Admin lead list/detail can read Supabase server-side through a service-role key after
-  the demo password gate.
+  password access.
 - Admin lead detail shows the submitted calculator/form payload: client contacts, vehicle,
   catalog price, budget, calculation breakdown, selected services and client comment.
 - Vehicle Catalog dropdown reads active catalog data and applies `source_price_usd` as
   the selected vehicle's base price.
 - Admin CSV import validates, previews and upserts Vehicle Catalog rows server-side.
-- Admin status/comment placeholders and read-only calculation settings.
+- Admin status/comment controls and read-only calculation settings.
 - Vercel deployment and GitHub-ready repository.
 
 ## Tech stack
@@ -53,7 +53,7 @@ to be a production customs calculator.
 - shadcn/ui-ready component structure
 - Supabase SQL schema, lead insert boundary, server-side admin read helper and Vehicle
   Catalog read model
-- OpenAI API-ready environment structure
+- Environment structure for future AI-assisted workflows
 
 ## Architecture decisions
 
@@ -62,7 +62,7 @@ to be a production customs calculator.
 - Zod validates calculation input before producing a result.
 - App Router routes are kept small and delegate UI to `components/*`.
 - Lead form submissions are routed through `lib/leads.ts`, which inserts into Supabase
-  when env vars are configured and falls back to demo success otherwise.
+  when env vars are configured and falls back to a local success response otherwise.
 - Admin data is routed through `lib/leads.ts` and reads Supabase only on the server via
   `SUPABASE_SERVICE_ROLE_KEY` after `ADMIN_DEMO_PASSWORD` access.
 - The public anon key is used for lead creation and public Vehicle Catalog reads.
@@ -73,7 +73,7 @@ to be a production customs calculator.
 - GitHub Actions runs tests, typecheck and build on push/PR.
 - Secrets are not committed. Environment variable names live in `.env.example`.
 
-## Demo limitations
+## Implementation Limits
 
 - Form submissions are saved only when Supabase anon env vars and insert permissions are configured.
 - Admin reads require `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_DEMO_PASSWORD` in server env.
@@ -81,8 +81,8 @@ to be a production customs calculator.
 - If catalog reads are unavailable, the calculator uses a local demo catalog fallback.
 - Admin status changes and manager comments are visible as planned controls but are not
   persisted yet.
-- Settings are read-only demo controls.
-- OpenAI is prepared but not connected.
+- Settings are read-only controls.
+- AI-assisted text generation is not connected.
 - Formulas are demo-only and are not real customs formulas.
 
 ## Current MVP status
@@ -103,8 +103,8 @@ to be a production customs calculator.
 - Persist admin status changes and manager comments.
 - Add real admin authentication.
 - Enrich catalog prices with real source URLs, source names and checked timestamps.
-- Replace demo formulas with verified business/legal calculation rules.
-- Add OpenAI-powered calculation explanation and manager message drafts.
+- Replace preliminary formulas with verified business/legal calculation rules.
+- Add AI-assisted calculation explanation and manager message drafts.
 
 ## How to run locally
 
@@ -145,7 +145,7 @@ app/                    Next.js routes
 components/calculator/  Calculator UI
 components/result/      Result and breakdown UI
 components/lead-form/   Lead form UI
-components/admin/       Demo admin UI
+components/admin/       Admin UI
 components/ui/          shadcn/ui-ready primitives
 lib/                    Business logic, data boundaries, validation and tests
 docs/                   Product and architecture docs

@@ -232,14 +232,13 @@ export default async function LeadDetailPage({ params, searchParams }: Props) {
             <div className="flex gap-3">
               <Sparkles className="mt-1 h-5 w-5 text-blue-600" />
               <div>
-                <h2 className="font-semibold text-blue-950">Демо-резюме заявки</h2>
+                <h2 className="font-semibold text-blue-950">Резюме заявки</h2>
                 <p className="mt-1 text-sm text-blue-900">
                   {lead.client || "Клиент"} интересуется авто {lead.vehicle.brand}{" "}
                   {lead.vehicle.model} {lead.vehicle.year ?? ""} из направления{" "}
                   {lead.vehicle.country}. Бюджет клиента:{" "}
                   {formatRub(lead.budgetSummary.budgetRub)}, итоговый расчет:{" "}
-                  {formatRub(lead.budgetSummary.totalRub)}. Этот блок пока формируется
-                  шаблоном; OpenAI не подключен.
+                  {formatRub(lead.budgetSummary.totalRub)}.
                 </p>
               </div>
             </div>
@@ -258,16 +257,10 @@ export default async function LeadDetailPage({ params, searchParams }: Props) {
               <option value="completed">Завершена</option>
               <option value="rejected">Отклонена</option>
             </select>
-            <p className="mt-2 text-xs text-slate-500">
-              Демо-режим: изменение статуса пока не сохраняется.
-            </p>
           </section>
           <section className="rounded-lg border bg-white p-5">
             <h2 className="font-semibold">Комментарий менеджера</h2>
             <textarea className="form-field mt-3 min-h-32" placeholder="Внутренний комментарий" />
-            <p className="mt-2 text-xs text-slate-500">
-              Демо-режим: комментарий пока не записывается в базу.
-            </p>
           </section>
         </aside>
       </div>

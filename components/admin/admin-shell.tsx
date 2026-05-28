@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BarChart3, Car, Database, Settings, Users } from "lucide-react";
-import { InfoAlert } from "@/components/ui/info-alert";
 
 type Props = {
   title: string;
@@ -15,12 +14,6 @@ export function AdminShell({ title, children }: Props) {
           <div className="flex h-16 items-center gap-2 border-b px-5 font-semibold">
             <Car className="h-5 w-5 text-blue-600" />
             AutoImport Admin
-          </div>
-          <div className="border-b p-3">
-            <InfoAlert className="p-2 text-xs">
-              Admin demo: реальные заявки читаются на сервере через service role после
-              demo-пароля; иначе показываются демо-данные.
-            </InfoAlert>
           </div>
           <nav className="space-y-1 p-3 text-sm">
             <Link href="/admin" className="flex items-center gap-3 rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100">

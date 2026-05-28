@@ -16,11 +16,11 @@ export type VehicleCatalogImportActionState = {
 
 async function requireAdminImportAccess() {
   if (!isAdminPasswordConfigured()) {
-    return "ADMIN_DEMO_PASSWORD is not configured. Catalog import is disabled.";
+    return "Импорт каталога недоступен: не настроен доступ администратора.";
   }
 
   if (!(await hasAdminAccess())) {
-    return "Admin access is required before importing catalog rows.";
+    return "Перед импортом каталога необходимо войти в админку.";
   }
 
   return null;
@@ -63,7 +63,7 @@ export async function previewVehicleCatalogCsv(
 
   if (!isFormDataUpload(file)) {
     return {
-      message: "Upload a CSV file first.",
+      message: "Сначала загрузите CSV-файл.",
       preview: null,
       importResult: null,
     };
@@ -75,8 +75,8 @@ export async function previewVehicleCatalogCsv(
   return {
     message:
       preview.errors.length > 0
-        ? "Preview found blocking validation errors. Fix the CSV and upload again."
-        : "Preview is valid. Review the first rows before confirming import.",
+        ? "Проверка нашла ошибки. Исправьте CSV и загрузите файл снова."
+        : "Файл прошел проверку. Проверьте первые строки перед подтверждением импорта.",
     preview,
     importResult: null,
   };
@@ -100,7 +100,7 @@ export async function confirmVehicleCatalogImport(
 
   if (typeof payload !== "string" || !payload) {
     return {
-      message: "No preview payload found. Upload and validate a CSV before confirming.",
+      message: "Нет данных проверки. Загрузите и проверьте CSV перед подтверждением.",
       preview: null,
       importResult: null,
     };
@@ -114,7 +114,7 @@ export async function confirmVehicleCatalogImport(
     rows = Array.isArray(parsed) ? (parsed as VehicleCatalogImportRow[]) : [];
   } catch {
     return {
-      message: "Preview payload could not be read. Upload and validate the CSV again.",
+      message: "Данные проверки не удалось прочитать. Загрузите и проверьте CSV снова.",
       preview: null,
       importResult: null,
     };
@@ -124,8 +124,8 @@ export async function confirmVehicleCatalogImport(
 
   return {
     message: result.ok
-      ? "Catalog import completed. Supabase is now the source of truth for these rows."
-      : "Catalog import failed before all rows could be written.",
+      ? "Импорт каталога завершен."
+      : "Импорт каталога не выполнен: часть строк не была записана.",
     preview: null,
     importResult: result,
   };

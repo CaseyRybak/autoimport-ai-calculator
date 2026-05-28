@@ -1,7 +1,6 @@
 import { Car } from "lucide-react";
 import { submitAdminPassword } from "@/app/admin/actions";
 import { Button } from "@/components/ui/button";
-import { InfoAlert } from "@/components/ui/info-alert";
 
 type Props = {
   hasError?: boolean;
@@ -16,10 +15,6 @@ export function AdminPasswordGate({ hasError = false, returnTo = "/admin" }: Pro
           <Car className="h-5 w-5 text-blue-600" />
           AutoImport Admin
         </div>
-
-        <InfoAlert className="mt-4">
-          Доступ к реальным заявкам закрыт demo-паролем. Проверка выполняется на сервере.
-        </InfoAlert>
 
         <form action={submitAdminPassword} className="mt-5 space-y-4">
           <input type="hidden" name="returnTo" value={returnTo} />

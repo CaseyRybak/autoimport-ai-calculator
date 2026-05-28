@@ -10,7 +10,6 @@ import {
   getVehicleCatalogFallback,
   type VehicleCatalogData,
 } from "@/lib/vehicle-catalog";
-import { InfoAlert } from "@/components/ui/info-alert";
 import { CalculatorForm } from "@/components/calculator/calculator-form";
 import { CalculationResult } from "@/components/result/calculation-result";
 import { LeadForm } from "@/components/lead-form/lead-form";
@@ -85,20 +84,19 @@ export function CalculatorExperience({ catalog }: Props) {
           <div className="flex flex-col justify-center">
             <div className="mb-3 inline-flex w-fit items-center gap-2 rounded-md border bg-slate-50 px-3 py-1 text-xs text-slate-600">
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              Портфолио-MVP: готово к Supabase и OpenAI
+              Предварительный расчет импорта авто
             </div>
             <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              Калькулятор импорта авто под ключ
+              Предварительный расчет импорта авто
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
-              Первая версия сервиса для оценки бюджета, сбора заявок и демонстрации
-              рабочего процесса менеджера. Формулы намеренно демонстрационные.
+              Расчет стоимости, заявка и обработка менеджером
             </p>
           </div>
 
           <div className="rounded-lg border bg-slate-950 p-4 text-white shadow-sm">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-300">Демо-результат</p>
+              <p className="text-xs text-slate-300">Предварительный итог</p>
               <SlidersHorizontal className="h-4 w-4 text-blue-300" />
             </div>
             <p className="mt-3 text-2xl font-bold">{result.totalRub.toLocaleString("ru-RU")} ₽</p>
@@ -113,7 +111,7 @@ export function CalculatorExperience({ catalog }: Props) {
               </div>
             </div>
             <p className="mt-3 text-xs leading-5 text-slate-400">
-              Визуальная структура перенесена из Figma-референса, код реализован как компоненты Next.js.
+              Расчет предварительный. Финальная стоимость уточняется менеджером по актуальным ставкам.
             </p>
           </div>
         </div>
@@ -133,11 +131,7 @@ export function CalculatorExperience({ catalog }: Props) {
 
       <section ref={leadRef} className="section-shell pb-8">
         {showLeadForm ? (
-          <div className="space-y-4">
-            <InfoAlert>
-              Демо-режим: данные пока не сохраняются в базу. Форма показывает будущий сценарий
-              отправки заявки в Supabase.
-            </InfoAlert>
+          <div>
             <LeadForm input={input} result={result} />
           </div>
         ) : null}

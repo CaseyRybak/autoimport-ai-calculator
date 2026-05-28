@@ -33,30 +33,30 @@ export function CatalogImportForm() {
   return (
     <div className="max-w-6xl space-y-5">
       <InfoAlert>
-        Excel нужно экспортировать в CSV. Supabase остается source of truth; SQL-файлы
-        нужны для migrations/seed, а не для ежедневного управления каталогом.
+        Excel-файл нужно экспортировать в CSV перед загрузкой. SQL-файлы используются
+        для структуры базы, а ежедневное обновление каталога выполняется через импорт.
       </InfoAlert>
 
       <section className="rounded-lg border bg-white p-5">
         <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-950">CSV import</h2>
+            <h2 className="text-lg font-semibold text-slate-950">Импорт CSV</h2>
             <p className="mt-1 text-sm text-slate-600">
-              Preview только валидирует файл. Запись в Supabase выполняется после confirm.
+              Сначала файл проходит проверку. Запись выполняется после подтверждения импорта.
             </p>
           </div>
           <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-950">
-            CSV/demo prices must have real `source_url` before being treated as market prices.
+            Для коммерческого каталога укажите `source_url`, источник и дату проверки цены.
           </p>
         </div>
 
         <div className="mt-4 rounded-md border border-dashed border-slate-300 bg-slate-50 p-4">
-          <p className="text-sm font-medium text-slate-700">Expected columns</p>
+          <p className="text-sm font-medium text-slate-700">Ожидаемые колонки</p>
           <code className="mt-2 block overflow-x-auto whitespace-nowrap text-xs text-slate-600">
             {vehicleCatalogImportColumns.join(",")}
           </code>
           <p className="mt-2 text-xs text-slate-500">
-            Template: `data/vehicle-catalog-template.csv`
+            Шаблон: `data/vehicle-catalog-template.csv`
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export function CatalogImportForm() {
           />
           <Button type="submit" disabled={previewPending}>
             <Upload className="h-4 w-4" />
-            {previewPending ? "Проверяем..." : "Upload и preview"}
+            {previewPending ? "Проверяем..." : "Загрузить и проверить"}
           </Button>
         </form>
       </section>
@@ -83,12 +83,12 @@ export function CatalogImportForm() {
       {preview ? (
         <section className="space-y-5 rounded-lg border bg-white p-5">
           <div>
-            <h2 className="text-lg font-semibold text-slate-950">Preview</h2>
+            <h2 className="text-lg font-semibold text-slate-950">Проверка файла</h2>
             <div className="mt-3 grid gap-3 md:grid-cols-4">
-              <Metric label="Total rows" value={preview.totalRows} />
-              <Metric label="Valid rows" value={preview.validRows} />
-              <Metric label="Invalid rows" value={preview.invalidRows} />
-              <Metric label="Skipped rows" value={preview.skippedRows} />
+              <Metric label="Всего строк" value={preview.totalRows} />
+              <Metric label="Корректные строки" value={preview.validRows} />
+              <Metric label="Строки с ошибками" value={preview.invalidRows} />
+              <Metric label="Пропущенные строки" value={preview.skippedRows} />
             </div>
           </div>
 
@@ -96,7 +96,7 @@ export function CatalogImportForm() {
             <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-950">
               <div className="flex items-center gap-2 font-semibold">
                 <AlertTriangle className="h-4 w-4" />
-                Blocking validation errors
+                Ошибки проверки
               </div>
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 {preview.errors.slice(0, 30).map((error) => (
@@ -104,7 +104,7 @@ export function CatalogImportForm() {
                 ))}
               </ul>
               {preview.errors.length > 30 ? (
-                <p className="mt-2">Showing first 30 errors.</p>
+                <p className="mt-2">Показаны первые 30 ошибок.</p>
               ) : null}
             </div>
           ) : null}
@@ -114,17 +114,17 @@ export function CatalogImportForm() {
               <table className="w-full min-w-[1100px] text-sm">
                 <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
                   <tr>
-                    <th className="px-3 py-2">Row</th>
-                    <th className="px-3 py-2">Country</th>
-                    <th className="px-3 py-2">Brand</th>
-                    <th className="px-3 py-2">Model</th>
-                    <th className="px-3 py-2">Year</th>
-                    <th className="px-3 py-2">Engine</th>
-                    <th className="px-3 py-2">Volume</th>
-                    <th className="px-3 py-2">Market</th>
-                    <th className="px-3 py-2">Price USD</th>
-                    <th className="px-3 py-2">Active</th>
-                    <th className="px-3 py-2">Errors</th>
+                    <th className="px-3 py-2">Строка</th>
+                    <th className="px-3 py-2">Страна</th>
+                    <th className="px-3 py-2">Марка</th>
+                    <th className="px-3 py-2">Модель</th>
+                    <th className="px-3 py-2">Год</th>
+                    <th className="px-3 py-2">Двигатель</th>
+                    <th className="px-3 py-2">Объем</th>
+                    <th className="px-3 py-2">Рынок</th>
+                    <th className="px-3 py-2">Цена USD</th>
+                    <th className="px-3 py-2">Активность</th>
+                    <th className="px-3 py-2">Ошибки</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -156,7 +156,7 @@ export function CatalogImportForm() {
             />
             <Button type="submit" disabled={!canConfirm || confirmPending}>
               <Database className="h-4 w-4" />
-              {confirmPending ? "Импортируем..." : "Confirm import"}
+              {confirmPending ? "Импортируем..." : "Подтвердить импорт"}
             </Button>
           </form>
         </section>
@@ -171,15 +171,15 @@ export function CatalogImportForm() {
       {importResult ? (
         <section className="rounded-lg border bg-white p-5">
           <h2 className="text-lg font-semibold text-slate-950">
-            {importResult.ok ? "Import complete" : "Import failed"}
+            {importResult.ok ? "Импорт завершен" : "Импорт не выполнен"}
           </h2>
           <div className="mt-3 grid gap-3 md:grid-cols-4">
-            <Metric label="Total rows" value={importResult.totalRows} />
-            <Metric label="Valid rows" value={importResult.validRows} />
-            <Metric label="Skipped rows" value={importResult.skippedRows} />
-            <Metric label="Brands inserted/updated" value={importResult.brandsUpserted} />
-            <Metric label="Models inserted/updated" value={importResult.modelsUpserted} />
-            <Metric label="Variants inserted/updated" value={importResult.variantsUpserted} />
+            <Metric label="Всего строк" value={importResult.totalRows} />
+            <Metric label="Корректные строки" value={importResult.validRows} />
+            <Metric label="Пропущенные строки" value={importResult.skippedRows} />
+            <Metric label="Марки обновлены" value={importResult.brandsUpserted} />
+            <Metric label="Модели обновлены" value={importResult.modelsUpserted} />
+            <Metric label="Варианты обновлены" value={importResult.variantsUpserted} />
           </div>
           {importResult.errors.length > 0 ? (
             <ul className="mt-3 list-disc pl-5 text-sm text-red-700">

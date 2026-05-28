@@ -2,18 +2,18 @@
 
 ## Goal
 
-AutoImport AI Calculator is a portfolio MVP for a vehicle import business. It demonstrates
-a public import-cost calculator, lead capture flow, admin workflow draft, demo formulas,
-and implemented Supabase integration for leads and Vehicle Catalog, with OpenAI still
-prepared but not connected.
+AutoImport AI Calculator is a working MVP for a vehicle import business. It includes
+a public import-cost calculator, lead capture flow, admin workflow draft, preliminary
+formulas, implemented Supabase integration for leads and Vehicle Catalog, and a structure
+for future AI-assisted workflows.
 
 ## Current Status
 
 - Next.js App Router project scaffolded.
 - TypeScript, Tailwind CSS, Zod and node:test-based unit tests are configured.
 - Public calculator UI implemented from the Figma wireframe as React components.
-- Demo result breakdown and Supabase-backed lead form submission are implemented.
-- Demo admin pages are available for leads, lead detail and settings.
+- Result breakdown and Supabase-backed lead form submission are implemented.
+- Admin pages are available for leads, lead detail and settings.
 - Supabase insert/read is implemented: `lib/leads.ts` can insert submitted leads through
   anon Supabase access and read admin leads server-side through service_role when env vars
   and permissions are configured.
@@ -36,6 +36,8 @@ prepared but not connected.
 - GitHub Actions CI is prepared for tests, typecheck and build.
 - No real API keys are present.
 - First version is deployed on Vercel: https://autoimport-ai-calculator.vercel.app/
+- Presentation polish completed: public and admin UI copy no longer exposes portfolio,
+  demo/mock, Supabase-ready or OpenAI-ready language to clients.
 
 ## Review Findings
 
@@ -47,7 +49,11 @@ prepared but not connected.
 
 ## Critical Polish Completed
 
-- Added clear demo-mode info alerts for lead form, result, mock admin and settings.
+- Replaced client-facing demo/test copy with commercial Russian copy for presentation.
+- Removed visible demo/admin technical alerts from public and admin UI.
+- Removed KRW from user-facing currency options and confirmed UI currency logic uses
+  USD/RUB/EUR/CNY.
+- Earlier demo-mode alerts were removed from the client/admin presentation UI.
 - Replaced English/placeholder copy with Russian product copy.
 - Changed unknown `/admin/leads/[id]` behavior to `notFound()`.
 - Disabled settings save action and explained Supabase-backed saving is planned.

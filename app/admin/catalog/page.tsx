@@ -91,7 +91,7 @@ export default async function CatalogAdminPage({ searchParams }: Props) {
       })
     : {
         source: "unconfigured",
-        error: "ADMIN_DEMO_PASSWORD is not configured. Catalog management is disabled.",
+        error: "Управление каталогом недоступно: не настроен доступ администратора.",
         items: [],
         summary: {
           totalVariants: 0,
@@ -108,17 +108,9 @@ export default async function CatalogAdminPage({ searchParams }: Props) {
       <div className="max-w-[1800px] space-y-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-3xl space-y-3">
-            {!isPasswordConfigured ? (
-              <InfoAlert>
-                `ADMIN_DEMO_PASSWORD` не задан, поэтому управление каталогом отключено.
-                Настройте admin-пароль и server-side `SUPABASE_SERVICE_ROLE_KEY`, чтобы
-                читать и обновлять строки каталога.
-              </InfoAlert>
-            ) : null}
             <InfoAlert>
-              Для production use цены каталога должны иметь источник и дату проверки:
-              `source_name`, `source_url` и `last_checked_at`. Демо-цены нельзя
-              представлять как рыночные предложения.
+              Для рабочих цен каталога указывайте источник и дату проверки:
+              `source_name`, `source_url` и `last_checked_at`.
             </InfoAlert>
           </div>
 
@@ -200,7 +192,7 @@ export default async function CatalogAdminPage({ searchParams }: Props) {
               <input
                 className="form-field"
                 name="search"
-                placeholder="Brand или model"
+                placeholder="Марка или модель"
                 defaultValue={params?.search ?? ""}
               />
             </label>
@@ -222,7 +214,7 @@ export default async function CatalogAdminPage({ searchParams }: Props) {
             <Database className="mx-auto h-8 w-8 text-slate-400" />
             <h2 className="mt-3 text-lg font-semibold text-slate-950">Каталог не найден</h2>
             <p className="mt-1 text-sm text-slate-600">
-              Измените фильтры или загрузите каталог через CSV import.
+              Измените фильтры или загрузите каталог через импорт CSV.
             </p>
             <Button asChild className="mt-4" variant="outline">
               <Link href="/admin/catalog/import">Импорт CSV</Link>

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { AdminPasswordGate } from "@/components/admin/admin-password-gate";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { InfoAlert } from "@/components/ui/info-alert";
 import { hasAdminAccess, isAdminPasswordConfigured } from "@/lib/admin-access";
 import { demoLeads } from "@/lib/lead-demo";
 import {
@@ -58,13 +57,6 @@ export default async function AdminPage({ searchParams }: Props) {
 
   return (
     <AdminShell title="Заявки">
-      {!isPasswordConfigured ? (
-        <InfoAlert className="mb-5">
-          Demo mode: `ADMIN_DEMO_PASSWORD` не задан, поэтому админка показывает только
-          демо-заявки и не читает реальные данные из Supabase.
-        </InfoAlert>
-      ) : null}
-
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border bg-white p-4">
           <p className="text-sm text-slate-500">Новые заявки</p>
