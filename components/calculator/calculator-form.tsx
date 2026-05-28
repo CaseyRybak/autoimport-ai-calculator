@@ -1,6 +1,6 @@
 "use client";
 
-import { Calculator, CheckSquare, RotateCcw } from "lucide-react";
+import { Calculator, CheckSquare, Send, RotateCcw } from "lucide-react";
 import type { CalculationInput } from "@/lib/calculate";
 import {
   convertUsdPrice,
@@ -399,7 +399,8 @@ export function CalculatorForm({ catalog, value, onChange, onSubmit }: Props) {
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <Button type="submit" size="lg" className="flex-1">
-            Рассчитать
+            <Send className="h-4 w-4" />
+            Оставить заявку
           </Button>
           <Button
             type="button"
