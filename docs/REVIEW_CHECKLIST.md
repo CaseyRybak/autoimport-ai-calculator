@@ -13,7 +13,7 @@ Use this checklist before portfolio review, Vercel deploys or major handoffs.
 ## Public Flow
 
 - [ ] `/` opens without runtime errors.
-- [ ] Hero copy is Russian and clearly states this is a portfolio/demo MVP.
+- [ ] Hero copy is Russian, commercial and does not expose portfolio/demo/mock implementation details.
 - [ ] Calculator loads Vehicle Catalog options or a clear fallback state.
 - [ ] Calculator dropdown uses catalog data and not manual vehicle price entry.
 - [ ] Changing country updates available catalog brands.
@@ -23,12 +23,15 @@ Use this checklist before portfolio review, Vercel deploys or major handoffs.
 - [ ] Changing currency, budget and options changes the result.
 - [ ] Result breakdown shows car price, customs fee, recycle fee, logistics, company fee,
       extra costs and total.
-- [ ] Demo-mode info alert is visible near the calculation result.
+- [ ] Result shows a neutral notice that the calculation is preliminary and final cost is
+      confirmed by a manager.
 - [ ] “Оставить заявку” opens the lead form.
 - [ ] Submitting the lead form shows loading and then success or an actionable error.
 - [ ] With Supabase env/table permissions configured, a submitted lead appears in `public.leads`.
-- [ ] Without Supabase env, the form clearly falls back to demo confirmation.
-- [ ] Documentation states: "Заявки сохраняются в Supabase при настроенных env; иначе используется demo/mock fallback."
+- [ ] Without Supabase env, the form shows neutral success confirmation without exposing
+      technical fallback details to clients.
+- [ ] Documentation states that leads save to Supabase when env/permissions are configured
+      and otherwise use demo/mock fallback.
 
 ## Admin Flow
 
@@ -36,13 +39,13 @@ Use this checklist before portfolio review, Vercel deploys or major handoffs.
 - [ ] With admin access and `SUPABASE_SERVICE_ROLE_KEY` set, `/admin` opens the real lead list.
 - [ ] `/admin` displays human-readable lead numbers like `AIC-000001`.
 - [ ] Without `ADMIN_DEMO_PASSWORD`, `/admin` falls back to the demo lead list.
-- [ ] Admin shell explains server-side service-role reads with demo fallback.
 - [ ] `/admin/leads/[id]` opens a Supabase lead detail page after admin access when that id exists.
 - [ ] `/admin/leads/1` opens a demo lead detail page in fallback/demo mode.
 - [ ] `/admin/leads/unknown` returns 404.
-- [ ] Status and comment controls clearly state they do not persist yet.
+- [ ] Status and comment controls are either persisted or clearly marked/disabled as
+      not persisted yet.
 - [ ] `/admin/settings` opens demo calculation settings.
-- [ ] Settings save action is disabled or clearly marked as not connected.
+- [ ] Settings save action is disabled.
 - [ ] `/admin/catalog/import` opens after admin access.
 - [ ] CSV upload preview validates rows without writing to Supabase.
 - [ ] CSV template/import does not include catalog display currency.

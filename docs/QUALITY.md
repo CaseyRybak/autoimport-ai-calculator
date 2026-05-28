@@ -18,10 +18,15 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 
 - Unit tests cover the pure calculation flow in `lib/calculate.ts`.
 - Unit tests cover demo fallback for the lead persistence boundary in `lib/leads.ts`.
+- Unit tests cover Vehicle Catalog dependent selectors and USD-to-display-currency
+  conversion.
+- Unit tests cover Vehicle Catalog CSV import parsing, required columns, row validation,
+  slug generation and source URL normalization.
+- Unit tests cover admin catalog filtering behavior.
 - Next.js production build verifies routes compile and prerender correctly.
 - TypeScript strict mode is enabled.
-- Demo-mode warnings are visible where data uses mock fallback or planned controls are
-  not persisted yet.
+- Public-facing UI uses commercial Russian copy. Demo/mock/Supabase-ready implementation
+  details are documented here and in setup notes, not exposed as client-facing labels.
 
 ## Known Gaps
 
@@ -37,7 +42,9 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Supabase must grant `service_role` usage on the `public` schema and `SELECT` on the
   admin-read tables used by the app.
 - Do not add anon `SELECT` policy for `public.leads`.
-- Settings are read-only demo controls.
+- Settings are read-only controls backed by demo calculation settings.
+- Admin lead status and manager comment controls are not persisted yet and need either
+  persistence or clearer disabled/read-only treatment before production CRM use.
 - OpenAI is prepared but not connected.
 - Calculation formulas are demo-only and not real customs formulas.
 
@@ -51,11 +58,16 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 
 - Live demo opens successfully.
 - Main calculator updates result from user input.
-- Lead form clearly communicates demo-mode.
+- Public copy stays commercial and does not expose demo/mock/Supabase-ready implementation
+  details.
+- Calculation result clearly states that the amount is preliminary and final cost is
+  confirmed by a manager.
 - Admin list and detail routes load Supabase leads through server-side service-role reads
   after demo-password access, with demo fallback when admin env is missing.
 - Unknown admin lead ids return 404.
-- Settings page clearly communicates read-only demo behavior.
+- Settings save action is disabled.
+- Non-persisted admin status/comment controls are either clearly marked as not persisted
+  or replaced with persisted behavior.
 - `npm test`, `npm run typecheck` and `npm run build` pass locally or in CI.
 
 ## Quality Bar For Supabase Changes

@@ -16,6 +16,11 @@ AutoImport AI Calculator.
 ## Where Things Live
 
 - `app/` - Next.js App Router routes.
+- `app/actions.ts` - public server actions, including lead submission.
+- `app/admin/actions.ts` - admin password-gate server actions.
+- `app/admin/catalog/` - admin Vehicle Catalog list, filters and row update actions.
+- `app/admin/catalog/import/` - CSV upload, validation, preview and import flow.
+- `app/admin/catalog/export/route.ts` - filtered Vehicle Catalog CSV export.
 - `components/calculator/` - public calculator experience.
 - `components/result/` - calculation result and breakdown UI.
 - `components/lead-form/` - lead form UI; saves to Supabase when env and permissions are configured, with demo/mock fallback.
@@ -25,6 +30,11 @@ AutoImport AI Calculator.
 - `lib/calculate.test.ts` - unit tests for calculation logic.
 - `lib/leads.ts` - lead data boundary: Supabase anon insert, server-side service_role admin reads and mock fallback.
 - `lib/vehicle-catalog.ts` - Vehicle Catalog data boundary for Supabase catalog reads and local fallback.
+- `lib/vehicle-catalog-admin.ts` - server-only Vehicle Catalog admin read/write, CSV export and import upsert boundary.
+- `lib/vehicle-catalog-import.ts` - CSV parsing, validation and normalization.
+- `lib/vehicle-catalog-admin-filters.ts` - admin catalog filter helpers and tests.
+- `lib/admin-access.ts` - admin password verification and signed access cookie.
+- `lib/supabase-admin.ts` - server-only Supabase service_role client helper.
 - `docs/` - product, architecture, formula and quality documents.
 - `supabase/schema.sql` - lead, calculation settings and lead comments schema.
 - `supabase/lead_number.sql` - human-readable lead number migration and sequence.
@@ -37,6 +47,9 @@ AutoImport AI Calculator.
 - Keep calculation formulas in `lib/calculate.ts` or related `lib/` modules.
 - UI should not import Supabase directly. Route data access through `lib/leads.ts`
   or `lib/vehicle-catalog.ts`/server actions.
+- Admin catalog reads, updates, imports and exports should route through
+  `lib/vehicle-catalog-admin.ts` and server actions/routes, never through client-side
+  Supabase access.
 - Lead form submissions save to `public.leads` through anon insert when Supabase env and
   permissions are configured; otherwise the app uses demo/mock fallback.
 - `/admin` reads `public.leads` server-side through `SUPABASE_SERVICE_ROLE_KEY` after
@@ -49,6 +62,8 @@ AutoImport AI Calculator.
   an import/catalog maintenance format, not the website source of truth.
 - `vehicle_variants.source_price_usd` is the catalog base price. Demo seed prices are
   placeholders, not market prices.
+- Current admin catalog management is variant-level only: managers can update price/source
+  fields and availability, but brand/model/year/engine structural editing is a later phase.
 - UUID remains the technical lead id and URL key. `lead_number` is the human-readable
   admin number displayed as `AIC-000001`.
 - Real customs formulas are not implemented. Current formulas are demo-only.

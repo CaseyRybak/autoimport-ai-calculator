@@ -194,7 +194,7 @@ Catalog read:
 
 Catalog management/import:
 
-- CSV import and future admin catalog management should use `service_role` server-side.
+- CSV import and admin catalog management use `service_role` server-side.
 - `service_role` may write `vehicle_brands`, `vehicle_models` and `vehicle_variants`.
 
 Recommended lead table posture:

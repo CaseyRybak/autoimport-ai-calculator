@@ -23,6 +23,9 @@
 - Админка: список заявок, карточка заявки и настройки.
 - `/admin` читает реальные заявки server-side через `SUPABASE_SERVICE_ROLE_KEY` после
   password gate, с mock fallback для локального режима.
+- CSV import для bulk-обновления Vehicle Catalog через admin UI.
+- Admin Vehicle Catalog management на уровне вариантов: просмотр, фильтры, поиск,
+  экспорт CSV, редактирование цены/источника/даты проверки и активация/деактивация.
 - Supabase-backed структура без реальных ключей в репозитории.
 - Структура для будущих AI-интеграций без реальных ключей.
 
@@ -30,7 +33,10 @@
 
 - Реальные таможенные формулы.
 - Production-авторизация админки.
-- CSV import и admin catalog management для Vehicle Catalog.
+- Structural catalog editor для добавления/редактирования brand/model/year/engine fields
+  напрямую в row editor.
+- Production price enrichment с проверенными source URLs, датами проверки и методами
+  обновления цен.
 - Реальные AI-запросы.
 - Production CRM workflows.
 - Persist admin status changes и manager comments.
@@ -48,7 +54,11 @@
   key, `lead_number` отображается как `AIC-000001`.
 - CSV import MVP уже входит в текущий MVP: `/admin/catalog/import` валидирует CSV,
   показывает preview и пишет в Supabase только после confirm.
-- Manual admin catalog management остается next phase.
+- Admin catalog management уже входит в текущий MVP на уровне вариантов:
+  `/admin/catalog` фильтрует, пагинирует, экспортирует CSV, обновляет
+  `source_price_usd`, `source_name`, `source_url`, `last_checked_at` и управляет
+  `is_active`.
+- Structural editing для brand/model/year/engine fields остается next phase.
 
 ## Acceptance Criteria для следующих фаз
 
@@ -63,13 +73,21 @@ CSV import считается готовым, когда:
 
 Текущий MVP CSV import покрывает эти критерии для bulk import без ручного catalog editor.
 
-Admin catalog management считается готовым, когда:
+Admin catalog management MVP считается готовым, когда:
 
-- Через admin UI можно добавлять и редактировать brand/model/variant.
 - Через admin UI можно обновлять `source_price_usd`, `source_name`, `source_url`,
   `last_checked_at` и `is_active`.
 - Изменения пишутся в Supabase server-side и отражаются в calculator dropdown.
 - Seed prices не маркируются как реальные рыночные цены.
+
+Текущий MVP покрывает эти критерии для variant-level управления без structural editor.
+
+Structural catalog editing считается готовым, когда:
+
+- Через admin UI можно добавлять brand/model/variant без CSV.
+- Через admin UI можно менять brand/model/year/engine fields с учетом relationships и
+  unique constraints.
+- Structural changes проходят server-side validation и не ломают public dropdown.
 
 Status/comment persistence считается готовым, когда:
 

@@ -38,6 +38,9 @@ for future AI-assisted workflows.
 - First version is deployed on Vercel: https://autoimport-ai-calculator.vercel.app/
 - Presentation polish completed: public and admin UI copy no longer exposes portfolio,
   demo/mock, Supabase-ready or OpenAI-ready language to clients.
+- Documentation alignment completed: PRD, README, architecture, quality notes and review
+  checklist now reflect implemented CSV import, variant-level admin catalog management,
+  commercial presentation copy and the next CRM persistence step.
 
 ## Review Findings
 
