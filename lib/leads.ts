@@ -8,6 +8,7 @@ import {
   demoLeads,
   getDemoLeadById,
   leadStatusLabels,
+  leadStatuses,
   type DemoLead,
   type LeadStatus,
 } from "@/lib/lead-demo";
@@ -18,6 +19,7 @@ export {
   getDemoLeadById,
   leadStatusClasses,
   leadStatusLabels,
+  leadStatuses,
   type DemoLead,
   type LeadStatus,
 } from "@/lib/lead-demo";
@@ -59,6 +61,25 @@ export type LeadReadResult = {
   debug: LeadReadDebug;
 };
 
+export type LeadManagerComment = {
+  id: string;
+  leadId: string;
+  createdAt: string;
+  authorName: string;
+  body: string;
+  isInternal: boolean;
+};
+
+export type LeadMutationResult =
+  | {
+      ok: true;
+      comment?: LeadManagerComment;
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
 type LeadRow = {
   id: string;
   lead_number: number | string | null;
@@ -86,6 +107,15 @@ type LeadDetailRow = LeadRow & {
   calculation_input: unknown;
   calculation_breakdown: unknown;
   budget_status: BudgetStatus;
+};
+
+type LeadCommentRow = {
+  id: string;
+  lead_id: string;
+  created_at: string;
+  author_name: string;
+  body: string;
+  is_internal: boolean;
 };
 
 export type LeadDetailService = {
@@ -150,8 +180,13 @@ const formatLeadDate = (value: string) =>
     year: "numeric",
   }).format(new Date(value));
 
-const toLeadStatus = (status: string): LeadStatus =>
-  status in leadStatusLabels ? (status as LeadStatus) : "new";
+const toLeadStatus = (status: string): LeadStatus => {
+  if (status === "completed") {
+    return "closed";
+  }
+
+  return status in leadStatusLabels ? (status as LeadStatus) : "new";
+};
 
 export const formatLeadDisplayNumber = (leadNumber: number | null) =>
   leadNumber === null ? "AIC-000000" : `AIC-${String(leadNumber).padStart(6, "0")}`;
@@ -305,6 +340,15 @@ const mapLeadDetailRow = (row: LeadDetailRow): AdminLeadDetail => {
   };
 };
 
+const mapLeadCommentRow = (row: LeadCommentRow): LeadManagerComment => ({
+  id: row.id,
+  leadId: row.lead_id,
+  createdAt: row.created_at,
+  authorName: row.author_name,
+  body: row.body,
+  isInternal: row.is_internal,
+});
+
 const mockReadDebug = ({
   serviceRoleClientAvailable,
   adminClientUsesServiceRoleEnv,
@@ -424,6 +468,150 @@ export async function getLeadById(id: string): Promise<AdminLeadDetail | null> {
   }
 
   return data ? mapLeadDetailRow(data as LeadDetailRow) : null;
+}
+
+export async function updateLeadStatus(
+  leadId: string,
+  status: LeadStatus,
+): Promise<LeadMutationResult> {
+  if (!leadId) {
+    return {
+      ok: false,
+      error: "Не найден идентификатор заявки.",
+    };
+  }
+
+  if (!leadStatuses.includes(status)) {
+    return {
+      ok: false,
+      error: "Недопустимый статус заявки.",
+    };
+  }
+
+  const { client: supabase } = await createAdminClient();
+
+  if (!supabase) {
+    return {
+      ok: false,
+      error: "Supabase admin client is not configured.",
+    };
+  }
+
+  const { error } = await supabase
+    .from("leads")
+    .update({
+      status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", leadId);
+
+  if (error) {
+    return {
+      ok: false,
+      error: error.message,
+    };
+  }
+
+  return {
+    ok: true,
+  };
+}
+
+export async function addLeadComment(
+  leadId: string,
+  comment: string,
+): Promise<LeadMutationResult> {
+  const body = comment.trim();
+
+  if (!leadId) {
+    return {
+      ok: false,
+      error: "Не найден идентификатор заявки.",
+    };
+  }
+
+  if (!body) {
+    return {
+      ok: false,
+      error: "Комментарий не должен быть пустым.",
+    };
+  }
+
+  const { client: supabase } = await createAdminClient();
+
+  if (!supabase) {
+    return {
+      ok: false,
+      error: "Supabase admin client is not configured.",
+    };
+  }
+
+  const { data: leadRow, error: leadError } = await supabase
+    .from("leads")
+    .select("id")
+    .eq("id", leadId)
+    .maybeSingle();
+
+  if (leadError) {
+    return {
+      ok: false,
+      error: leadError.message,
+    };
+  }
+
+  if (!leadRow) {
+    return {
+      ok: false,
+      error: "Заявка не найдена.",
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("lead_comments")
+    .insert({
+      lead_id: leadId,
+      author_name: "Менеджер",
+      body,
+      is_internal: true,
+    })
+    .select("id, lead_id, created_at, author_name, body, is_internal")
+    .single();
+
+  if (error) {
+    return {
+      ok: false,
+      error: error.message,
+    };
+  }
+
+  return {
+    ok: true,
+    comment: mapLeadCommentRow(data as LeadCommentRow),
+  };
+}
+
+export async function listLeadComments(leadId: string): Promise<LeadManagerComment[]> {
+  if (!leadId) {
+    return [];
+  }
+
+  const { client: supabase } = await createAdminClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("lead_comments")
+    .select("id, lead_id, created_at, author_name, body, is_internal")
+    .eq("lead_id", leadId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return [];
+  }
+
+  return (data ?? []).map((row) => mapLeadCommentRow(row as LeadCommentRow));
 }
 
 const cleanOptionalText = (value: string | undefined) => {

@@ -4,7 +4,7 @@ create table if not exists public.leads (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  status text not null default 'new' check (status in ('new', 'in_progress', 'completed', 'rejected')),
+  status text not null default 'new' check (status in ('new', 'in_progress', 'waiting_client', 'closed', 'rejected')),
   customer_name text not null,
   phone text not null,
   telegram text,

@@ -39,11 +39,12 @@ new values.
 Apply these files manually in the Supabase SQL editor in this order:
 
 1. `supabase/schema.sql`
-2. `supabase/lead_number.sql`
-3. `supabase/vehicle_catalog.sql`
-4. `supabase/drop_vehicle_catalog_display_currency.sql` for existing projects that still
+2. `supabase/lead_statuses.sql`
+3. `supabase/lead_number.sql`
+4. `supabase/vehicle_catalog.sql`
+5. `supabase/drop_vehicle_catalog_display_currency.sql` for existing projects that still
    have the old catalog display-currency column.
-5. `supabase/vehicle_catalog_seed_demo.sql`
+6. `supabase/vehicle_catalog_seed_demo.sql`
 
 ## What Each File Does
 
@@ -61,6 +62,20 @@ After applying `schema.sql`, verify:
 select to_regclass('public.leads') as leads_table;
 select to_regclass('public.calculation_settings') as calculation_settings_table;
 select to_regclass('public.lead_comments') as lead_comments_table;
+```
+
+`supabase/lead_statuses.sql`
+
+- Migrates legacy `completed` lead statuses to `closed`.
+- Replaces the `public.leads.status` check constraint with the current CRM status set:
+  `new`, `in_progress`, `waiting_client`, `closed`, `rejected`.
+- Grants service-role update access for lead status changes.
+- Grants service-role select/insert access for manager comments in `public.lead_comments`.
+
+After applying `lead_statuses.sql`, verify:
+
+```sql
+select distinct status from public.leads order by status;
 ```
 
 `supabase/lead_number.sql`
@@ -174,7 +189,8 @@ create policy "Allow anonymous lead inserts"
 Admin read:
 
 - Uses `SUPABASE_SERVICE_ROLE_KEY` server-side.
-- `service_role` needs usage on schema `public` and `SELECT` on the admin-read tables.
+- `service_role` needs usage on schema `public`, `SELECT` on the admin-read tables,
+  `UPDATE` on lead status fields and `INSERT` on `public.lead_comments`.
 - Admin read should not use the public anon key.
 
 Apply this admin read grants block:
@@ -184,6 +200,8 @@ grant usage on schema public to service_role;
 grant select on table public.leads to service_role;
 grant select on table public.lead_comments to service_role;
 grant select on table public.calculation_settings to service_role;
+grant update (status, updated_at) on table public.leads to service_role;
+grant insert on table public.lead_comments to service_role;
 ```
 
 Catalog read:

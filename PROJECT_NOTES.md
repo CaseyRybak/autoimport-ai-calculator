@@ -40,7 +40,9 @@ for future AI-assisted workflows.
   demo/mock, Supabase-ready or OpenAI-ready language to clients.
 - Documentation alignment completed: PRD, README, architecture, quality notes and review
   checklist now reflect implemented CSV import, variant-level admin catalog management,
-  commercial presentation copy and the next CRM persistence step.
+  commercial presentation copy and CRM persistence.
+- CRM-minimum implemented: admin lead status changes now persist to `public.leads.status`,
+  and manager comments persist to `public.lead_comments` with newest-first history.
 
 ## Review Findings
 
@@ -96,7 +98,8 @@ for future AI-assisted workflows.
   catalog price, budget, calculation breakdown, selected services and client comment.
 - UUID remains the technical lead id and URL key. `lead_number` is the human-readable
   admin number displayed as `AIC-000001`.
-- Admin status changes and manager comments remain demo-only and are not persisted yet.
+- Admin status changes and manager comments are persisted through server-side service-role
+  helpers. Legacy `completed` status is migrated to `closed` by `supabase/lead_statuses.sql`.
 
 ## Vehicle Catalog
 
@@ -138,12 +141,12 @@ for future AI-assisted workflows.
 ## Next Version
 
 - Replace demo catalog prices with sourced production price enrichment.
-- Save admin status changes and manager comments.
+- Add richer CRM workflows around persisted status and comment history.
 - Add real admin authentication.
 - Replace demo formulas with verified business/legal calculation rules.
 - Add OpenAI-powered explanation and manager message generation.
 
 ## Next High-Impact Step
 
-Persisting admin status changes and manager comments is the next recommended CRM step.
-Real admin authentication is the next security step after that.
+Real admin authentication is the next recommended security step. Richer CRM workflow
+filters and automation can build on persisted status and comment history.

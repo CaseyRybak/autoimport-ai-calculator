@@ -42,7 +42,7 @@ to be a production customs calculator.
 - Admin CSV import validates, previews and upserts Vehicle Catalog rows server-side.
 - Admin Vehicle Catalog management supports filtering, CSV export, variant price/source
   updates and activate/deactivate actions.
-- Non-persisted admin status/comment controls and read-only calculation settings.
+- Persisted admin status changes, manager comments and read-only calculation settings.
 - Vercel deployment and GitHub-ready repository.
 
 ## Tech stack
@@ -81,8 +81,6 @@ to be a production customs calculator.
 - Admin reads require `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_DEMO_PASSWORD` in server env.
 - If admin env vars are missing, admin pages intentionally show demo/mock data.
 - If catalog reads are unavailable, the calculator uses a local demo catalog fallback.
-- Admin status changes and manager comments are visible as planned controls but are not
-  persisted yet.
 - Settings are read-only controls.
 - AI-assisted text generation is not connected.
 - Formulas are demo-only and are not real customs formulas.
@@ -98,13 +96,15 @@ to be a production customs calculator.
 - CSV import MVP is implemented for bulk Vehicle Catalog maintenance.
 - Admin catalog management MVP is implemented for variant-level price/source/availability
   updates.
+- Admin lead status changes and manager comments are persisted through server-side
+  service-role helpers.
 - Human-readable lead numbers are implemented as `AIC-000001` while UUID remains the
   technical id and URL key.
 
 ## Roadmap
 
 - Add richer structural catalog editing for brand/model/variant fields.
-- Persist admin status changes and manager comments.
+- Add richer CRM workflows around persisted statuses and manager comments.
 - Add real admin authentication.
 - Enrich catalog prices with real source URLs, source names and checked timestamps.
 - Replace preliminary formulas with verified business/legal calculation rules.

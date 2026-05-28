@@ -45,8 +45,8 @@ manual review checklist.
 - [ ] `/admin/leads/[id]` opens a Supabase lead detail page after admin access when that id exists.
 - [ ] `/admin/leads/1` opens a demo lead detail page in fallback/demo mode.
 - [ ] `/admin/leads/unknown` returns 404.
-- [ ] Status and comment controls are either persisted or clearly marked/disabled as
-      not persisted yet.
+- [ ] Status changes persist and remain visible after reload.
+- [ ] Manager comments save to history and are shown newest first.
 - [ ] `/admin/settings` opens demo calculation settings.
 - [ ] Settings save action is disabled.
 - [ ] `/admin/catalog/import` opens after admin access.

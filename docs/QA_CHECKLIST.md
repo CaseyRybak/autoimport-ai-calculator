@@ -34,6 +34,8 @@ affect runtime behavior.
 - [ ] Open a lead detail card from `/admin`.
 - [ ] Verify the detail page shows client contacts, selected vehicle, budget, total,
       calculation breakdown, selected services and client comment.
+- [ ] Change lead status and verify the saved status remains after reload.
+- [ ] Add a manager comment and verify it appears in newest-first history after reload.
 
 ## Production smoke test
 
@@ -56,6 +58,8 @@ affect runtime behavior.
       and sequence grants are configured.
 - [ ] Do not enable anon `SELECT` on `public.leads`.
 - [ ] Server-side service-role lead read works for `/admin` and lead detail routes.
+- [ ] Server-side service-role status update works for `public.leads.status`.
+- [ ] Server-side service-role comment insert/read works for `public.lead_comments`.
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is configured only as a server-side env var.
 - [ ] Vehicle Catalog counts are available:
 
@@ -106,6 +110,5 @@ select count(*) from public.vehicle_variants;
 - The calculation is preliminary and is not a real customs calculation.
 - Catalog prices require real sources before production/commercial use.
 - Demo seed prices are placeholders and must not be presented as market prices.
-- Admin lead status and manager comments are not persisted yet.
 - Calculation settings are read-only demo controls.
 - OpenAI-assisted text generation is prepared conceptually but not connected.

@@ -26,6 +26,7 @@
 - CSV import для bulk-обновления Vehicle Catalog через admin UI.
 - Admin Vehicle Catalog management на уровне вариантов: просмотр, фильтры, поиск,
   экспорт CSV, редактирование цены/источника/даты проверки и активация/деактивация.
+- Persisted admin lead statuses and manager comments.
 - Supabase-backed структура без реальных ключей в репозитории.
 - Структура для будущих AI-интеграций без реальных ключей.
 
@@ -39,7 +40,6 @@
   обновления цен.
 - Реальные AI-запросы.
 - Production CRM workflows.
-- Persist admin status changes и manager comments.
 
 ## Текущий MVP-статус
 
@@ -58,6 +58,8 @@
   `/admin/catalog` фильтрует, пагинирует, экспортирует CSV, обновляет
   `source_price_usd`, `source_name`, `source_url`, `last_checked_at` и управляет
   `is_active`.
+- Admin status/comment persistence уже входит в текущий MVP: статус заявки сохраняется
+  в `public.leads.status`, а комментарии менеджера сохраняются в `public.lead_comments`.
 - Structural editing для brand/model/year/engine fields остается next phase.
 
 ## Acceptance Criteria для следующих фаз
@@ -94,3 +96,5 @@ Status/comment persistence считается готовым, когда:
 - Изменение статуса заявки сохраняется в Supabase и видно после reload.
 - Комментарий менеджера сохраняется в Supabase и связан с lead UUID.
 - Admin UI показывает persisted status/comment state без временных обещаний.
+
+Текущий MVP покрывает эти критерии для CRM-minimum.

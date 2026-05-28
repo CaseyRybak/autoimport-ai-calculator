@@ -4,12 +4,15 @@ import type React from "react";
 import { MessageCircle, Phone, Sparkles } from "lucide-react";
 import { AdminPasswordGate } from "@/components/admin/admin-password-gate";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { LeadCrmPanel } from "@/components/admin/lead-crm-controls";
 import { hasAdminAccess, isAdminPasswordConfigured } from "@/lib/admin-access";
 import {
   getDemoLeadDetailById,
   getLeadById,
   leadStatusClasses,
   leadStatusLabels,
+  leadStatuses,
+  listLeadComments,
 } from "@/lib/leads";
 
 export const dynamic = "force-dynamic";
@@ -104,6 +107,7 @@ export default async function LeadDetailPage({ params, searchParams }: Props) {
     notFound();
   }
 
+  const comments = isPasswordConfigured ? await listLeadComments(id) : [];
   const sourcePriceUsd =
     lead.catalogPrice.sourcePriceUsd ??
     (lead.catalogPrice.currency === "usd" ? lead.catalogPrice.amount : null);
@@ -246,22 +250,18 @@ export default async function LeadDetailPage({ params, searchParams }: Props) {
         </div>
 
         <aside className="space-y-5">
-          <section className="rounded-lg border bg-white p-5">
-            <h2 className="font-semibold">Статус</h2>
-            <span className={`mt-3 inline-flex rounded-md px-2 py-1 text-xs font-medium ${leadStatusClasses[lead.status]}`}>
-              {leadStatusLabels[lead.status]}
-            </span>
-            <select className="form-field mt-4" defaultValue={lead.status}>
-              <option value="new">Новая</option>
-              <option value="in_progress">В работе</option>
-              <option value="completed">Завершена</option>
-              <option value="rejected">Отклонена</option>
-            </select>
-          </section>
-          <section className="rounded-lg border bg-white p-5">
-            <h2 className="font-semibold">Комментарий менеджера</h2>
-            <textarea className="form-field mt-3 min-h-32" placeholder="Внутренний комментарий" />
-          </section>
+          <LeadCrmPanel
+            leadId={lead.id}
+            status={lead.status}
+            comments={comments}
+            isManagementEnabled={isPasswordConfigured}
+            statusLabels={leadStatusLabels}
+            statusClasses={leadStatusClasses}
+            statusOptions={leadStatuses.map((status) => ({
+                value: status,
+                label: leadStatusLabels[status],
+            }))}
+          />
         </aside>
       </div>
     </AdminShell>

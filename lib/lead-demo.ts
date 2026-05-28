@@ -1,4 +1,4 @@
-export type LeadStatus = "new" | "in_progress" | "completed" | "rejected";
+export type LeadStatus = "new" | "in_progress" | "waiting_client" | "closed" | "rejected";
 
 export type DemoLead = {
   id: string;
@@ -56,22 +56,26 @@ export const demoLeads: DemoLead[] = [
     country: "Китай",
     budget: 3_500_000,
     total: 3_310_000,
-    status: "completed",
+    status: "closed",
   },
 ];
 
 export const leadStatusLabels: Record<LeadStatus, string> = {
   new: "Новая",
   in_progress: "В работе",
-  completed: "Завершена",
-  rejected: "Отклонена",
+  waiting_client: "Ждём клиента",
+  closed: "Закрыта",
+  rejected: "Отказ",
 };
 
 export const leadStatusClasses: Record<LeadStatus, string> = {
   new: "bg-blue-50 text-blue-700",
   in_progress: "bg-amber-50 text-amber-700",
-  completed: "bg-emerald-50 text-emerald-700",
+  waiting_client: "bg-violet-50 text-violet-700",
+  closed: "bg-emerald-50 text-emerald-700",
   rejected: "bg-red-50 text-red-700",
 };
+
+export const leadStatuses = Object.keys(leadStatusLabels) as LeadStatus[];
 
 export const getDemoLeadById = (id: string) => demoLeads.find((lead) => lead.id === id) ?? null;

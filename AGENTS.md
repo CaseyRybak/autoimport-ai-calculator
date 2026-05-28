@@ -37,6 +37,7 @@ AutoImport AI Calculator.
 - `lib/supabase-admin.ts` - server-only Supabase service_role client helper.
 - `docs/` - product, architecture, formula and quality documents.
 - `supabase/schema.sql` - lead, calculation settings and lead comments schema.
+- `supabase/lead_statuses.sql` - CRM lead status migration, legacy `completed` to `closed`, and service_role grants for status/comment writes.
 - `supabase/lead_number.sql` - human-readable lead number migration and sequence.
 - `supabase/vehicle_catalog.sql` - implemented Vehicle Catalog schema, RLS policies and grants.
 - `supabase/vehicle_catalog_seed_demo.sql` - repeatable demo catalog seed.
@@ -66,9 +67,11 @@ AutoImport AI Calculator.
   fields and availability, but brand/model/year/engine structural editing is a later phase.
 - UUID remains the technical lead id and URL key. `lead_number` is the human-readable
   admin number displayed as `AIC-000001`.
+- Admin status changes and manager comments persist server-side through service_role:
+  `public.leads.status` and `public.lead_comments`.
 - Real customs formulas are not implemented. Current formulas are demo-only.
 - Demo-mode UX must be honest when mock fallback is used or a planned control is not
-  persisted yet.
+  connected yet.
 
 ## Required Checks
 

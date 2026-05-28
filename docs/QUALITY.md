@@ -43,8 +43,7 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
   admin-read tables used by the app.
 - Do not add anon `SELECT` policy for `public.leads`.
 - Settings are read-only controls backed by demo calculation settings.
-- Admin lead status and manager comment controls are not persisted yet and need either
-  persistence or clearer disabled/read-only treatment before production CRM use.
+- Admin lead status and manager comments persist through server-side service-role helpers.
 - OpenAI is prepared but not connected.
 - Calculation formulas are demo-only and not real customs formulas.
 
@@ -66,8 +65,7 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
   after demo-password access, with demo fallback when admin env is missing.
 - Unknown admin lead ids return 404.
 - Settings save action is disabled.
-- Non-persisted admin status/comment controls are either clearly marked as not persisted
-  or replaced with persisted behavior.
+- Admin status changes and manager comments persist and remain visible after reload.
 - `npm test`, `npm run typecheck` and `npm run build` pass locally or in CI.
 
 ## Quality Bar For Supabase Changes

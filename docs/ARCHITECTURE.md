@@ -92,9 +92,10 @@ Structural fields для brand/model/year/engine не редактируются
 - Fallback mode -> mock/demo leads or local demo catalog when env vars, permissions or
   Supabase are unavailable.
 
-## Next CRM Persistence Design
+## CRM Persistence
 
-Следующий CRM-шаг - сохранение статуса заявки и комментариев менеджера. Целевой дизайн:
+CRM-minimum сохраняет статусы заявок и комментарии менеджера через server-side actions и
+service-role helpers:
 
 - Status updates пишут `public.leads.status` через server action после проверки
   `ADMIN_DEMO_PASSWORD` access и создания service-role client.
@@ -102,8 +103,6 @@ Structural fields для brand/model/year/engine не редактируются
   и `is_internal = true`.
 - Lead detail читает persisted comments на сервере через `lib/leads.ts` или связанную
   `lib/` data boundary, но не напрямую из client component.
-- UI не должен показывать editable status/comment controls как production CRM controls,
-  пока они не сохраняются или явно не отключены/read-only.
 - Validation должна отклонять unknown lead ids, unsupported statuses и empty comments.
 
 ## Harness
