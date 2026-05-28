@@ -2,6 +2,9 @@
 
 Use this checklist before portfolio review, Vercel deploys or major handoffs.
 
+For release-oriented QA, use [`docs/QA_CHECKLIST.md`](QA_CHECKLIST.md) alongside this
+manual review checklist.
+
 ## Local Checks
 
 - [ ] `npm install` or `npm ci` completes.

@@ -1,0 +1,111 @@
+# MVP QA Checklist
+
+Use this checklist before release handoffs, Vercel deploy verification and major demo
+reviews. It focuses on the current MVP surface: public calculator, Vehicle Catalog,
+Supabase leads, admin leads, admin catalog, CSV import/export and production deployment.
+
+## Pre-commit checks
+
+Run before committing code changes:
+
+```bash
+npm test
+npm run typecheck
+npm run build
+```
+
+For markdown-only documentation changes, these checks may be skipped when the change cannot
+affect runtime behavior.
+
+## Local smoke test
+
+- [ ] Start the local app with `npm run dev`.
+- [ ] Open `/`.
+- [ ] Verify the calculator loads without runtime errors.
+- [ ] Select country -> brand -> model -> year -> engine -> volume.
+- [ ] Verify the selected catalog vehicle price is applied automatically.
+- [ ] Switch display currency between USD, RUB, EUR and CNY.
+- [ ] Verify totals and breakdown update after currency, budget or option changes.
+- [ ] Submit a lead from the public form.
+- [ ] Open `/admin`.
+- [ ] Pass the admin password gate when `ADMIN_DEMO_PASSWORD` is configured.
+- [ ] Verify the lead list loads real Supabase leads when service-role env is configured,
+      or demo fallback when admin env is missing.
+- [ ] Open a lead detail card from `/admin`.
+- [ ] Verify the detail page shows client contacts, selected vehicle, budget, total,
+      calculation breakdown, selected services and client comment.
+
+## Production smoke test
+
+- [ ] After Vercel deploy, open `/` on the production URL.
+- [ ] Verify the deployed UI reflects the new commit, not an older build.
+- [ ] Complete the main calculator flow in production.
+- [ ] Submit a production smoke-test lead.
+- [ ] Open `/admin`.
+- [ ] Verify the admin password gate and lead list behavior.
+- [ ] Open `/admin/catalog`.
+- [ ] Verify catalog filters, pagination and row cards load.
+- [ ] Open `/admin/catalog/import`.
+- [ ] Verify the CSV import screen loads after admin access.
+- [ ] Verify the deployed commit SHA or visible change matches the commit being released.
+
+## Supabase checks
+
+- [ ] Submitted leads are saved in `public.leads` when
+      `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, anon insert policy
+      and sequence grants are configured.
+- [ ] Do not enable anon `SELECT` on `public.leads`.
+- [ ] Server-side service-role lead read works for `/admin` and lead detail routes.
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` is configured only as a server-side env var.
+- [ ] Vehicle Catalog counts are available:
+
+```sql
+select count(*) from public.vehicle_brands;
+select count(*) from public.vehicle_models;
+select count(*) from public.vehicle_variants;
+```
+
+- [ ] Demo seed counts match expectations when the demo seed is used:
+      15 brands, 60 models and 180 variants.
+
+## Vehicle Catalog checks
+
+- [ ] Public calculator reads active Vehicle Catalog data or shows the local fallback state.
+- [ ] Country selection limits available brands.
+- [ ] Brand selection limits available models.
+- [ ] Model selection limits available years, engine types and engine volumes.
+- [ ] Inactive-only brands/models do not appear in the public calculator.
+- [ ] `source_price_usd` is used as the catalog base price.
+- [ ] The public calculator does not allow manual editing of the selected catalog price.
+- [ ] Admin `/admin/catalog` supports country, brand, model, activity and search filters.
+- [ ] Admin `/admin/catalog` supports 10, 50 and 100 cards per page.
+- [ ] Row save updates `source_price_usd`, `source_name`, `source_url` and
+      `last_checked_at` through server-side service-role logic.
+- [ ] Activate/deactivate changes `vehicle_variants.is_active` without hard delete.
+
+## CSV import/export checks
+
+- [ ] CSV template/import columns are:
+      `country,brand,model,year,engine_type,engine_volume_liters,source_market,source_price_usd,source_name,source_url,last_checked_at,is_active`.
+- [ ] Uploading CSV shows validation preview without writing data.
+- [ ] Preview reports blocking row errors before confirm.
+- [ ] Confirm import is available only when there are no blocking validation errors.
+- [ ] Confirm import writes valid data through server-side service-role upsert.
+- [ ] Re-importing the same rows is repeatable and does not create duplicate brand/model/
+      variant records.
+- [ ] Export downloads the filtered dataset for the current `/admin/catalog` country,
+      brand, model, activity and search filters.
+- [ ] Export uses the same columns as the import template and does not include display
+      currency.
+
+## Known MVP limitations
+
+- Production auth is not implemented; admin access uses the current password gate.
+- Supabase Free does not provide automatic backups; export or database backup strategy is
+      required before production data matters.
+- The calculation is preliminary and is not a real customs calculation.
+- Catalog prices require real sources before production/commercial use.
+- Demo seed prices are placeholders and must not be presented as market prices.
+- Admin lead status and manager comments are not persisted yet.
+- Calculation settings are read-only demo controls.
+- OpenAI-assisted text generation is prepared conceptually but not connected.

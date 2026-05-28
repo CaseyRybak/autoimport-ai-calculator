@@ -134,6 +134,8 @@ use a `NEXT_PUBLIC_` prefix.
 Supabase setup order, grants and verification steps are documented in
 [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md).
 
+MVP QA release checks are documented in [`docs/QA_CHECKLIST.md`](docs/QA_CHECKLIST.md).
+
 Useful checks:
 
 ```bash
