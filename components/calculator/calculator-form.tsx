@@ -396,7 +396,7 @@ export function CalculatorForm({ catalog, value, onChange, onSubmit }: Props) {
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button type="submit" size="lg" className="flex-1">
+          <Button type="submit" size="lg" className="sm:flex-1">
             <Send className="h-4 w-4" />
             Оставить заявку
           </Button>
