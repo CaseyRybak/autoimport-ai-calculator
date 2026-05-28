@@ -49,7 +49,7 @@ export function CatalogFilters({
   return (
     <section className="rounded-lg border bg-white p-4">
       <form
-        className="grid gap-3 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[150px_180px_180px_150px_minmax(180px,1fr)]"
+        className="grid gap-3 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[150px_180px_180px_150px_minmax(220px,1fr)_160px_auto]"
         onSubmit={(event) => {
           event.preventDefault();
           const formData = new FormData(event.currentTarget);
@@ -161,14 +161,14 @@ export function CatalogFilters({
           />
         </label>
 
-        <div className="flex items-end lg:col-span-2 xl:col-span-2 xl:justify-end">
+        <div className="flex items-end lg:col-span-2 xl:col-span-1 xl:justify-end">
           <Button type="submit" className="w-full">
             <Search className="h-4 w-4" />
             Найти
           </Button>
         </div>
 
-        <div className="flex items-end lg:col-span-2 xl:col-span-3 xl:justify-end">
+        <div className="flex items-end lg:col-span-2 xl:col-span-1 xl:justify-end">
           <Button
             type="button"
             variant="ghost"
