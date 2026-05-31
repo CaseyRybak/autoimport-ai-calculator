@@ -9,6 +9,8 @@ for future AI-assisted workflows.
 
 ## Current Status
 
+- `docs/SESSION_BRIEF.md` exists as the short startup context for cheaper new
+  Codex sessions.
 - Next.js App Router project scaffolded.
 - TypeScript, Tailwind CSS, Zod and node:test-based unit tests are configured.
 - Public calculator UI implemented from the Figma wireframe as React components.

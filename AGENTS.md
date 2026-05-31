@@ -3,6 +3,21 @@
 Repository map and operating rules for Codex or other coding agents working on
 AutoImport AI Calculator.
 
+## Fast Path
+
+- For short new Codex sessions, read `docs/SESSION_BRIEF.md` first.
+- Do not read this full file or `PROJECT_NOTES.md` by default when the brief is
+  enough for the task.
+- Read `PROJECT_NOTES.md` only for project history, audit context or when the user
+  explicitly asks for it.
+- For simple read-only checks such as `git status`, `date`, file existence,
+  or short command output, do not load skills, `PROJECT_NOTES.md`, README, package
+  metadata, or other docs unless the user explicitly asks.
+- If the user says "read only" or "check only", follow that limit literally and
+  avoid additional discovery.
+- Load skills only when changing product behavior, code, docs, data flow, or
+  when the user explicitly asks to use a skill.
+
 ## Boundaries
 
 - Work only inside this project directory.
