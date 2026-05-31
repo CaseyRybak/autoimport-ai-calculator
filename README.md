@@ -64,13 +64,14 @@ to be a production customs calculator.
   business formulas.
 - Zod validates calculation input before producing a result.
 - App Router routes are kept small and delegate UI to `components/*`.
-- Lead form submissions are routed through `lib/leads.ts`, which inserts into Supabase
-  when env vars are configured and falls back to a local success response otherwise.
+- Lead form submissions are routed through `lib/leads.ts`, which prefers server-side
+  Supabase lead creation through `SUPABASE_SERVICE_ROLE_KEY`, keeps anon insert as a
+  fallback and falls back to a local success response when env vars are unavailable.
 - Admin data is routed through `lib/leads.ts` and reads Supabase only on the server via
   `SUPABASE_SERVICE_ROLE_KEY` after `ADMIN_DEMO_PASSWORD` access.
-- The public anon key is used for lead creation and public Vehicle Catalog reads.
-- Lead form needs anon `INSERT` on `public.leads`; anon `SELECT` on `public.leads` is not
-  needed and should not be granted.
+- The public anon key is used for public Vehicle Catalog reads and remains available for
+  lead insert fallback.
+- Anon `SELECT` on `public.leads` is not needed and should not be granted.
 - Public catalog reads may grant anon/authenticated `SELECT` only for active catalog rows.
 - Admin lead reads use the server-side `SUPABASE_SERVICE_ROLE_KEY`, not the public anon key.
 - GitHub Actions runs tests, typecheck and build on push/PR.
@@ -78,7 +79,8 @@ to be a production customs calculator.
 
 ## Implementation Limits
 
-- Form submissions are saved only when Supabase anon env vars and insert permissions are configured.
+- Form submissions are saved when Supabase env vars and insert permissions are configured;
+  service_role creation is the preferred path and anon insert remains a fallback.
 - Admin reads require `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_DEMO_PASSWORD` in server env.
 - If admin env vars are missing, admin pages intentionally show demo/mock data.
 - If catalog reads are unavailable, the calculator uses a local demo catalog fallback.

@@ -16,8 +16,8 @@ APP_BASE_URL=
 ```
 
 - `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL used by public/server helpers.
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: public anon key used for lead form insert and active
-  Vehicle Catalog reads.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: public anon key used for active Vehicle Catalog reads
+  and lead insert fallback.
 - `SUPABASE_SERVICE_ROLE_KEY`: server-only key used by lead creation with returned
   admin identifiers, admin reads and catalog management/import jobs.
 - `ADMIN_DEMO_PASSWORD`: current demo gate for `/admin`.
@@ -95,8 +95,8 @@ select distinct status from public.leads order by status;
 - Creates `public.leads_lead_number_seq`.
 - Backfills missing human-readable lead numbers.
 - Sets the default sequence value and unique index.
-- Grants sequence usage/select to `anon`, `authenticated` and `service_role` so anon
-  lead insert can receive a generated lead number.
+- Grants sequence usage/select to `anon`, `authenticated` and `service_role` so lead
+  creation can receive a generated lead number.
 
 After applying `lead_number.sql`, verify:
 
@@ -173,14 +173,16 @@ Expected demo seed counts:
 
 ## Grants And Policies
 
-Lead form:
+Lead creation:
 
-- Needs anon `INSERT` on `public.leads`.
+- Preferred flow uses `SUPABASE_SERVICE_ROLE_KEY` server-side for lead creation and read
+  of returned admin identifiers such as `id` and `lead_number`.
+- Anon `INSERT` on `public.leads` remains available as a fallback path.
 - Needs sequence usage/select from `supabase/lead_number.sql`.
 - Does not need anon `SELECT` on `public.leads`.
 - Anon `SELECT` on `public.leads` is forbidden for this portfolio admin model.
 
-Apply this lead form permissions block after `supabase/schema.sql` and
+Apply this anon fallback permissions block after `supabase/schema.sql` and
 `supabase/lead_number.sql`:
 
 ```sql
@@ -197,15 +199,15 @@ create policy "Allow anonymous lead inserts"
   with check (true);
 ```
 
-Admin read:
+Server-side lead creation/read:
 
 - Uses `SUPABASE_SERVICE_ROLE_KEY` server-side.
 - `service_role` needs usage on schema `public`, `INSERT` and `SELECT` on
   `public.leads`, `SELECT` on the other admin-read tables, `UPDATE` on lead status fields
   and `INSERT` on `public.lead_comments`.
-- Admin read should not use the public anon key.
+- Lead creation/read should not use anon `SELECT`.
 
-Apply this admin read grants block:
+Apply this service_role grants block:
 
 ```sql
 grant usage on schema public to service_role;
