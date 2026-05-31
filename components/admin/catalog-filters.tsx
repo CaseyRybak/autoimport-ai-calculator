@@ -49,7 +49,7 @@ export function CatalogFilters({
   return (
     <section className="rounded-lg border bg-white p-4">
       <form
-        className="grid gap-3 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[150px_180px_180px_150px_minmax(220px,1fr)_160px_auto]"
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,1.25fr)_minmax(112px,0.65fr)_minmax(112px,0.65fr)]"
         onSubmit={(event) => {
           event.preventDefault();
           const formData = new FormData(event.currentTarget);
@@ -61,7 +61,7 @@ export function CatalogFilters({
         }}
       >
         <input type="hidden" name="pageSize" value={selected.pageSize} />
-        <label className="space-y-1 text-sm font-medium text-slate-700">
+        <label className="min-w-0 space-y-1 text-sm font-medium text-slate-700">
           Страна
           <select
             className="form-field"
@@ -85,7 +85,7 @@ export function CatalogFilters({
           </select>
         </label>
 
-        <label className="space-y-1 text-sm font-medium text-slate-700">
+        <label className="min-w-0 space-y-1 text-sm font-medium text-slate-700">
           Марка
           <select
             className="form-field"
@@ -108,7 +108,7 @@ export function CatalogFilters({
           </select>
         </label>
 
-        <label className="space-y-1 text-sm font-medium text-slate-700">
+        <label className="min-w-0 space-y-1 text-sm font-medium text-slate-700">
           Модель
           <select
             className="form-field"
@@ -130,7 +130,7 @@ export function CatalogFilters({
           </select>
         </label>
 
-        <label className="space-y-1 text-sm font-medium text-slate-700">
+        <label className="min-w-0 space-y-1 text-sm font-medium text-slate-700">
           Активность
           <select
             className="form-field"
@@ -151,7 +151,7 @@ export function CatalogFilters({
           </select>
         </label>
 
-        <label className="space-y-1 text-sm font-medium text-slate-700 lg:col-span-2 xl:col-span-1">
+        <label className="min-w-0 space-y-1 text-sm font-medium text-slate-700 lg:col-span-2 2xl:col-span-1">
           Поиск
           <input
             className="form-field"
@@ -161,18 +161,18 @@ export function CatalogFilters({
           />
         </label>
 
-        <div className="flex items-end lg:col-span-2 xl:col-span-1 xl:justify-end">
-          <Button type="submit" className="w-full">
+        <div className="flex min-w-0 items-end lg:col-span-1 2xl:col-span-1">
+          <Button type="submit" className="w-full min-w-0">
             <Search className="h-4 w-4" />
             Найти
           </Button>
         </div>
 
-        <div className="flex items-end lg:col-span-2 xl:col-span-1 xl:justify-end">
+        <div className="flex min-w-0 items-end lg:col-span-1 2xl:col-span-1">
           <Button
             type="button"
             variant="ghost"
-            className="w-full xl:w-auto"
+            className="w-full min-w-0"
             onClick={() => router.push("/admin/catalog")}
           >
             Сбросить
