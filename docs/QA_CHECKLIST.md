@@ -31,6 +31,8 @@ affect runtime behavior.
 - [ ] Pass the admin password gate when `ADMIN_DEMO_PASSWORD` is configured.
 - [ ] Verify the lead list loads real Supabase leads when service-role env is configured,
       or demo fallback when admin env is missing.
+- [ ] Verify `/admin` status filter, search, sorting and 10/50/100 pagination update the
+      URL query params and visible lead list.
 - [ ] Open a lead detail card from `/admin`.
 - [ ] Verify the detail page shows client contacts, selected vehicle, budget, total,
       calculation breakdown, selected services and client comment.
@@ -45,6 +47,8 @@ affect runtime behavior.
 - [ ] Submit a production smoke-test lead.
 - [ ] Open `/admin`.
 - [ ] Verify the admin password gate and lead list behavior.
+- [ ] Verify CRM filters/search/sort and 10/50/100 pagination work on the production
+      lead list.
 - [ ] Open `/admin/catalog`.
 - [ ] Verify catalog filters, pagination and row cards load.
 - [ ] Open `/admin/catalog/import`.

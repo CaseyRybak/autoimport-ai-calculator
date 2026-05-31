@@ -36,6 +36,8 @@ to be a production customs calculator.
   confirmation.
 - Admin lead list/detail can read Supabase server-side through a service-role key after
   password access.
+- Admin lead list supports CRM filters, search, sorting and 10/50/100 pagination through
+  URL query params.
 - Admin lead detail shows the submitted calculator/form payload: client contacts, vehicle,
   catalog price, budget, calculation breakdown, selected services and client comment.
 - Vehicle Catalog dropdown reads active catalog data and applies `source_price_usd` as
@@ -96,6 +98,8 @@ to be a production customs calculator.
   insert remains a fallback when service_role is not configured.
 - Admin real lead read is implemented server-side through `SUPABASE_SERVICE_ROLE_KEY`
   after the demo password gate.
+- Admin lead list supports CRM filtering by status, search by lead/client/contact/vehicle
+  fields, sorting by date, budget or total and 10/50/100 pagination.
 - Vehicle Catalog dropdown is implemented and applies the selected variant's
   `source_price_usd`.
 - CSV import MVP is implemented for bulk Vehicle Catalog maintenance.

@@ -20,13 +20,13 @@ export function AdminShell({ title, children }: Props) {
               <Users className="h-4 w-4" />
               Заявки
             </Link>
-            <Link href="/admin/settings" className="flex items-center gap-3 rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100">
-              <Settings className="h-4 w-4" />
-              Настройки
-            </Link>
             <Link href="/admin/catalog" className="flex items-center gap-3 rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100">
               <Database className="h-4 w-4" />
               Каталог авто
+            </Link>
+            <Link href="/admin/settings" className="flex items-center gap-3 rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100">
+              <Settings className="h-4 w-4" />
+              Настройки
             </Link>
             <span className="flex items-center gap-3 rounded-md px-3 py-2 text-slate-400">
               <BarChart3 className="h-4 w-4" />

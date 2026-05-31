@@ -44,6 +44,8 @@ for future AI-assisted workflows.
   commercial presentation copy and CRM persistence.
 - CRM-minimum implemented: admin lead status changes now persist to `public.leads.status`,
   and manager comments persist to `public.lead_comments` with newest-first history.
+- Admin lead list now supports CRM status filters, search, sorting and 10/50/100
+  pagination with URL query params.
 - Optional Telegram manager notifications are implemented for successful lead submissions
   when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_LEADS_CHAT_ID` are configured server-side.
 
@@ -108,6 +110,8 @@ for future AI-assisted workflows.
   admin number displayed as `AIC-000001`.
 - Admin status changes and manager comments are persisted through server-side service-role
   helpers. Legacy `completed` status is migrated to `closed` by `supabase/lead_statuses.sql`.
+- Admin lead list supports filtering by status, searching by AIC number/client/contact/
+  vehicle, sorting by newest, oldest, budget or total and 10/50/100 pagination.
 
 ## Vehicle Catalog
 

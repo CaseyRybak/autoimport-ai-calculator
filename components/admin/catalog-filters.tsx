@@ -171,7 +171,7 @@ export function CatalogFilters({
         <div className="flex min-w-0 items-end lg:col-span-1 2xl:col-span-1">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             className="w-full min-w-0"
             onClick={() => router.push("/admin/catalog")}
           >
