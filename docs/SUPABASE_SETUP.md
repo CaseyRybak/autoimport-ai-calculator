@@ -10,17 +10,25 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ADMIN_DEMO_PASSWORD=
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_LEADS_CHAT_ID=
+APP_BASE_URL=
 ```
 
 - `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL used by public/server helpers.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: public anon key used for lead form insert and active
   Vehicle Catalog reads.
-- `SUPABASE_SERVICE_ROLE_KEY`: server-only key used by admin reads and catalog
-  management/import jobs.
+- `SUPABASE_SERVICE_ROLE_KEY`: server-only key used by lead creation with returned
+  admin identifiers, admin reads and catalog management/import jobs.
 - `ADMIN_DEMO_PASSWORD`: current demo gate for `/admin`.
+- `TELEGRAM_BOT_TOKEN`: optional server-only Telegram bot token for new lead
+  notifications.
+- `TELEGRAM_LEADS_CHAT_ID`: optional Telegram chat id for manager lead notifications.
+- `APP_BASE_URL`: optional public app URL used to build admin lead links in
+  notifications when a lead URL is available.
 
-`SUPABASE_SERVICE_ROLE_KEY` must never be exposed to client components and must not use a
-`NEXT_PUBLIC_` prefix.
+`SUPABASE_SERVICE_ROLE_KEY` and Telegram secrets must never be exposed to client
+components and must not use a `NEXT_PUBLIC_` prefix.
 
 ## Vercel Notes
 
@@ -30,6 +38,9 @@ Production env must define:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_DEMO_PASSWORD`
+- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_LEADS_CHAT_ID` if Telegram notifications should be
+  enabled.
+- `APP_BASE_URL` if notification links should use an explicit production URL.
 
 After changing Vercel environment variables, redeploy the project so Next.js receives the
 new values.
@@ -189,8 +200,9 @@ create policy "Allow anonymous lead inserts"
 Admin read:
 
 - Uses `SUPABASE_SERVICE_ROLE_KEY` server-side.
-- `service_role` needs usage on schema `public`, `SELECT` on the admin-read tables,
-  `UPDATE` on lead status fields and `INSERT` on `public.lead_comments`.
+- `service_role` needs usage on schema `public`, `INSERT` and `SELECT` on
+  `public.leads`, `SELECT` on the other admin-read tables, `UPDATE` on lead status fields
+  and `INSERT` on `public.lead_comments`.
 - Admin read should not use the public anon key.
 
 Apply this admin read grants block:
@@ -198,6 +210,7 @@ Apply this admin read grants block:
 ```sql
 grant usage on schema public to service_role;
 grant select on table public.leads to service_role;
+grant insert on table public.leads to service_role;
 grant select on table public.lead_comments to service_role;
 grant select on table public.calculation_settings to service_role;
 grant update (status, updated_at) on table public.leads to service_role;

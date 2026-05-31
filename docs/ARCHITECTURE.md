@@ -31,10 +31,11 @@
 ## Data Boundary
 
 Заявки проходят через `lib/leads.ts`. Это текущая Supabase-backed граница данных:
-форма заявки вызывает `createLead()`, helper вставляет запись в `public.leads` через
-anon Supabase client при настроенных env-переменных и разрешениях. Если env/Supabase
-недоступны, включается demo/mock fallback, чтобы локальная демонстрация оставалась
-работоспособной.
+форма заявки вызывает `createLead()`, helper вставляет запись в `public.leads`
+server-side через service_role, когда он настроен, чтобы безопасно получить `id` и
+`lead_number` для админских ссылок и уведомлений. Если service_role недоступен, остается
+anon insert fallback без anon `SELECT`; если env/Supabase недоступны, включается
+demo/mock fallback, чтобы локальная демонстрация оставалась работоспособной.
 
 Admin routes также проходят через `lib/leads.ts`. После `ADMIN_DEMO_PASSWORD` gate
 серверный helper использует `SUPABASE_SERVICE_ROLE_KEY` для чтения `public.leads`.
@@ -81,7 +82,7 @@ Structural fields для brand/model/year/engine не редактируются
 
 ## Current Data Flow
 
-- Lead form -> `createLead()` -> Supabase anon insert -> `public.leads`.
+- Lead form -> `createLead()` -> server-side Supabase insert -> `public.leads`.
 - Admin -> server-side service-role read -> `public.leads`.
 - Calculator -> Vehicle Catalog read -> dependent dropdown -> selected
   `source_price_usd`.

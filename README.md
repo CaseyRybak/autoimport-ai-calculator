@@ -32,7 +32,8 @@ to be a production customs calculator.
 - Calculation formulas for price conversion, customs fee, recycle fee, logistics, company fee
   and extra services.
 - Budget status: within budget or over budget.
-- Lead form with Supabase anon insert when configured and neutral fallback confirmation.
+- Lead form with server-side Supabase persistence when configured and neutral fallback
+  confirmation.
 - Admin lead list/detail can read Supabase server-side through a service-role key after
   password access.
 - Admin lead detail shows the submitted calculator/form payload: client contacts, vehicle,
@@ -87,8 +88,10 @@ to be a production customs calculator.
 
 ## Current MVP status
 
-- Lead persistence is implemented through Supabase anon insert when env vars and table
-  permissions are configured.
+- Lead persistence is implemented through the server-side lead data boundary. When
+  `SUPABASE_SERVICE_ROLE_KEY` is configured, new lead creation uses service_role so the
+  app can safely receive `id` and `lead_number` for admin links and notifications; anon
+  insert remains a fallback when service_role is not configured.
 - Admin real lead read is implemented server-side through `SUPABASE_SERVICE_ROLE_KEY`
   after the demo password gate.
 - Vehicle Catalog dropdown is implemented and applies the selected variant's
@@ -126,10 +129,17 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ADMIN_DEMO_PASSWORD=
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_LEADS_CHAT_ID=
+APP_BASE_URL=
 ```
 
 Keep `SUPABASE_SERVICE_ROLE_KEY` only in `.env.local` or Vercel server env. It must not
-use a `NEXT_PUBLIC_` prefix.
+use a `NEXT_PUBLIC_` prefix. Telegram lead notifications are optional; when
+`TELEGRAM_BOT_TOKEN` and `TELEGRAM_LEADS_CHAT_ID` are set, successful lead submissions
+send a manager notification through the Telegram Bot API. Telegram secrets must also stay
+server-side and must not use a `NEXT_PUBLIC_` prefix. `APP_BASE_URL` is optional and is
+used to build admin lead links in notifications when a lead URL can be assembled.
 
 Supabase setup order, grants and verification steps are documented in
 [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md).

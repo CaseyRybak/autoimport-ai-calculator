@@ -53,14 +53,17 @@ affect runtime behavior.
 
 ## Supabase checks
 
-- [ ] Submitted leads are saved in `public.leads` when
-      `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, anon insert policy
-      and sequence grants are configured.
+- [ ] Submitted leads are saved in `public.leads` when Supabase env vars, lead insert
+      grants and sequence grants are configured.
 - [ ] Do not enable anon `SELECT` on `public.leads`.
 - [ ] Server-side service-role lead read works for `/admin` and lead detail routes.
 - [ ] Server-side service-role status update works for `public.leads.status`.
 - [ ] Server-side service-role comment insert/read works for `public.lead_comments`.
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is configured only as a server-side env var.
+- [ ] Optional Telegram lead notifications work when `TELEGRAM_BOT_TOKEN` and
+      `TELEGRAM_LEADS_CHAT_ID` are configured as server-side env vars.
+- [ ] Lead submission still succeeds when Telegram env vars are missing or Telegram API
+      delivery fails.
 - [ ] Vehicle Catalog counts are available:
 
 ```sql

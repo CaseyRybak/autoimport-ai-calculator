@@ -48,6 +48,7 @@ describe("createLead", () => {
       ok: true,
       mode: "demo",
       id: null,
+      lead: null,
     });
   });
 });

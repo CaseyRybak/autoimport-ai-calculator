@@ -2,6 +2,7 @@
 
 import type { CalculationBreakdown, CalculationInput } from "@/lib/calculate";
 import { createLead } from "@/lib/leads";
+import { sendLeadCreatedNotification } from "@/lib/telegram";
 
 export type SubmitLeadState =
   | {
@@ -29,6 +30,18 @@ export async function submitLeadAction(payload: {
       ok: false,
       error: result.error,
     };
+  }
+
+  if (result.mode === "supabase") {
+    await sendLeadCreatedNotification({
+      id: result.lead?.id ?? result.id,
+      leadNumber: result.lead?.leadNumber ?? null,
+      customerName: result.lead?.customerName ?? payload.customerName,
+      phone: result.lead?.phone ?? payload.phone,
+      telegram: result.lead?.telegram ?? payload.telegram,
+      calculationInput: result.lead?.calculationInput ?? payload.calculationInput,
+      calculationBreakdown: result.lead?.calculationBreakdown ?? payload.calculationBreakdown,
+    });
   }
 
   return {

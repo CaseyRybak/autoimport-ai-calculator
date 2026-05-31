@@ -4,6 +4,7 @@ import type {
   CalculationInput,
   Currency,
 } from "@/lib/calculate";
+import { randomUUID } from "node:crypto";
 import {
   demoLeads,
   getDemoLeadById,
@@ -33,11 +34,22 @@ export type CreateLeadInput = {
   calculationBreakdown: CalculationBreakdown;
 };
 
+export type CreatedLead = {
+  id: string;
+  leadNumber: number | null;
+  customerName: string;
+  phone: string;
+  telegram: string | null;
+  calculationInput: CalculationInput;
+  calculationBreakdown: CalculationBreakdown;
+};
+
 export type CreateLeadResult =
   | {
       ok: true;
       mode: "supabase" | "demo";
       id: string | null;
+      lead: CreatedLead | null;
     }
   | {
       ok: false;
@@ -118,6 +130,14 @@ type LeadCommentRow = {
   is_internal: boolean;
 };
 
+type CreatedLeadRow = {
+  id: string;
+  lead_number: number | string | null;
+  customer_name: string;
+  phone: string;
+  telegram: string | null;
+};
+
 export type LeadDetailService = {
   key:
     | "includeCarrier"
@@ -172,6 +192,7 @@ const leadColumns =
   "id, lead_number, created_at, status, customer_name, phone, telegram, country, brand, model, year, budget_rub, total_rub";
 const leadDetailColumns =
   "id, lead_number, created_at, updated_at, status, customer_name, phone, telegram, comment, country, brand, model, year, engine_type, engine_volume_liters, car_price, currency, budget_rub, destination_city, calculation_input, calculation_breakdown, total_rub, budget_status";
+const createdLeadColumns = "id, lead_number, customer_name, phone, telegram";
 
 const formatLeadDate = (value: string) =>
   new Intl.DateTimeFormat("ru-RU", {
@@ -619,29 +640,15 @@ const cleanOptionalText = (value: string | undefined) => {
   return trimmed ? trimmed : null;
 };
 
-export async function createLead(payload: CreateLeadInput): Promise<CreateLeadResult> {
+const hasSupabaseAdminEnv = () =>
+  Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+const buildLeadInsertPayload = (payload: CreateLeadInput, leadId: string) => {
   const calculationInput = payload.calculationInput;
   const calculationBreakdown = payload.calculationBreakdown;
 
-  if (!isSupabaseConfigured()) {
-    return {
-      ok: true,
-      mode: "demo",
-      id: null,
-    };
-  }
-
-  const supabase = createSupabaseClient();
-
-  if (!supabase) {
-    return {
-      ok: true,
-      mode: "demo",
-      id: null,
-    };
-  }
-
-  const { error } = await supabase.from("leads").insert({
+  return {
+    id: leadId,
     customer_name: payload.customerName.trim(),
     phone: payload.phone.trim(),
     telegram: cleanOptionalText(payload.telegram),
@@ -660,7 +667,92 @@ export async function createLead(payload: CreateLeadInput): Promise<CreateLeadRe
     calculation_breakdown: calculationBreakdown,
     total_rub: calculationBreakdown.totalRub,
     budget_status: calculationBreakdown.budgetStatus,
-  });
+  };
+};
+
+const mapCreatedLead = (row: CreatedLeadRow, payload: CreateLeadInput): CreatedLead => ({
+  id: row.id,
+  leadNumber: toNumberOrNull(row.lead_number),
+  customerName: row.customer_name,
+  phone: row.phone,
+  telegram: row.telegram,
+  calculationInput: payload.calculationInput,
+  calculationBreakdown: payload.calculationBreakdown,
+});
+
+type LeadAdminClient = NonNullable<Awaited<ReturnType<typeof createAdminClient>>["client"]>;
+
+const getCreatedLeadById = async (
+  adminClient: LeadAdminClient,
+  leadId: string,
+  payload: CreateLeadInput,
+) => {
+  const { data, error } = await adminClient
+    .from("leads")
+    .select(createdLeadColumns)
+    .eq("id", leadId)
+    .single();
+
+  if (error) {
+    console.error(`Service-role created lead lookup failed: ${error.message}`);
+    return null;
+  }
+
+  return mapCreatedLead(data as CreatedLeadRow, payload);
+};
+
+export async function createLead(payload: CreateLeadInput): Promise<CreateLeadResult> {
+  if (!isSupabaseConfigured()) {
+    return {
+      ok: true,
+      mode: "demo",
+      id: null,
+      lead: null,
+    };
+  }
+
+  const leadId = randomUUID();
+  const insertPayload = buildLeadInsertPayload(payload, leadId);
+  let adminClient: LeadAdminClient | null = null;
+
+  if (hasSupabaseAdminEnv()) {
+    const { client } = await createAdminClient();
+    adminClient = client;
+
+    if (adminClient) {
+      const { data, error } = await adminClient
+        .from("leads")
+        .insert(insertPayload)
+        .select(createdLeadColumns)
+        .single();
+
+      if (error) {
+        console.error(`Service-role lead insert failed: ${error.message}`);
+      } else {
+        const lead = mapCreatedLead(data as CreatedLeadRow, payload);
+
+        return {
+          ok: true,
+          mode: "supabase",
+          id: lead.id,
+          lead,
+        };
+      }
+    }
+  }
+
+  const supabase = createSupabaseClient();
+
+  if (!supabase) {
+    return {
+      ok: true,
+      mode: "demo",
+      id: null,
+      lead: null,
+    };
+  }
+
+  const { error } = await supabase.from("leads").insert(insertPayload);
 
   if (error) {
     return {
@@ -670,9 +762,12 @@ export async function createLead(payload: CreateLeadInput): Promise<CreateLeadRe
     };
   }
 
+  const lead = adminClient ? await getCreatedLeadById(adminClient, leadId, payload) : null;
+
   return {
     ok: true,
     mode: "supabase",
-    id: null,
+    id: leadId,
+    lead,
   };
 }

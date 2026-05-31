@@ -14,12 +14,13 @@ for future AI-assisted workflows.
 - Public calculator UI implemented from the Figma wireframe as React components.
 - Result breakdown and Supabase-backed lead form submission are implemented.
 - Admin pages are available for leads, lead detail and settings.
-- Supabase insert/read is implemented: `lib/leads.ts` can insert submitted leads through
-  anon Supabase access and read admin leads server-side through service_role when env vars
-  and permissions are configured.
-- `lib/leads.ts` remains the lead data boundary: anon Supabase insert for form submissions,
-  server-side service-role admin reads after demo-password access, and mock fallback
-  when admin env is missing.
+- Supabase insert/read is implemented: `lib/leads.ts` can insert submitted leads
+  server-side through service_role when configured, fall back to anon insert when needed,
+  and read admin leads server-side through service_role when env vars and permissions are
+  configured.
+- `lib/leads.ts` remains the lead data boundary: server-side lead insert, server-side
+  service-role admin reads after demo-password access, and mock fallback when admin env
+  is missing.
 - Vehicle Catalog schema, demo seed and calculator dropdown are implemented.
 - Public calculator reads Vehicle Catalog options from Supabase through a `lib/` helper
   and uses dependent dropdowns instead of manual vehicle price entry.
@@ -43,6 +44,8 @@ for future AI-assisted workflows.
   commercial presentation copy and CRM persistence.
 - CRM-minimum implemented: admin lead status changes now persist to `public.leads.status`,
   and manager comments persist to `public.lead_comments` with newest-first history.
+- Optional Telegram manager notifications are implemented for successful lead submissions
+  when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_LEADS_CHAT_ID` are configured server-side.
 
 ## Review Findings
 
@@ -79,6 +82,11 @@ for future AI-assisted workflows.
 - Added `createLead()` in `lib/leads.ts` to map lead form payloads into `public.leads`.
 - Added a server action so the client form does not import Supabase directly.
 - Kept demo success fallback when Supabase env vars are not configured.
+- Successful lead submissions can optionally notify managers in Telegram. Missing or
+  failed Telegram delivery does not block lead creation.
+- When `SUPABASE_SERVICE_ROLE_KEY` is configured, `createLead()` uses service_role insert
+  with a returned `id` and `lead_number` so Telegram notifications can link to the admin
+  lead card without enabling anon `SELECT` on `public.leads`.
 
 ## Supabase Admin Reads
 
