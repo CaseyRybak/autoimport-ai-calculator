@@ -1,7 +1,16 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { Car, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import {
+  Calculator,
+  Car,
+  CarFront,
+  ClipboardCheck,
+  Headphones,
+  MapPinned,
+  PencilLine,
+  ShieldCheck,
+} from "lucide-react";
 import { calculateImportCost, type CalculationInput } from "@/lib/calculate";
 import {
   convertUsdPrice,
@@ -54,6 +63,7 @@ export function CalculatorExperience({ catalog }: Props) {
   const [input, setInput] = useState<CalculationInput>(() => createInitialInput(safeCatalog));
   const [showLeadForm, setShowLeadForm] = useState(false);
   const leadRef = useRef<HTMLDivElement>(null);
+  const calculatorRef = useRef<HTMLDivElement>(null);
   const result = useMemo(() => calculateImportCost(input), [input]);
 
   const openLeadForm = () => {
@@ -63,73 +73,170 @@ export function CalculatorExperience({ catalog }: Props) {
     }, 0);
   };
 
+  const scrollToCalculator = () => {
+    calculatorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const serviceItems = [
+    {
+      icon: CarFront,
+      title: "Каталог авто",
+      text: "Актуальные модели и цены",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Прозрачный расчет",
+      text: "Все расходы без скрытых платежей",
+    },
+    {
+      icon: MapPinned,
+      title: "Подбор маршрута",
+      text: "Оптимальные пути и сроки доставки",
+    },
+    {
+      icon: Headphones,
+      title: "Поддержка менеджера",
+      text: "Сопровождение на всех этапах сделки",
+    },
+  ];
+
+  const workflowSteps = [
+    ["01", "Выбор авто", "Подберите авто в каталоге и укажите параметры"],
+    ["02", "Расчет", "Мы рассчитаем маршрут и итоговую стоимость"],
+    ["03", "Заявка", "Оставьте заявку и получите консультацию менеджера"],
+    ["04", "Сопровождение", "Полное сопровождение до выдачи автомобиля"],
+  ];
+
   return (
-    <main>
-      <header className="border-b bg-white/90 backdrop-blur">
-        <div className="section-shell flex h-12 items-center justify-between">
-          <div className="flex items-center gap-2 font-semibold text-slate-950">
-            <Car className="h-5 w-5 text-blue-600" />
-            AutoImport AI
+    <main className="min-h-screen">
+      <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="wide-shell flex h-14 items-center justify-between">
+          <div className="flex items-center gap-3 font-semibold text-slate-950">
+            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-cyan-900 text-white">
+              <Car className="h-4 w-4" />
+            </span>
+            <span>
+              <span className="block leading-4">AutoImport</span>
+              <span className="hidden text-xs font-normal text-slate-500 sm:block">
+                Импорт авто без лишних рисков
+              </span>
+            </span>
           </div>
-          <nav className="hidden items-center gap-5 text-sm text-slate-600 md:flex">
-            <a href="/admin" className="hover:text-blue-600">
+          <nav className="hidden items-center gap-5 text-sm font-medium text-slate-600 md:flex">
+            <a href="/admin" className="hover:text-cyan-800">
               Админка
             </a>
           </nav>
         </div>
       </header>
 
-      <section className="border-b bg-white">
-        <div className="section-shell grid gap-5 py-5 lg:grid-cols-[1fr_320px] lg:py-6">
-          <div className="flex flex-col justify-center">
-            <div className="mb-3 inline-flex w-fit items-center gap-2 rounded-md border bg-slate-50 px-3 py-1 text-xs text-slate-600">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              Предварительный расчет импорта авто
-            </div>
-            <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-slate-950 md:text-4xl">
-              Предварительный расчет импорта авто
+      <section
+        className="relative overflow-hidden bg-cyan-950 text-white"
+        style={{
+          backgroundImage:
+            "linear-gradient(90deg, rgba(3, 22, 35, 0.94) 0%, rgba(5, 38, 54, 0.86) 34%, rgba(5, 38, 54, 0.52) 62%, rgba(3, 22, 35, 0.78) 100%), url('/images/autoimport-hero-neutral-cars.png')",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+        }}
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_30%,rgba(20,184,166,0.18),transparent_26rem)]" />
+        <div className="wide-shell relative pb-28 pt-10 lg:pb-28 lg:pt-14">
+          <div className="max-w-4xl">
+            <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
+              Импорт автомобилей из Кореи, Китая и Европы
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
-              Расчет стоимости, заявка и обработка менеджером
+            <p className="mt-5 max-w-xl text-base font-medium leading-7 text-cyan-50/90 md:text-lg">
+              Проверьте маршрут, бюджет и предварительную стоимость поставки под ключ.
             </p>
-          </div>
 
-          <div className="rounded-lg border bg-slate-950 p-4 text-white shadow-sm">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-300">Предварительный итог</p>
-              <SlidersHorizontal className="h-4 w-4 text-blue-300" />
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={scrollToCalculator}
+                className="inline-flex h-12 items-center justify-center gap-3 rounded-md border border-teal-300/60 bg-teal-500 px-7 text-sm font-semibold text-white shadow-lg shadow-teal-950/30 transition hover:bg-teal-400"
+              >
+                <Calculator className="h-5 w-5" />
+                Рассчитать стоимость
+              </button>
+              <button
+                type="button"
+                onClick={openLeadForm}
+                className="inline-flex h-12 items-center justify-center gap-3 rounded-md border border-white/80 bg-white/5 px-7 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
+              >
+                <PencilLine className="h-5 w-5" />
+                Оставить заявку
+              </button>
             </div>
-            <p className="mt-3 text-2xl font-bold">{result.totalRub.toLocaleString("ru-RU")} ₽</p>
-            <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-              <div className="rounded-md bg-white/10 p-2">
-                <p className="text-slate-300">Логистика</p>
-                <p className="mt-1 font-semibold">{result.logisticsRub.toLocaleString("ru-RU")} ₽</p>
-              </div>
-              <div className="rounded-md bg-white/10 p-2">
-                <p className="text-slate-300">Комиссия</p>
-                <p className="mt-1 font-semibold">{result.companyFeeRub.toLocaleString("ru-RU")} ₽</p>
-              </div>
+
+            <div className="mt-8 grid max-w-4xl gap-x-7 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+              {serviceItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={item.title}
+                    className="grid grid-cols-[48px_minmax(0,1fr)] items-start gap-3"
+                  >
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 text-cyan-50 backdrop-blur">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <span>
+                      <span className="block whitespace-nowrap text-sm font-semibold">
+                        {item.title}
+                      </span>
+                      <span className="block text-xs leading-5 text-cyan-50/72">{item.text}</span>
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-            <p className="mt-3 text-xs leading-5 text-slate-400">
-              Расчет предварительный. Финальная стоимость уточняется менеджером по актуальным ставкам.
-            </p>
           </div>
         </div>
       </section>
 
-      <section className="section-shell grid gap-6 py-6 lg:grid-cols-[minmax(0,1fr)_420px]">
-        <CalculatorForm
-          catalog={safeCatalog}
-          value={input}
-          onChange={setInput}
-          onSubmit={openLeadForm}
-        />
-        <div>
-          <CalculationResult input={input} result={result} onLeadClick={openLeadForm} />
+      <section
+        ref={calculatorRef}
+        className="wide-shell -mt-20 grid items-stretch gap-5 pb-5 lg:grid-cols-[minmax(0,1fr)_440px]"
+      >
+        <div className="relative flex">
+          <CalculatorForm
+            catalog={safeCatalog}
+            value={input}
+            onChange={setInput}
+            onSubmit={openLeadForm}
+          />
+        </div>
+        <div className="relative flex">
+          <CalculationResult input={input} result={result} />
         </div>
       </section>
 
-      <section ref={leadRef} className="section-shell pb-8">
+      <section className="wide-shell pb-8">
+        <div className="case-panel grid gap-4 p-5 md:grid-cols-[120px_repeat(4,minmax(0,1fr))] md:items-center md:p-6">
+          <p className="case-label text-cyan-800">Как мы работаем</p>
+          {workflowSteps.map(([number, title, text], index) => (
+            <div key={number} className="flex items-start gap-4">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cyan-900 text-white">
+                {index === 0 ? (
+                  <Car className="h-5 w-5" />
+                ) : index === 1 ? (
+                  <Calculator className="h-5 w-5" />
+                ) : index === 2 ? (
+                  <ClipboardCheck className="h-5 w-5" />
+                ) : (
+                  <ShieldCheck className="h-5 w-5" />
+                )}
+              </span>
+              <span>
+                <span className="tabular text-lg font-semibold text-slate-400">{number}</span>
+                <span className="ml-3 font-semibold text-slate-950">{title}</span>
+                <span className="mt-1 block text-sm leading-5 text-slate-500">{text}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section ref={leadRef} className="wide-shell pb-8">
         {showLeadForm ? (
           <div>
             <LeadForm input={input} result={result} />

@@ -17,8 +17,8 @@ export function LeadForm({ input, result }: Props) {
 
   if (submitState?.ok) {
     return (
-      <section className="rounded-lg border bg-white p-6 text-center shadow-sm">
-        <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-600" />
+      <section className="case-panel p-6 text-center">
+        <CheckCircle2 className="mx-auto h-10 w-10 text-teal-700" />
         <h2 className="mt-3 text-xl font-semibold text-slate-950">Заявка принята</h2>
         <p className="mt-2 text-sm text-slate-600">
           Менеджер проверит расчет и свяжется с вами.
@@ -28,17 +28,18 @@ export function LeadForm({ input, result }: Props) {
   }
 
   return (
-    <section id="lead-form" className="rounded-lg border bg-white p-5 shadow-sm md:p-6">
-      <div className="mb-5">
+    <section id="lead-form" className="case-panel p-5 md:p-6">
+      <div className="mb-5 border-b border-slate-300 pb-5">
+        <p className="case-label">Связь с менеджером</p>
         <h2 className="text-xl font-semibold text-slate-950">Оставить заявку</h2>
         <p className="text-sm text-slate-500">Менеджер проверит расчет и свяжется с вами.</p>
       </div>
 
-      <div className="mb-5 rounded-md border border-blue-100 bg-blue-50 p-4 text-sm text-blue-950">
+      <div className="mb-5 rounded-md border border-teal-200 bg-teal-50/80 p-4 text-sm text-teal-950">
         <p className="font-semibold">
           {input.brand} {input.model} {input.year}
         </p>
-        <p className="mt-1">
+        <p className="tabular mt-1">
           Расчетная стоимость: {result.totalRub.toLocaleString("ru-RU")} ₽
         </p>
       </div>
@@ -96,7 +97,7 @@ export function LeadForm({ input, result }: Props) {
           />
         </label>
         {submitState && !submitState.ok ? (
-          <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+          <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <p>Не удалось сохранить заявку: {submitState.error}</p>
           </div>

@@ -3,21 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
+  --background: 210 28% 97%;
+  --foreground: 218 34% 13%;
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --primary: 221 83% 53%;
-  --primary-foreground: 210 40% 98%;
-  --muted: 214 32% 91%;
-  --muted-foreground: 215 16% 47%;
-  --accent: 160 84% 39%;
-  --accent-foreground: 210 40% 98%;
+  --card-foreground: 218 34% 13%;
+  --primary: 199 84% 28%;
+  --primary-foreground: 210 32% 98%;
+  --muted: 210 22% 91%;
+  --muted-foreground: 215 14% 40%;
+  --accent: 178 54% 30%;
+  --accent-foreground: 210 32% 98%;
   --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 221 83% 53%;
+  --destructive-foreground: 210 32% 98%;
+  --border: 211 20% 80%;
+  --input: 211 20% 80%;
+  --ring: 199 84% 28%;
   --radius: 0.5rem;
 }
 
@@ -27,16 +27,39 @@
 
 body {
   min-height: 100vh;
-  background: hsl(var(--background));
+  background:
+    linear-gradient(90deg, rgba(20, 44, 66, 0.045) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(20, 44, 66, 0.04) 1px, transparent 1px),
+    radial-gradient(circle at 18% 0%, rgba(14, 116, 144, 0.12), transparent 28rem),
+    radial-gradient(circle at 95% 18%, rgba(15, 118, 110, 0.11), transparent 30rem),
+    hsl(var(--background));
+  background-size: 56px 56px, 56px 56px, auto, auto, auto;
   color: hsl(var(--foreground));
+  font-family: "Aptos", "Segoe UI", sans-serif;
 }
 
 @layer components {
   .form-field {
-    @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100;
+    @apply w-full rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-950 shadow-sm outline-none transition focus:border-cyan-700 focus:bg-white focus:ring-2 focus:ring-cyan-100 disabled:bg-slate-100 disabled:text-slate-500;
   }
 
   .section-shell {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .wide-shell {
+    @apply mx-auto w-full px-4 sm:px-6 lg:px-14;
+  }
+
+  .case-panel {
+    @apply rounded-lg border border-slate-300 bg-white shadow-sm;
+  }
+
+  .case-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }

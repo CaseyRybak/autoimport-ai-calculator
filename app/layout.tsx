@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AutoImport AI Calculator",
+  title: "AutoImport - импорт автомобилей",
   description: "Предварительный расчет стоимости импорта авто под ключ.",
 };
 

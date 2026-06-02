@@ -10,3 +10,14 @@ args = [
   "--executable-path",
   "/home/enzomonro/.local/bin/google-chrome",
 ]
+
+[mcp_servers.playwright.tools.browser_navigate]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_resize]
+approval_mode = "approve"
+
+[mcp_servers.n8n]
+command = "npx"
+args = ["-y", "n8n-mcp@2.56.0"]
+env = { "MCP_MODE" = "stdio", "LOG_LEVEL" = "error", "DISABLE_CONSOLE_OUTPUT" = "true", "N8N_MCP_TELEMETRY_DISABLED" = "true" }
