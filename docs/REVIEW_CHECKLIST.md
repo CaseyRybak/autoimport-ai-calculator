@@ -63,26 +63,32 @@ manual review checklist.
 ## Documentation
 
 - [ ] README has the live demo URL.
-- [ ] README states lead insert/admin read/Vehicle Catalog use Supabase when configured and OpenAI is not connected.
+- [ ] README states lead creation/admin read/Vehicle Catalog use Supabase when configured
+      and AI-assisted flows are not connected.
 - [ ] README states formulas are demo-only.
-- [ ] PROJECT_NOTES reflects the current status and next high-impact step.
+- [ ] `PROJECT_NOTES.md`, when updated for a major change, reflects the current status
+      and next high-impact step.
 - [ ] AGENTS.md points to the right project files and checks.
 - [ ] AGENTS.md does not say Supabase is future-only or admin is mock-only.
 
 ## Supabase Setup
 
-- [ ] Supabase SQL order was applied: `schema.sql`, `lead_number.sql`,
-      `vehicle_catalog.sql`, `drop_vehicle_catalog_display_currency.sql`,
+- [ ] Supabase SQL order was applied: `schema.sql`, `lead_statuses.sql`,
+      `lead_number.sql`, `vehicle_catalog.sql`, `drop_vehicle_catalog_display_currency.sql`,
       `vehicle_catalog_seed_demo.sql`.
 - [ ] Anon `INSERT` on `public.leads` exists.
 - [ ] Anon `SELECT` on `public.leads` is absent.
-- [ ] `service_role` has `SELECT` grants on `public.leads`, `public.lead_comments` and
-      `public.calculation_settings`.
+- [ ] `service_role` has required grants for lead/admin flows: `INSERT`/`SELECT` on
+      `public.leads`, `UPDATE(status, updated_at)` on `public.leads`, `INSERT`/`SELECT`
+      on `public.lead_comments` and `SELECT` on `public.calculation_settings`.
 - [ ] Vehicle Catalog counts match demo seed expectations: 15 brands, 60 models,
       180 variants.
 - [ ] Vercel env vars exist: `NEXT_PUBLIC_SUPABASE_URL`,
       `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
       `ADMIN_DEMO_PASSWORD`.
+- [ ] Optional notification env vars exist when Telegram lead notifications are in scope:
+      `TELEGRAM_BOT_TOKEN`, `TELEGRAM_LEADS_CHAT_ID` and, when explicit links are needed,
+      `APP_BASE_URL`.
 
 ## Security
 

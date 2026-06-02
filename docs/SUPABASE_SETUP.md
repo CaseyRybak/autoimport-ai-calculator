@@ -3,13 +3,20 @@
 This project uses Supabase for lead persistence, server-side admin lead reads and Vehicle
 Catalog data. Real keys belong only in `.env.local` or hosting environment variables.
 
-## Required Env Vars
+## Environment Variables
+
+Core Supabase/admin mode:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ADMIN_DEMO_PASSWORD=
+```
+
+Optional integrations:
+
+```bash
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_LEADS_CHAT_ID=
 APP_BASE_URL=
@@ -64,7 +71,7 @@ Apply these files manually in the Supabase SQL editor in this order:
 - Enables `pgcrypto`.
 - Creates `public.leads` for submitted lead form payloads and calculation results.
 - Creates `public.calculation_settings` for future calculation configuration.
-- Creates `public.lead_comments` for future manager/internal comments.
+- Creates `public.lead_comments` for manager/internal comments.
 - Adds lead and comment indexes.
 
 After applying `schema.sql`, verify:
@@ -251,7 +258,11 @@ Recommended lead table posture:
 2. In Supabase, verify the row exists in `public.leads`.
 3. Open `/admin`, pass the demo password gate and verify the lead appears from
    server-side admin read.
-4. Verify Vehicle Catalog counts:
+4. Open `/admin/leads/[id]` for the submitted lead and verify lead detail, status changes
+   and manager comments load through server-side service-role helpers.
+5. If Telegram env vars are configured, verify the manager notification is delivered. If
+   they are not configured, verify lead submission still succeeds.
+6. Verify Vehicle Catalog counts:
 
 ```sql
 select count(*) from public.vehicle_brands;

@@ -17,7 +17,8 @@
 - Vehicle Catalog dropdown: выбор страны, бренда, модели, года, двигателя и объема из
   Supabase-каталога с зависимыми списками.
 - Расчет breakdown и статуса бюджета.
-- Форма заявки с сохранением в Supabase при настроенных env-переменных и правах.
+- Форма заявки с сохранением в Supabase при настроенных env-переменных и правах:
+  service-role creation как основной путь и anon insert как fallback.
 - Neutral fallback: если Supabase/env недоступны, форма показывает нейтральное
   подтверждение без технических деталей в клиентском UI.
 - Админка: список заявок, карточка заявки и настройки.
@@ -28,7 +29,7 @@
   экспорт CSV, редактирование цены/источника/даты проверки и активация/деактивация.
 - Persisted admin lead statuses and manager comments.
 - Supabase-backed структура без реальных ключей в репозитории.
-- Структура для будущих AI-интеграций без реальных ключей.
+- Архитектурные точки расширения для будущих AI-интеграций без реальных AI-запросов.
 
 ## Не входит в MVP
 
@@ -43,9 +44,11 @@
 
 ## Текущий MVP-статус
 
-- Lead persistence уже входит в текущий MVP: `createLead()` делает insert в
-  `public.leads`, если заданы `NEXT_PUBLIC_SUPABASE_URL`,
-  `NEXT_PUBLIC_SUPABASE_ANON_KEY` и Supabase разрешает anon insert.
+- Lead persistence уже входит в текущий MVP: `createLead()` предпочитает server-side
+  insert через `SUPABASE_SERVICE_ROLE_KEY`, чтобы получить `id` и `lead_number` для
+  админских ссылок и уведомлений. Если service-role env недоступен, остается anon insert
+  fallback при настроенных `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и
+  insert-only правах.
 - Admin real lead read уже входит в текущий MVP: admin routes читают `public.leads`
   через server-side service-role helper после `ADMIN_DEMO_PASSWORD`.
 - Vehicle Catalog dropdown уже входит в текущий MVP: калькулятор читает активные строки

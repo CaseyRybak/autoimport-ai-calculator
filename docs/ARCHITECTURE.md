@@ -9,7 +9,8 @@
 - node:test + tsx
 - shadcn/ui-ready component structure
 - Supabase lead insert, server-side admin read and Vehicle Catalog SQL
-- OpenAI-ready environment setup
+- Optional Telegram lead notification helper
+- Future AI extension points without runtime OpenAI wiring
 
 ## Key Directories
 
@@ -115,9 +116,11 @@ service-role helpers:
 
 ## Integrations
 
-Supabase подключен для lead insert, admin lead read и Vehicle Catalog read при наличии
-переменных окружения и нужных grants/policies. OpenAI подготовлен на уровне env/documentation,
-но реальные OpenAI-запросы не подключены.
+Supabase подключен для lead creation, admin lead read, Vehicle Catalog read/write и
+CRM-minimum persistence при наличии переменных окружения и нужных grants/policies.
+Telegram notifications опциональны и работают только при настроенных server-side
+Telegram env vars. AI-assisted flows остаются roadmap-пунктом; runtime OpenAI env vars и
+реальные OpenAI-запросы сейчас не подключены.
 
 Переменные окружения описаны в `.env.example` и `docs/SUPABASE_SETUP.md`. Реальные
 секреты нельзя коммитить в репозиторий.

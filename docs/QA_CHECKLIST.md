@@ -57,8 +57,11 @@ affect runtime behavior.
 
 ## Supabase checks
 
-- [ ] Submitted leads are saved in `public.leads` when Supabase env vars, lead insert
-      grants and sequence grants are configured.
+- [ ] Submitted leads are saved in `public.leads` through service-role creation when
+      `SUPABASE_SERVICE_ROLE_KEY`, insert/select grants and sequence grants are
+      configured.
+- [ ] Anon lead insert fallback works only when public Supabase env vars and insert-only
+      lead permissions are configured.
 - [ ] Do not enable anon `SELECT` on `public.leads`.
 - [ ] Server-side service-role lead read works for `/admin` and lead detail routes.
 - [ ] Server-side service-role status update works for `public.leads.status`.
@@ -118,4 +121,4 @@ select count(*) from public.vehicle_variants;
 - Catalog prices require real sources before production/commercial use.
 - Demo seed prices are placeholders and must not be presented as market prices.
 - Calculation settings are read-only demo controls.
-- OpenAI-assisted text generation is prepared conceptually but not connected.
+- AI-assisted text generation is roadmap-only and not connected.

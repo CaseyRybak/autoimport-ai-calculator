@@ -16,9 +16,10 @@ unless the task needs them or the user explicitly asks.
 - Next.js App Router app with TypeScript, Tailwind CSS, Zod, and node:test tests.
 - Public calculator is implemented from the Vehicle Catalog, not manual vehicle
   price entry.
-- Supabase is connected for lead insert, admin reads, Vehicle Catalog, lead
-  statuses/comments, and optional Telegram notifications when env vars and grants
-  are configured.
+- Supabase is connected for lead creation, admin reads, Vehicle Catalog, lead
+  statuses/comments and catalog management when env vars and grants are configured.
+- Optional Telegram lead notifications are available when Telegram env vars are
+  configured.
 - Admin pages cover leads, lead detail, settings, catalog management, and catalog
   CSV import/export.
 - Demo/mock fallback remains when env vars or permissions are missing.
@@ -46,6 +47,9 @@ unless the task needs them or the user explicitly asks.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_DEMO_PASSWORD`
+
+Optional integrations:
+
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_LEADS_CHAT_ID`
 - `APP_BASE_URL`

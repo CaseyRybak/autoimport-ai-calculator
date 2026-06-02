@@ -32,7 +32,9 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 
 - No end-to-end browser tests yet.
 - No visual regression tests yet.
-- Lead submissions require configured anon Supabase env vars and compatible insert permissions.
+- Lead submissions prefer server-side Supabase creation through `SUPABASE_SERVICE_ROLE_KEY`.
+  Anon insert remains a fallback when public Supabase env vars and insert-only permissions
+  are configured.
 - Admin reads use Supabase server-side through `SUPABASE_SERVICE_ROLE_KEY` after
   `ADMIN_DEMO_PASSWORD` access, with mock fallback when admin env is missing.
 - Lead UUID remains the technical id and route key; `lead_number` is used for
@@ -44,14 +46,19 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Do not add anon `SELECT` policy for `public.leads`.
 - Settings are read-only controls backed by demo calculation settings.
 - Admin lead status and manager comments persist through server-side service-role helpers.
-- OpenAI is prepared but not connected.
+- AI-assisted text generation is roadmap-only; runtime OpenAI env vars and requests are not
+  connected.
 - Calculation formulas are demo-only and not real customs formulas.
 
 ## Codex Project Setup
 
-- Project-scoped Codex skills live in `.codex/skills/autoimport-product/` and `.codex/skills/nextjs-supabase-mvp/`.
-- MCP servers enabled in `.codex/config.toml`: Context7 via `@upstash/context7-mcp` and Playwright via `@playwright/mcp`.
-- Supabase MCP is intentionally deferred for now and should not be added until the project is ready to expose that integration.
+- Project-scoped Codex skills live in `.codex/skills/autoimport-product/`,
+  `.codex/skills/nextjs-supabase-mvp/`, `.codex/skills/frontend-design/` and
+  `.codex/skills/n8n-mcp-tools-expert/`.
+- MCP servers enabled in `.codex/config.toml`: Context7 via `@upstash/context7-mcp`,
+  Playwright via `@playwright/mcp` and n8n via `n8n-mcp`.
+- Supabase MCP is intentionally deferred for now and should not be added until the project
+  is ready to expose that integration.
 
 ## Quality Bar Before Employer Demo
 

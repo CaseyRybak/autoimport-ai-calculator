@@ -58,7 +58,7 @@ to be a production customs calculator.
 - shadcn/ui-ready component structure
 - Supabase SQL schema, lead insert boundary, server-side admin read helper and Vehicle
   Catalog read model
-- Environment structure for future AI-assisted workflows
+- Optional Telegram notification env structure and future AI extension points
 
 ## Architecture decisions
 
@@ -128,13 +128,18 @@ npm run dev
 
 Open http://localhost:3000.
 
-Optional local env names:
+Local env names for Supabase/admin mode:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ADMIN_DEMO_PASSWORD=
+```
+
+Optional integration env names:
+
+```bash
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_LEADS_CHAT_ID=
 APP_BASE_URL=
@@ -172,5 +177,5 @@ components/ui/          shadcn/ui-ready primitives
 lib/                    Business logic, data boundaries, validation and tests
 docs/                   Product and architecture docs
 supabase/               SQL schema, lead numbering and Vehicle Catalog setup
-reference/figma/        Original Figma export reference
+reference/              Design references; not application source of truth
 ```
