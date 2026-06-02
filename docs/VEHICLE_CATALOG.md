@@ -87,8 +87,8 @@ Supabase remains the website source of truth after import. SQL files are for mig
 and demo seed data, not daily catalog management.
 
 `/admin/catalog/export` downloads CSV for the current `/admin/catalog` filters:
-country, brand, activity and search. The export uses the same columns as the import
-template and does not include display currency.
+country, brand, model, activity and search. The export uses the same columns as the
+import template and does not include display currency.
 
 Daily catalog changes should not be made through the Supabase SQL Editor when the admin UI
 can handle them. Use SQL only for migrations, grants, policies, diagnostics or controlled

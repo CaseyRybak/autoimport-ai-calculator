@@ -242,7 +242,7 @@ as an n8n credential/secret.
 
 ## Credentials Needed In n8n
 
-- Telegram Bot API token, used by the import workflows through `TELEGRAM_BOT_TOKEN`.
+- Telegram Bot API token, used by the automation workflows through `TELEGRAM_BOT_TOKEN`.
 - Telegram group chat id for normal lead notifications/reminders, exposed in the app as
   `TELEGRAM_LEADS_CHAT_ID` and in n8n as direct node parameters in the current workflow.
 - Telegram owner/private chat id for RED ALERT and owner reports, exposed in n8n as
@@ -263,7 +263,7 @@ instance:
 The current live n8n workflows have had those values replaced directly in node
 parameters. Export templates intentionally avoid real credential values. Code node
 defaults are literal because n8n Cloud test mode did not allow `$env` access inside Code
-nodes: reminder interval `10`, max reminders `2`, report timezone `Europe/Moscow`.
+nodes: reminder interval `10`, max reminders `3`, report timezone `Europe/Moscow`.
 
 Current production state:
 

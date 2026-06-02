@@ -74,10 +74,11 @@ Apply these files manually in the Supabase SQL editor in this order:
 1. `supabase/schema.sql`
 2. `supabase/lead_statuses.sql`
 3. `supabase/lead_number.sql`
-4. `supabase/vehicle_catalog.sql`
-5. `supabase/drop_vehicle_catalog_display_currency.sql` for existing projects that still
+4. `supabase/lead_access_policies.sql`
+5. `supabase/vehicle_catalog.sql`
+6. `supabase/drop_vehicle_catalog_display_currency.sql` for existing projects that still
    have the old catalog display-currency column.
-6. `supabase/vehicle_catalog_seed_demo.sql`
+7. `supabase/vehicle_catalog_seed_demo.sql`
 
 ## What Each File Does
 
@@ -130,6 +131,34 @@ where table_schema = 'public'
   and column_name = 'lead_number';
 
 select to_regclass('public.leads_lead_number_seq') as lead_number_sequence;
+```
+
+`supabase/lead_access_policies.sql`
+
+- Grants anon insert-only fallback access to `public.leads`.
+- Revokes anon/authenticated read, update and delete access on `public.leads`.
+- Revokes anon/authenticated access on `public.lead_comments` and
+  `public.calculation_settings`.
+- Enables RLS on `public.leads`.
+- Adds an anon insert policy and intentionally does not add anon read policies.
+- Grants the service-role privileges used by server-side lead creation, admin reads,
+  status updates, manager comments and settings reads.
+- Replaces any broad service-role `UPDATE` on `public.leads` from earlier setup steps
+  with a column-level grant for `status` and `updated_at`.
+
+After applying `lead_access_policies.sql`, verify:
+
+```sql
+select tablename, rowsecurity
+from pg_tables
+where schemaname = 'public'
+  and tablename = 'leads';
+
+select policyname, cmd, roles
+from pg_policies
+where schemaname = 'public'
+  and tablename = 'leads'
+order by policyname;
 ```
 
 `supabase/vehicle_catalog.sql`
@@ -204,11 +233,14 @@ Lead creation:
 - Does not need anon `SELECT` on `public.leads`.
 - Anon `SELECT` on `public.leads` is forbidden for this portfolio admin model.
 
-Apply this anon fallback permissions block after `supabase/schema.sql` and
-`supabase/lead_number.sql`:
+`supabase/lead_access_policies.sql` applies this anon fallback permissions block after
+`supabase/schema.sql` and `supabase/lead_number.sql`:
 
 ```sql
 grant usage on schema public to anon;
+revoke select, update, delete on table public.leads from anon, authenticated;
+revoke select, insert, update, delete on table public.lead_comments from anon, authenticated;
+revoke select, insert, update, delete on table public.calculation_settings from anon, authenticated;
 grant insert on table public.leads to anon;
 
 alter table public.leads enable row level security;
@@ -229,7 +261,7 @@ Server-side lead creation/read:
   and `INSERT` on `public.lead_comments`.
 - Lead creation/read should not use anon `SELECT`.
 
-Apply this service_role grants block:
+`supabase/lead_access_policies.sql` also applies this service_role grants block:
 
 ```sql
 grant usage on schema public to service_role;
@@ -237,6 +269,7 @@ grant select on table public.leads to service_role;
 grant insert on table public.leads to service_role;
 grant select on table public.lead_comments to service_role;
 grant select on table public.calculation_settings to service_role;
+revoke update on table public.leads from service_role;
 grant update (status, updated_at) on table public.leads to service_role;
 grant insert on table public.lead_comments to service_role;
 ```

@@ -60,7 +60,7 @@ manual review checklist.
 - [ ] CSV source URLs accept short domains like `aaa.com` and reject invalid domains like `aaa_com`.
 - [ ] Confirm import is available only when there are no blocking validation errors.
 - [ ] Confirm import upserts catalog rows through server-side service_role.
-- [ ] `/admin/catalog` CSV export downloads the current filtered country/brand/activity/search view.
+- [ ] `/admin/catalog` CSV export downloads the current filtered country/brand/model/activity/search view.
 - [ ] `/admin/catalog` row save shows inline success without a visible page refresh.
 - [ ] `/admin/catalog` paginates filtered catalog rows server-side and supports 10, 50 and 100 cards per page.
 - [ ] `/admin/catalog` filters are dependent: country limits brands, brand limits models, and changes reset to page 1.
@@ -79,8 +79,8 @@ manual review checklist.
 ## Supabase Setup
 
 - [ ] Supabase SQL order was applied: `schema.sql`, `lead_statuses.sql`,
-      `lead_number.sql`, `vehicle_catalog.sql`, `drop_vehicle_catalog_display_currency.sql`,
-      `vehicle_catalog_seed_demo.sql`.
+      `lead_number.sql`, `lead_access_policies.sql`, `vehicle_catalog.sql`,
+      `drop_vehicle_catalog_display_currency.sql`, `vehicle_catalog_seed_demo.sql`.
 - [ ] Anon `INSERT` on `public.leads` exists.
 - [ ] Anon `SELECT` on `public.leads` is absent.
 - [ ] `service_role` has required grants for lead/admin flows: `INSERT`/`SELECT` on

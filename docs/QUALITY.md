@@ -34,6 +34,8 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 
 - No end-to-end browser tests yet.
 - No visual regression tests yet.
+- CSV import reads the uploaded file into memory during preview; admin access is required,
+  but a production hardening pass should add an explicit upload size limit.
 - Lead submissions prefer server-side Supabase creation through `SUPABASE_SERVICE_ROLE_KEY`.
   Anon insert remains a fallback when public Supabase env vars and insert-only permissions
   are configured.
@@ -89,7 +91,7 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Keep UI calls routed through `lib/leads.ts` or server actions instead of Supabase imports.
 - Keep mock data available as a fallback for local demo mode.
 - Add broader tests around lead input normalization and Supabase error handling.
-- Update `supabase/schema.sql` and docs together.
+- Update relevant `supabase/*.sql` files and docs together.
 - Do not expose service-role keys to client components.
 - Keep `SUPABASE_SERVICE_ROLE_KEY` only in `.env.local` and Vercel server env.
 - Keep anon access limited to public lead insert and active Vehicle Catalog reads; anon

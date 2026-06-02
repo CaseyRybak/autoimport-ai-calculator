@@ -170,6 +170,22 @@ Supabase setup order, grants and verification steps are documented in
 
 MVP QA release checks are documented in [`docs/QA_CHECKLIST.md`](docs/QA_CHECKLIST.md).
 
+## Documentation map
+
+- [`docs/SESSION_BRIEF.md`](docs/SESSION_BRIEF.md) - short handoff context for new
+  sessions.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - data boundaries, route flows and
+  integration posture.
+- [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md) - SQL order, grants, RLS policies,
+  env vars and verification.
+- [`docs/VEHICLE_CATALOG.md`](docs/VEHICLE_CATALOG.md) - catalog source of truth, import,
+  export, admin management and public read model.
+- [`docs/N8N_WORKFLOW_PLAN.md`](docs/N8N_WORKFLOW_PLAN.md) - live automation handoff and
+  sanitized workflow expectations.
+- [`docs/QA_CHECKLIST.md`](docs/QA_CHECKLIST.md) and
+  [`docs/REVIEW_CHECKLIST.md`](docs/REVIEW_CHECKLIST.md) - release and manual review
+  checks.
+
 Useful checks:
 
 ```bash

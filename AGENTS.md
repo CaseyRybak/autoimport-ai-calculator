@@ -46,7 +46,8 @@ AutoImport AI Calculator.
 - `components/ui/` - small shadcn/ui-ready primitives.
 - `lib/calculate.ts` - calculation input schema, demo settings and pure calculation logic.
 - `lib/calculate.test.ts` - unit tests for calculation logic.
-- `lib/leads.ts` - lead data boundary: Supabase anon insert, server-side service_role admin reads and mock fallback.
+- `lib/leads.ts` - lead data boundary: preferred server-side service_role insert/read,
+  anon insert fallback and mock fallback.
 - `lib/vehicle-catalog.ts` - Vehicle Catalog data boundary for Supabase catalog reads and local fallback.
 - `lib/vehicle-catalog-admin.ts` - server-only Vehicle Catalog admin read/write, CSV export and import upsert boundary.
 - `lib/vehicle-catalog-import.ts` - CSV parsing, validation and normalization.
@@ -57,6 +58,8 @@ AutoImport AI Calculator.
 - `supabase/schema.sql` - lead, calculation settings and lead comments schema.
 - `supabase/lead_statuses.sql` - CRM lead status migration, legacy `completed` to `closed`, and service_role grants for status/comment writes.
 - `supabase/lead_number.sql` - human-readable lead number migration and sequence.
+- `supabase/lead_access_policies.sql` - lead RLS, anon insert-only fallback and
+  service_role lead/comment/settings grants.
 - `supabase/vehicle_catalog.sql` - implemented Vehicle Catalog schema, RLS policies and grants.
 - `supabase/vehicle_catalog_seed_demo.sql` - repeatable demo catalog seed.
 
