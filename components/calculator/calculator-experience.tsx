@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import {
   Calculator,
@@ -107,6 +108,24 @@ export function CalculatorExperience({ catalog }: Props) {
     ["04", "Сопровождение", "Полное сопровождение до выдачи автомобиля"],
   ];
 
+  const showcaseCards = [
+    {
+      image: "/images/showcase-premium-cars.jpg",
+      title: "Премиум автомобили",
+      text: "Из Европы и Азии",
+    },
+    {
+      image: "/images/showcase-customs.jpg",
+      title: "Быстрая растаможка",
+      text: "Полное сопровождение",
+    },
+    {
+      image: "/images/showcase-exclusive-models.jpg",
+      title: "Эксклюзивные модели",
+      text: "Под заказ",
+    },
+  ];
+
   return (
     <main className="min-h-screen">
       <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -130,45 +149,45 @@ export function CalculatorExperience({ catalog }: Props) {
         </div>
       </header>
 
-      <section
-        className="relative overflow-hidden bg-cyan-950 text-white"
-        style={{
-          backgroundImage:
-            "linear-gradient(90deg, rgba(3, 22, 35, 0.94) 0%, rgba(5, 38, 54, 0.86) 34%, rgba(5, 38, 54, 0.52) 62%, rgba(3, 22, 35, 0.78) 100%), url('/images/autoimport-hero-neutral-cars.png')",
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-        }}
-      >
+      <section className="autoimport-hero relative overflow-hidden bg-cyan-950 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_30%,rgba(20,184,166,0.18),transparent_26rem)]" />
-        <div className="wide-shell relative pb-28 pt-10 lg:pb-28 lg:pt-14">
-          <div className="max-w-4xl">
-            <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-              Импорт автомобилей из Кореи, Китая и Европы
-            </h1>
-            <p className="mt-5 max-w-xl text-base font-medium leading-7 text-cyan-50/90 md:text-lg">
-              Проверьте маршрут, бюджет и предварительную стоимость поставки под ключ.
-            </p>
+        <button
+          type="button"
+          aria-label="Подсветить фары автомобиля"
+          className="hero-headlight-trigger absolute bottom-0 right-0 top-0 z-[3] hidden w-1/2 cursor-default lg:block"
+        />
+        <div className="hero-headlight-glow absolute inset-0 hidden lg:block" />
+        <div className="wide-shell relative flex min-h-[520px] items-center py-10 sm:min-h-[560px] lg:min-h-[620px] lg:py-14 2xl:min-h-[680px]">
+          <div className="max-w-3xl">
+            <div className="lg:-translate-y-10 2xl:-translate-y-12">
+              <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
+                Импорт автомобилей из Кореи, Китая и Европы
+              </h1>
+              <p className="mt-5 max-w-xl text-base font-medium leading-7 text-cyan-50/90 md:text-lg">
+                Проверьте маршрут, бюджет и предварительную стоимость поставки под ключ.
+              </p>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                onClick={scrollToCalculator}
-                className="inline-flex h-12 items-center justify-center gap-3 rounded-md border border-teal-300/60 bg-teal-500 px-7 text-sm font-semibold text-white shadow-lg shadow-teal-950/30 transition hover:bg-teal-400"
-              >
-                <Calculator className="h-5 w-5" />
-                Рассчитать стоимость
-              </button>
-              <button
-                type="button"
-                onClick={openLeadForm}
-                className="inline-flex h-12 items-center justify-center gap-3 rounded-md border border-white/80 bg-white/5 px-7 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
-              >
-                <PencilLine className="h-5 w-5" />
-                Оставить заявку
-              </button>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={scrollToCalculator}
+                  className="inline-flex h-12 items-center justify-center gap-3 rounded-md border border-teal-300/60 bg-teal-500 px-7 text-sm font-semibold text-white shadow-lg shadow-teal-950/30 transition hover:bg-teal-400"
+                >
+                  <Calculator className="h-5 w-5" />
+                  Рассчитать стоимость
+                </button>
+                <button
+                  type="button"
+                  onClick={openLeadForm}
+                  className="inline-flex h-12 items-center justify-center gap-3 rounded-md border border-white/80 bg-white/5 px-7 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
+                >
+                  <PencilLine className="h-5 w-5" />
+                  Оставить заявку
+                </button>
+              </div>
             </div>
 
-            <div className="mt-8 grid max-w-4xl gap-x-7 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-8 grid max-w-3xl gap-x-7 gap-y-5 sm:grid-cols-2 lg:absolute lg:bottom-10 lg:left-14 lg:right-14 lg:mt-0 xl:grid-cols-4 2xl:bottom-12">
               {serviceItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -195,7 +214,7 @@ export function CalculatorExperience({ catalog }: Props) {
 
       <section
         ref={calculatorRef}
-        className="wide-shell -mt-20 grid items-stretch gap-5 pb-5 lg:grid-cols-[minmax(0,1fr)_440px]"
+        className="wide-shell grid items-stretch gap-5 py-6 lg:grid-cols-[minmax(0,1fr)_440px] xl:py-8"
       >
         <div className="relative flex">
           <CalculatorForm
@@ -242,6 +261,30 @@ export function CalculatorExperience({ catalog }: Props) {
             <LeadForm input={input} result={result} />
           </div>
         ) : null}
+      </section>
+
+      <section className="wide-shell pb-12 pt-2">
+        <div className="grid gap-5 md:grid-cols-3">
+          {showcaseCards.map((card) => (
+            <article
+              key={card.title}
+              className="group relative h-56 overflow-hidden rounded-lg border border-slate-300 bg-slate-950 shadow-sm md:h-64"
+            >
+              <Image
+                src={card.image}
+                alt={card.title}
+                fill
+                sizes="(min-width: 1440px) 405px, (min-width: 768px) 30vw, calc(100vw - 32px)"
+                className="object-cover transition duration-500 ease-out group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/82 via-slate-950/24 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                <h2 className="text-xl font-bold leading-tight tracking-tight">{card.title}</h2>
+                <p className="mt-2 text-sm font-medium text-cyan-50/88">{card.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </main>
   );
