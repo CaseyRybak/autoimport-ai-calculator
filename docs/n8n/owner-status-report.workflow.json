@@ -1,0 +1,128 @@
+{
+  "name": "AutoImport - Owner Status Report",
+  "active": false,
+  "settings": {
+    "timezone": "Europe/Moscow"
+  },
+  "nodes": [
+    {
+      "id": "owner-report-schedule",
+      "name": "Owner Report Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 20,
+              "triggerAtMinute": 20
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "get-lead-status-counts",
+      "name": "Get Lead Status Counts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{($env.AUTOIMPORT_APP_BASE_URL || 'https://autoimport-ai-calculator.vercel.app') + '/api/n8n/leads'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-n8n-shared-secret",
+              "value": "={{$env.AUTOIMPORT_N8N_SHARED_SECRET || $env.N8N_SHARED_SECRET}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "format-owner-report",
+      "name": "Format Owner Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const nl = String.fromCharCode(10);\nconst counts = items[0].json.counts ?? {};\nconst now = new Intl.DateTimeFormat('ru-RU', {\n  timeZone: 'Europe/Moscow',\n  day: '2-digit',\n  month: '2-digit',\n  year: 'numeric',\n  hour: '2-digit',\n  minute: '2-digit',\n}).format(new Date());\nconst text = [\n  'Сводка по заявкам AutoImport: ' + now,\n  '',\n  'Новые: ' + (counts.new ?? 0),\n  'Принятые в работу: ' + (counts.in_progress ?? 0),\n  'Ожидают клиента: ' + (counts.waiting_client ?? 0),\n  'Завершенные: ' + (counts.closed ?? 0),\n  'Отказанные: ' + (counts.rejected ?? 0),\n].join(nl);\n\nreturn [{ json: { telegram_message: text } }];"
+      }
+    },
+    {
+      "id": "send-owner-report",
+      "name": "Send Owner Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        780,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://api.telegram.org/bot' + $env.TELEGRAM_BOT_TOKEN + '/sendMessage'}}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { chat_id: $env.TELEGRAM_OWNER_CHAT_ID, text: $json.telegram_message, disable_web_page_preview: true } }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Owner Report Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get Lead Status Counts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Lead Status Counts": {
+      "main": [
+        [
+          {
+            "node": "Format Owner Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Owner Report": {
+      "main": [
+        [
+          {
+            "node": "Send Owner Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

@@ -31,6 +31,11 @@ manual review checklist.
 - [ ] “Оставить заявку” opens the lead form.
 - [ ] Submitting the lead form shows loading and then success or an actionable error.
 - [ ] With Supabase env/table permissions configured, a submitted lead appears in `public.leads`.
+- [ ] With n8n env configured, a submitted Supabase lead calls the configured n8n webhook.
+- [ ] With n8n automation active, new lead and reminder Telegram messages route to the
+      employee group, while RED ALERT and owner report messages route to owner chat.
+- [ ] With n8n webhook missing or failing, direct Telegram fallback does not block lead
+      creation.
 - [ ] Without Supabase env, the form shows neutral success confirmation without exposing
       technical fallback details to clients.
 - [ ] Documentation states that leads save to Supabase when env/permissions are configured
@@ -87,12 +92,19 @@ manual review checklist.
       `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
       `ADMIN_DEMO_PASSWORD`.
 - [ ] Optional notification env vars exist when Telegram lead notifications are in scope:
-      `TELEGRAM_BOT_TOKEN`, `TELEGRAM_LEADS_CHAT_ID` and, when explicit links are needed,
-      `APP_BASE_URL`.
+      `TELEGRAM_BOT_TOKEN`, `TELEGRAM_LEADS_CHAT_ID`, `TELEGRAM_OWNER_CHAT_ID` and,
+      when explicit links are needed, `APP_BASE_URL`.
+- [ ] Optional n8n env vars exist when automation is in scope:
+      `N8N_NEW_LEAD_WEBHOOK_URL` and `N8N_SHARED_SECRET`.
+- [ ] Vercel env changes are followed by a production redeploy when they affect runtime
+      server behavior.
 
 ## Security
 
 - [ ] No real API keys are committed.
 - [ ] `.env.example` contains names only.
+- [ ] `.env.local` was not edited, overwritten or regenerated without explicit user
+      permission in that turn.
 - [ ] No client component imports a service-role key or server-only secret.
+- [ ] `/api/n8n/leads` returns 401 without the `x-n8n-shared-secret` header.
 - [ ] Git remote points to the intended GitHub repository.

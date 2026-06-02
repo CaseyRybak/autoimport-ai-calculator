@@ -67,8 +67,14 @@ affect runtime behavior.
 - [ ] Server-side service-role status update works for `public.leads.status`.
 - [ ] Server-side service-role comment insert/read works for `public.lead_comments`.
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is configured only as a server-side env var.
-- [ ] Optional Telegram lead notifications work when `TELEGRAM_BOT_TOKEN` and
-      `TELEGRAM_LEADS_CHAT_ID` are configured as server-side env vars.
+- [ ] n8n lead intake works when `N8N_NEW_LEAD_WEBHOOK_URL` and `N8N_SHARED_SECRET` are
+      configured: webhook receives the lead and `/api/n8n/leads` status/count reads pass
+      with the shared secret.
+- [ ] Telegram routing is correct when automation is enabled: new lead and reminders go
+      to `TELEGRAM_LEADS_CHAT_ID`; RED ALERT and owner report go to
+      `TELEGRAM_OWNER_CHAT_ID`.
+- [ ] Direct Telegram lead notification works only as fallback when n8n is not configured
+      or the n8n webhook fails.
 - [ ] Lead submission still succeeds when Telegram env vars are missing or Telegram API
       delivery fails.
 - [ ] Vehicle Catalog counts are available:
@@ -121,4 +127,6 @@ select count(*) from public.vehicle_variants;
 - Catalog prices require real sources before production/commercial use.
 - Demo seed prices are placeholders and must not be presented as market prices.
 - Calculation settings are read-only demo controls.
+- n8n reminder/report settings are currently workflow-level values, not editable from the
+      app UI.
 - AI-assisted text generation is roadmap-only and not connected.

@@ -138,6 +138,41 @@ type CreatedLeadRow = {
   telegram: string | null;
 };
 
+type LeadAutomationStatusRow = {
+  id: string;
+  lead_number: number | string | null;
+  created_at: string;
+  status: string;
+  customer_name: string;
+  phone: string;
+  telegram: string | null;
+  brand: string;
+  model: string;
+  year: number;
+  budget_rub: number;
+  total_rub: number;
+};
+
+type LeadStatusCountRow = {
+  status: string;
+};
+
+export type LeadAutomationStatus = {
+  id: string;
+  leadNumber: number | null;
+  displayNumber: string;
+  createdAt: string;
+  status: LeadStatus;
+  customerName: string;
+  phone: string;
+  telegram: string | null;
+  vehicleSummary: string;
+  budgetRub: number;
+  totalRub: number;
+};
+
+export type LeadStatusCounts = Record<LeadStatus, number>;
+
 export type LeadDetailService = {
   key:
     | "includeCarrier"
@@ -193,6 +228,8 @@ const leadColumns =
 const leadDetailColumns =
   "id, lead_number, created_at, updated_at, status, customer_name, phone, telegram, comment, country, brand, model, year, engine_type, engine_volume_liters, car_price, currency, budget_rub, destination_city, calculation_input, calculation_breakdown, total_rub, budget_status";
 const createdLeadColumns = "id, lead_number, customer_name, phone, telegram";
+const leadAutomationStatusColumns =
+  "id, lead_number, created_at, status, customer_name, phone, telegram, brand, model, year, budget_rub, total_rub";
 
 const formatLeadDate = (value: string) =>
   new Intl.DateTimeFormat("ru-RU", {
@@ -226,6 +263,32 @@ const mapLeadRow = (row: LeadRow): DemoLead => ({
   total: Number(row.total_rub),
   status: toLeadStatus(row.status),
 });
+
+const emptyLeadStatusCounts = (): LeadStatusCounts => ({
+  new: 0,
+  in_progress: 0,
+  waiting_client: 0,
+  closed: 0,
+  rejected: 0,
+});
+
+const mapLeadAutomationStatusRow = (row: LeadAutomationStatusRow): LeadAutomationStatus => {
+  const leadNumber = toNumberOrNull(row.lead_number);
+
+  return {
+    id: row.id,
+    leadNumber,
+    displayNumber: formatLeadDisplayNumber(leadNumber),
+    createdAt: row.created_at,
+    status: toLeadStatus(row.status),
+    customerName: row.customer_name,
+    phone: row.phone,
+    telegram: row.telegram,
+    vehicleSummary: `${row.brand} ${row.model} ${row.year}`.trim(),
+    budgetRub: Number(row.budget_rub),
+    totalRub: Number(row.total_rub),
+  };
+};
 
 const serviceLabels: Record<LeadDetailService["key"], string> = {
   includeCarrier: "Автовоз",
@@ -461,6 +524,58 @@ export async function getLeads(): Promise<DemoLead[]> {
   const { leads } = await getLeadsWithDebug();
 
   return leads;
+}
+
+export async function getLeadAutomationStatus(
+  leadId: string,
+): Promise<LeadAutomationStatus | null> {
+  if (!leadId) {
+    return null;
+  }
+
+  const { client: supabase } = await createAdminClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("leads")
+    .select(leadAutomationStatusColumns)
+    .eq("id", leadId)
+    .single();
+
+  if (error || !data) {
+    if (error) {
+      console.error(`n8n lead status lookup failed: ${error.message}`);
+    }
+
+    return null;
+  }
+
+  return mapLeadAutomationStatusRow(data as LeadAutomationStatusRow);
+}
+
+export async function getLeadStatusCounts(): Promise<LeadStatusCounts | null> {
+  const { client: supabase } = await createAdminClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase.from("leads").select("status");
+
+  if (error) {
+    console.error(`n8n lead status counts failed: ${error.message}`);
+    return null;
+  }
+
+  return (data ?? []).reduce((counts, row) => {
+    const status = toLeadStatus((row as LeadStatusCountRow).status);
+    counts[status] += 1;
+
+    return counts;
+  }, emptyLeadStatusCounts());
 }
 
 export async function listLeads(): Promise<DemoLead[]> {

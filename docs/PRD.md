@@ -28,6 +28,8 @@
 - Admin Vehicle Catalog management на уровне вариантов: просмотр, фильтры, поиск,
   экспорт CSV, редактирование цены/источника/даты проверки и активация/деактивация.
 - Persisted admin lead statuses and manager comments.
+- n8n automation for production lead intake: Google Sheets append, Telegram routing,
+  employee reminders, owner RED ALERT and daily owner status report.
 - Supabase-backed структура без реальных ключей в репозитории.
 - Архитектурные точки расширения для будущих AI-интеграций без реальных AI-запросов.
 
@@ -40,7 +42,8 @@
 - Production price enrichment с проверенными source URLs, датами проверки и методами
   обновления цен.
 - Реальные AI-запросы.
-- Production CRM workflows.
+- Full production CRM workflows beyond the current n8n lead intake/reminder/report
+  automation.
 
 ## Текущий MVP-статус
 
@@ -63,6 +66,9 @@
   `is_active`.
 - Admin status/comment persistence уже входит в текущий MVP: статус заявки сохраняется
   в `public.leads.status`, а комментарии менеджера сохраняются в `public.lead_comments`.
+- n8n automation уже входит в текущий MVP: новая заявка передается в n8n после
+  Supabase insert, пишется в Google Sheet, отправляет Telegram-сообщение в группу
+  сотрудников, делает reminders, RED ALERT владельцу и ежедневный owner report.
 - Structural editing для brand/model/year/engine fields остается next phase.
 
 ## Acceptance Criteria для следующих фаз
@@ -101,3 +107,14 @@ Status/comment persistence считается готовым, когда:
 - Admin UI показывает persisted status/comment state без временных обещаний.
 
 Текущий MVP покрывает эти критерии для CRM-minimum.
+
+n8n automation считается готовой для текущего MVP, когда:
+
+- Новая Supabase-заявка вызывает n8n production webhook.
+- Заявка добавляется в Google Sheet `AutoImport Leads`.
+- Новая заявка и reminders уходят в employee Telegram group.
+- RED ALERT и ежедневный owner report уходят в owner Telegram chat.
+- `/api/n8n/leads` защищен shared secret и возвращает status/count data для n8n.
+
+Текущий MVP покрывает эти критерии, но настройки reminder/report пока hardcoded в n8n
+workflow и требуют отдельной editable settings phase.

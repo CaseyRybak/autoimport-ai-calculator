@@ -9,7 +9,8 @@
 - node:test + tsx
 - shadcn/ui-ready component structure
 - Supabase lead insert, server-side admin read and Vehicle Catalog SQL
-- Optional Telegram lead notification helper
+- n8n lead intake, reminder and owner-report automation
+- Optional direct Telegram lead notification helper as fallback when n8n is unavailable
 - Future AI extension points without runtime OpenAI wiring
 
 ## Key Directories
@@ -84,6 +85,10 @@ Structural fields для brand/model/year/engine не редактируются
 ## Current Data Flow
 
 - Lead form -> `createLead()` -> server-side Supabase insert -> `public.leads`.
+- Successful Supabase lead creation -> `sendLeadCreatedN8nWebhook()` -> n8n New Lead
+  Intake workflow, when `N8N_NEW_LEAD_WEBHOOK_URL` is configured.
+- If n8n is not configured or the webhook call fails, the app falls back to direct
+  Telegram notification through `sendLeadCreatedNotification()`.
 - Admin -> server-side service-role read -> `public.leads`.
 - Calculator -> Vehicle Catalog read -> dependent dropdown -> selected
   `source_price_usd`.
@@ -118,9 +123,12 @@ service-role helpers:
 
 Supabase подключен для lead creation, admin lead read, Vehicle Catalog read/write и
 CRM-minimum persistence при наличии переменных окружения и нужных grants/policies.
-Telegram notifications опциональны и работают только при настроенных server-side
-Telegram env vars. AI-assisted flows остаются roadmap-пунктом; runtime OpenAI env vars и
-реальные OpenAI-запросы сейчас не подключены.
+n8n automation подключена для новых заявок, Google Sheets append, Telegram routing,
+reminders, RED ALERT и owner status report. Telegram напрямую из приложения используется
+как fallback, чтобы не дублировать сообщения при рабочем n8n. AI-assisted flows остаются
+roadmap-пунктом; runtime OpenAI env vars и реальные OpenAI-запросы сейчас не подключены.
 
 Переменные окружения описаны в `.env.example` и `docs/SUPABASE_SETUP.md`. Реальные
-секреты нельзя коммитить в репозиторий.
+секреты нельзя коммитить в репозиторий. `.env.local` содержит реальные локальные
+секреты и не должен редактироваться или перезаписываться агентом без отдельного явного
+разрешения пользователя.

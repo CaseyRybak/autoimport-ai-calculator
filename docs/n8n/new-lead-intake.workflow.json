@@ -1,0 +1,479 @@
+{
+  "name": "AutoImport - New Lead Intake",
+  "active": false,
+  "settings": {
+    "timezone": "Europe/Moscow",
+    "executionTimeout": 900
+  },
+  "nodes": [
+    {
+      "id": "webhook-new-lead",
+      "name": "New Lead Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "autoimport/new-lead",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "normalize-lead-payload",
+      "name": "Normalize Lead Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const nl = String.fromCharCode(10);\nconst body = items[0].json.body ?? items[0].json;\nconst lead = body.lead ?? body;\nconst maxReminders = 3;\nconst intervalMinutes = 10;\nconst vehicle = lead.vehicle ?? {};\nconst customer = lead.customer ?? {};\nconst budget = lead.budget ?? {};\nconst displayNumber = lead.lead_number ?? lead.leadNumber ?? 'AIC-000000';\nconst vehicleSummary = vehicle.summary ?? [vehicle.brand, vehicle.model, vehicle.year].filter(Boolean).join(' ');\nconst adminUrl = lead.admin_lead_url ?? lead.adminLeadUrl ?? '';\nconst name = customer.name ?? lead.customerName ?? '';\nconst phone = customer.phone ?? lead.phone ?? '';\nconst telegram = customer.telegram ?? lead.telegram ?? '';\nconst text = [\n  'Новая заявка ' + displayNumber,\n  '',\n  'Клиент: ' + (name || 'Не указан'),\n  'Телефон: ' + (phone || 'Не указан'),\n  telegram ? 'Telegram: ' + telegram : 'Telegram: Не указан',\n  '',\n  'Авто: ' + (vehicleSummary || 'Не указано'),\n  'Бюджет: ' + (budget.budget_rub ?? 'не указан') + ' ₽',\n  'Итог: ' + (budget.total_rub ?? 'не указан') + ' ₽',\n  adminUrl ? '' : null,\n  adminUrl ? 'Открыть заявку: ' + adminUrl : null,\n].filter((line) => line !== null).join(nl);\n\nreturn [{\n  json: {\n    lead_id: lead.lead_id ?? lead.id,\n    lead_number: displayNumber,\n    customer_name: name,\n    customer_phone: phone,\n    customer_telegram: telegram,\n    vehicle_summary: vehicleSummary,\n    budget_rub: budget.budget_rub ?? null,\n    total_rub: budget.total_rub ?? null,\n    budget_status: budget.status ?? null,\n    admin_lead_url: adminUrl,\n    created_at: lead.created_at ?? new Date().toISOString(),\n    reminder_count: 0,\n    max_reminders: Number.isFinite(maxReminders) ? maxReminders : 3,\n    reminder_interval_minutes: Number.isFinite(intervalMinutes) ? intervalMinutes : 10,\n    telegram_message: text,\n  },\n}];"
+      }
+    },
+    {
+      "id": "append-owner-sheet",
+      "name": "Append Owner Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        520,
+        -120
+      ],
+      "continueOnFail": true,
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "mode": "id",
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {
+          "handlingExtraData": "insertInNewColumn",
+          "valueInputMode": "USER_ENTERED"
+        }
+      }
+    },
+    {
+      "id": "send-new-lead-telegram",
+      "name": "Send New Lead Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        780,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://api.telegram.org/bot' + $env.TELEGRAM_BOT_TOKEN + '/sendMessage'}}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { chat_id: $env.TELEGRAM_LEADS_CHAT_ID, text: $json.telegram_message, disable_web_page_preview: true } }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "init-reminder-state",
+      "name": "Init Reminder State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{ json: $('Normalize Lead Payload').first().json }];"
+      }
+    },
+    {
+      "id": "wait-reminder-interval",
+      "name": "Wait Reminder Interval",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1300,
+        0
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": "={{$json.reminder_interval_minutes || 10}}",
+        "unit": "minutes"
+      }
+    },
+    {
+      "id": "get-current-lead-status",
+      "name": "Get Current Lead Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1560,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{($env.AUTOIMPORT_APP_BASE_URL || 'https://autoimport-ai-calculator.vercel.app') + '/api/n8n/leads?leadId=' + encodeURIComponent($json.lead_id)}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-n8n-shared-secret",
+              "value": "={{$env.AUTOIMPORT_N8N_SHARED_SECRET || $env.N8N_SHARED_SECRET}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "build-reminder-decision",
+      "name": "Build Reminder Decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1820,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const state = $('Wait Reminder Interval').first().json;\nconst response = items[0].json;\nconst lead = response.lead ?? {};\nconst status = lead.status ?? 'unknown';\nconst reminderCount = Number(state.reminder_count ?? 0);\nconst maxReminders = Number(state.max_reminders ?? 3);\nconst createdAt = new Date(lead.createdAt ?? state.created_at ?? Date.now()).getTime();\nconst elapsedMinutes = Math.max(0, Math.round((Date.now() - createdAt) / 60000));\nconst displayNumber = lead.displayNumber ?? state.lead_number ?? 'AIC-000000';\nconst customerName = lead.customerName ?? state.customer_name ?? 'Не указан';\nconst phone = lead.phone ?? state.customer_phone ?? 'Не указан';\nconst vehicleSummary = lead.vehicleSummary ?? state.vehicle_summary ?? 'Не указано';\nconst adminUrl = state.admin_lead_url ?? '';\nconst base = {\n  ...state,\n  current_status: status,\n  elapsed_minutes: elapsedMinutes,\n  reminder_count: reminderCount,\n};\n\nif (status !== 'new') {\n  return [{ json: { ...base, action: 'stop' } }];\n}\n\nif (reminderCount >= maxReminders) {\n  return [{\n    json: {\n      ...base,\n      action: 'red_alert',\n      telegram_message: [\n        `RED ALERT: заявка ${displayNumber} без реакции`,\n        '',\n        `Клиент: ${customerName}`,\n        `Телефон: ${phone}`,\n        `Авто: ${vehicleSummary}`,\n        `Прошло минут: ${elapsedMinutes}`,\n        adminUrl ? '' : null,\n        adminUrl ? `Открыть заявку: ${adminUrl}` : null,\n      ].filter((line) => line !== null).join('\\n'),\n    },\n  }];\n}\n\nreturn [{\n  json: {\n    ...base,\n    action: 'remind',\n    telegram_message: [\n      `Напоминание: заявка ${displayNumber} все еще новая`,\n      '',\n      `Клиент: ${customerName}`,\n      `Телефон: ${phone}`,\n      `Авто: ${vehicleSummary}`,\n      `Напоминание: ${reminderCount + 1}/${maxReminders}`,\n      adminUrl ? '' : null,\n      adminUrl ? `Открыть заявку: ${adminUrl}` : null,\n    ].filter((line) => line !== null).join('\\n'),\n  },\n}];"
+      }
+    },
+    {
+      "id": "if-red-alert",
+      "name": "If RED ALERT",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2080,
+        -140
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "action-red-alert",
+              "leftValue": "={{$json.action}}",
+              "rightValue": "red_alert",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "send-red-alert",
+      "name": "Send RED ALERT",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2340,
+        -220
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://api.telegram.org/bot' + $env.TELEGRAM_BOT_TOKEN + '/sendMessage'}}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { chat_id: $env.TELEGRAM_OWNER_CHAT_ID, text: $json.telegram_message, disable_web_page_preview: true } }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "if-reminder",
+      "name": "If Reminder",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2340,
+        80
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "action-remind",
+              "leftValue": "={{$json.action}}",
+              "rightValue": "remind",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "send-reminder",
+      "name": "Send Reminder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2600,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://api.telegram.org/bot' + $env.TELEGRAM_BOT_TOKEN + '/sendMessage'}}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { chat_id: $env.TELEGRAM_LEADS_CHAT_ID, text: $json.telegram_message, disable_web_page_preview: true } }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "increment-reminder",
+      "name": "Increment Reminder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2860,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const nl = String.fromCharCode(10);\nconst state = $('If Reminder').first().json;\nconst reminderCount = Number(state.reminder_count ?? 0) + 1;\nconst maxReminders = Number(state.max_reminders ?? 3);\nconst adminUrl = state.admin_lead_url ?? '';\nconst nextState = {\n  ...state,\n  reminder_count: reminderCount,\n  reminder_interval_minutes: Number(state.reminder_interval_minutes ?? 10),\n};\n\nif (reminderCount >= maxReminders) {\n  return [{ json: { ...nextState, action: 'red_alert', telegram_message: [\n    'RED ALERT: заявка ' + (state.lead_number ?? 'AIC-000000') + ' без реакции',\n    '',\n    'Клиент: ' + (state.customer_name || 'Не указан'),\n    'Телефон: ' + (state.customer_phone || 'Не указан'),\n    'Авто: ' + (state.vehicle_summary || 'Не указано'),\n    'Напоминаний отправлено: ' + reminderCount + '/' + maxReminders,\n    adminUrl ? '' : null,\n    adminUrl ? 'Открыть заявку: ' + adminUrl : null,\n  ].filter((line) => line !== null).join(nl) } }];\n}\n\nreturn [{ json: { ...nextState, action: 'wait_next_reminder' } }];"
+      }
+    },
+    {
+      "id": "if-final-reminder-reached",
+      "name": "If Final Reminder Reached",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3120,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "final-reminder-red-alert",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "red_alert",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "New Lead Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Lead Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Lead Payload": {
+      "main": [
+        [
+          {
+            "node": "Append Owner Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Owner Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Send New Lead Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send New Lead Telegram": {
+      "main": [
+        [
+          {
+            "node": "Init Reminder State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Reminder State": {
+      "main": [
+        [
+          {
+            "node": "Wait Reminder Interval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Reminder Interval": {
+      "main": [
+        [
+          {
+            "node": "Get Current Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Current Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Build Reminder Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Reminder Decision": {
+      "main": [
+        [
+          {
+            "node": "If RED ALERT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If RED ALERT": {
+      "main": [
+        [
+          {
+            "node": "Send RED ALERT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Reminder": {
+      "main": [
+        [
+          {
+            "node": "Send Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Reminder": {
+      "main": [
+        [
+          {
+            "node": "Increment Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increment Reminder": {
+      "main": [
+        [
+          {
+            "node": "If Final Reminder Reached",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Final Reminder Reached": {
+      "main": [
+        [
+          {
+            "node": "Send RED ALERT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Reminder Interval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

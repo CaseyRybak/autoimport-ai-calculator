@@ -26,6 +26,9 @@ AutoImport AI Calculator.
 - Do not change Git remotes or force push unless explicitly requested.
 - Do not add real API keys or secrets.
 - Use `.env.example` for environment variable names only.
+- Do not edit, overwrite, regenerate, truncate, or run `vercel env pull` into
+  `.env.local` unless the user explicitly permits that exact action in the current turn.
+  For env inspection, write to a separate temporary file.
 - Do not edit `reference/figma` unless explicitly required.
 
 ## Where Things Live

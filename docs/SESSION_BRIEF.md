@@ -10,6 +10,7 @@ unless the task needs them or the user explicitly asks.
 - Product: AutoImport AI Calculator MVP for vehicle import calculation, lead
   capture, and admin CRM workflow.
 - Deployed first version: `https://autoimport-ai-calculator.vercel.app/`
+- n8n lead automation is live on the Vercel production site.
 
 ## Status
 
@@ -20,6 +21,9 @@ unless the task needs them or the user explicitly asks.
   statuses/comments and catalog management when env vars and grants are configured.
 - Optional Telegram lead notifications are available when Telegram env vars are
   configured.
+- n8n workflows `AutoImport - New Lead Intake` and `AutoImport - Owner Status Report`
+  are active. The new-lead workflow writes to Google Sheet `AutoImport Leads`, sends
+  Telegram notifications and performs reminder/status checks through `/api/n8n/leads`.
 - Admin pages cover leads, lead detail, settings, catalog management, and catalog
   CSV import/export.
 - Demo/mock fallback remains when env vars or permissions are missing.
@@ -30,6 +34,9 @@ unless the task needs them or the user explicitly asks.
 - Do not touch `/mnt/c` or other Windows disk paths.
 - Do not use `sudo` without explicit user permission.
 - Do not commit `.env.local`.
+- Do not edit, overwrite, regenerate or run `vercel env pull` into `.env.local` unless
+  the user explicitly permits it in that turn. Use a separate temporary file for env
+  inspection.
 - Do not add real API keys or secrets.
 - Keep `SUPABASE_SERVICE_ROLE_KEY` server-side only; never expose it to client
   components or `NEXT_PUBLIC_` env vars.
@@ -52,7 +59,22 @@ Optional integrations:
 
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_LEADS_CHAT_ID`
+- `TELEGRAM_OWNER_CHAT_ID`
 - `APP_BASE_URL`
+- `N8N_NEW_LEAD_WEBHOOK_URL`
+- `N8N_SHARED_SECRET`
+
+## Live Automation
+
+- Production site: `https://autoimport-ai-calculator.vercel.app/`
+- n8n new-lead workflow id: `5qXRyji4Yv3bbFMo`
+- n8n owner-report workflow id: `rLze04ap1PeGahCf`
+- Google Sheet: `https://docs.google.com/spreadsheets/d/130cZrwdQwiW2-56mwHxZamxAqTkb2A_Yr4jGpyx1vjY/edit`
+- A production UI test lead submitted on June 2, 2026 verified webhook receipt,
+  Google Sheets append and Telegram notification.
+- Telegram routing: new lead and reminder messages go to the employee group through
+  `TELEGRAM_LEADS_CHAT_ID`; RED ALERT and daily owner reports go to
+  `TELEGRAM_OWNER_CHAT_ID`.
 
 ## Known Limitations
 
@@ -63,7 +85,9 @@ Optional integrations:
 
 ## Recommended Next Step
 
-- Implement an n8n webhook or CRM improvements only after an explicit user command.
+- Current automation is live. Next likely implementation steps are production admin
+  authentication, real catalog price enrichment, or converting n8n reminder/report
+  settings from hardcoded workflow values into editable settings.
 
 ## Startup
 

@@ -18,6 +18,8 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 
 - Unit tests cover the pure calculation flow in `lib/calculate.ts`.
 - Unit tests cover demo fallback for the lead persistence boundary in `lib/leads.ts`.
+- Unit tests cover n8n lead webhook payload construction and skip paths.
+- Unit tests cover Telegram lead message formatting and admin link generation.
 - Unit tests cover Vehicle Catalog dependent selectors and USD-to-display-currency
   conversion.
 - Unit tests cover Vehicle Catalog CSV import parsing, required columns, row validation,
@@ -41,6 +43,9 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
   human-readable admin display numbers like `AIC-000001`.
 - Vercel must provide `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_DEMO_PASSWORD` as server
   environment variables for real admin reads.
+- `.env.local` contains real local secrets. Do not overwrite, regenerate or edit it
+  without explicit user permission; inspect Vercel env into a separate temporary file
+  when needed.
 - Supabase must grant `service_role` usage on the `public` schema and `SELECT` on the
   admin-read tables used by the app.
 - Do not add anon `SELECT` policy for `public.leads`.
@@ -63,6 +68,10 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 ## Quality Bar Before Employer Demo
 
 - Live demo opens successfully.
+- n8n new-lead automation is active and was verified through the production UI on
+  June 2, 2026: webhook intake, Google Sheets append and Telegram notification passed.
+- Telegram routing is split: new lead/reminder messages go to the employee group, while
+  RED ALERT and owner status reports go to the owner chat.
 - Main calculator updates result from user input.
 - Public copy stays commercial and does not expose demo/mock/Supabase-ready implementation
   details.
@@ -85,3 +94,15 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Keep `SUPABASE_SERVICE_ROLE_KEY` only in `.env.local` and Vercel server env.
 - Keep anon access limited to public lead insert and active Vehicle Catalog reads; anon
   `SELECT` on `public.leads` is intentionally not granted for admin.
+
+## Quality Bar For Automation Changes
+
+- Do not edit `.env.local` without explicit user permission in that turn.
+- Keep production n8n workflows active only after test execution or targeted read-only
+  verification.
+- Keep new lead/reminder Telegram routes pointed at `TELEGRAM_LEADS_CHAT_ID`.
+- Keep RED ALERT and owner report routes pointed at `TELEGRAM_OWNER_CHAT_ID`.
+- Avoid duplicate new-lead Telegram sends: app direct Telegram is fallback only when n8n
+  is not configured or fails.
+- Update `docs/N8N_WORKFLOW_PLAN.md` and sanitized workflow exports when live workflow
+  structure, schedule or routing changes.

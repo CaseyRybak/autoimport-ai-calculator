@@ -19,7 +19,10 @@ Optional integrations:
 ```bash
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_LEADS_CHAT_ID=
+TELEGRAM_OWNER_CHAT_ID=
 APP_BASE_URL=
+N8N_NEW_LEAD_WEBHOOK_URL=
+N8N_SHARED_SECRET=
 ```
 
 - `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL used by public/server helpers.
@@ -30,12 +33,19 @@ APP_BASE_URL=
 - `ADMIN_DEMO_PASSWORD`: current demo gate for `/admin`.
 - `TELEGRAM_BOT_TOKEN`: optional server-only Telegram bot token for new lead
   notifications.
-- `TELEGRAM_LEADS_CHAT_ID`: optional Telegram chat id for manager lead notifications.
+- `TELEGRAM_LEADS_CHAT_ID`: optional Telegram chat id for the employee group that
+  receives new lead and reminder notifications.
+- `TELEGRAM_OWNER_CHAT_ID`: optional Telegram chat id for owner-only RED ALERT and
+  daily status report notifications.
 - `APP_BASE_URL`: optional public app URL used to build admin lead links in
   notifications when a lead URL is available.
+- `N8N_NEW_LEAD_WEBHOOK_URL`: optional n8n production webhook URL called after a
+  successful Supabase lead insert.
+- `N8N_SHARED_SECRET`: server-only shared secret used for outgoing n8n webhook headers
+  and for protected n8n status/count reads at `/api/n8n/leads`.
 
-`SUPABASE_SERVICE_ROLE_KEY` and Telegram secrets must never be exposed to client
-components and must not use a `NEXT_PUBLIC_` prefix.
+`SUPABASE_SERVICE_ROLE_KEY`, Telegram secrets and n8n shared secrets must never be
+exposed to client components and must not use a `NEXT_PUBLIC_` prefix.
 
 ## Vercel Notes
 
@@ -45,12 +55,17 @@ Production env must define:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_DEMO_PASSWORD`
-- `TELEGRAM_BOT_TOKEN` and `TELEGRAM_LEADS_CHAT_ID` if Telegram notifications should be
-  enabled.
+- `TELEGRAM_BOT_TOKEN`, `TELEGRAM_LEADS_CHAT_ID` and `TELEGRAM_OWNER_CHAT_ID` if
+  Telegram notifications should be enabled.
 - `APP_BASE_URL` if notification links should use an explicit production URL.
+- `N8N_NEW_LEAD_WEBHOOK_URL` and `N8N_SHARED_SECRET` if n8n lead intake/reminder
+  automation should be enabled.
 
 After changing Vercel environment variables, redeploy the project so Next.js receives the
 new values.
+
+Do not run `vercel env pull` into `.env.local` or overwrite `.env.local` unless the user
+explicitly permits that exact action. For inspection, pull to a separate temporary file.
 
 ## SQL Application Order
 
@@ -260,9 +275,13 @@ Recommended lead table posture:
    server-side admin read.
 4. Open `/admin/leads/[id]` for the submitted lead and verify lead detail, status changes
    and manager comments load through server-side service-role helpers.
-5. If Telegram env vars are configured, verify the manager notification is delivered. If
-   they are not configured, verify lead submission still succeeds.
-6. Verify Vehicle Catalog counts:
+5. If n8n env vars are configured, verify lead submission calls the n8n webhook and the
+   n8n workflow sends new lead/reminder messages to the employee group while RED ALERT
+   and owner report messages go to the owner chat.
+6. If n8n is not configured but Telegram env vars are configured, verify the direct
+   Telegram fallback notification is delivered. If Telegram env vars are not configured,
+   verify lead submission still succeeds.
+7. Verify Vehicle Catalog counts:
 
 ```sql
 select count(*) from public.vehicle_brands;

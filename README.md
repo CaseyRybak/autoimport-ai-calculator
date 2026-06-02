@@ -16,6 +16,8 @@ https://autoimport-ai-calculator.vercel.app/
 - An admin area with password access, server-side Supabase reads and local fallback.
 - A lead data boundary in `lib/leads.ts` for Supabase insert, admin read and mock fallback.
 - A Supabase Vehicle Catalog for calculator dropdown options and catalog base prices.
+- n8n lead automation for Google Sheets append, Telegram routing, reminders, RED ALERT
+  and daily owner status report.
 - Shared calculation logic in `lib/calculate.ts` with unit tests.
 - Documentation, Supabase schema files and deployment-ready project structure.
 
@@ -58,7 +60,7 @@ to be a production customs calculator.
 - shadcn/ui-ready component structure
 - Supabase SQL schema, lead insert boundary, server-side admin read helper and Vehicle
   Catalog read model
-- Optional Telegram notification env structure and future AI extension points
+- n8n automation, Telegram notification routing and future AI extension points
 
 ## Architecture decisions
 
@@ -109,10 +111,15 @@ to be a production customs calculator.
   service-role helpers.
 - Human-readable lead numbers are implemented as `AIC-000001` while UUID remains the
   technical id and URL key.
+- n8n lead intake is live: successful Supabase leads call the n8n webhook, append to
+  Google Sheets, notify the employee Telegram group, run reminder/RED ALERT checks and
+  send a daily owner report.
 
 ## Roadmap
 
 - Add richer structural catalog editing for brand/model/variant fields.
+- Add editable automation settings for reminder intervals, RED ALERT threshold and owner
+  report schedule.
 - Add richer CRM workflows around persisted statuses and manager comments.
 - Add real admin authentication.
 - Enrich catalog prices with real source URLs, source names and checked timestamps.
@@ -142,15 +149,21 @@ Optional integration env names:
 ```bash
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_LEADS_CHAT_ID=
+TELEGRAM_OWNER_CHAT_ID=
 APP_BASE_URL=
+N8N_NEW_LEAD_WEBHOOK_URL=
+N8N_SHARED_SECRET=
 ```
 
 Keep `SUPABASE_SERVICE_ROLE_KEY` only in `.env.local` or Vercel server env. It must not
-use a `NEXT_PUBLIC_` prefix. Telegram lead notifications are optional; when
-`TELEGRAM_BOT_TOKEN` and `TELEGRAM_LEADS_CHAT_ID` are set, successful lead submissions
-send a manager notification through the Telegram Bot API. Telegram secrets must also stay
-server-side and must not use a `NEXT_PUBLIC_` prefix. `APP_BASE_URL` is optional and is
-used to build admin lead links in notifications when a lead URL can be assembled.
+use a `NEXT_PUBLIC_` prefix. n8n lead automation is optional; when
+`N8N_NEW_LEAD_WEBHOOK_URL` and `N8N_SHARED_SECRET` are set, successful Supabase lead
+submissions call the n8n production webhook. Direct Telegram notification remains a
+fallback if n8n is not configured or fails. Telegram secrets must stay server-side and
+must not use a `NEXT_PUBLIC_` prefix. `TELEGRAM_LEADS_CHAT_ID` is the employee group;
+`TELEGRAM_OWNER_CHAT_ID` is used for RED ALERT and owner reports. `APP_BASE_URL` is
+optional and is used to build admin lead links in notifications when a lead URL can be
+assembled.
 
 Supabase setup order, grants and verification steps are documented in
 [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md).
