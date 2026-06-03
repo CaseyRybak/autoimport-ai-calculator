@@ -42,12 +42,17 @@ to be a production customs calculator.
   URL query params.
 - Admin lead detail shows the submitted calculator/form payload: client contacts, vehicle,
   catalog price, budget, calculation breakdown, selected services and client comment.
+- Admin lead detail polls for compact CRM updates so status/comment changes made from
+  Telegram or another admin view appear without a manual browser reload.
 - Vehicle Catalog dropdown reads active catalog data and applies `source_price_usd` as
   the selected vehicle's base price.
 - Admin CSV import validates, previews and upserts Vehicle Catalog rows server-side.
 - Admin Vehicle Catalog management supports filtering, CSV export, variant price/source
   updates and activate/deactivate actions.
 - Persisted admin status changes, manager comments and read-only calculation settings.
+- Telegram employee status buttons for new lead/reminder messages; successful button
+  clicks update CRM status, remove the clicked message buttons and post a group
+  confirmation.
 - Vercel deployment and GitHub-ready repository.
 
 ## Tech stack
@@ -60,7 +65,8 @@ to be a production customs calculator.
 - shadcn/ui-ready component structure
 - Supabase SQL schema, lead insert boundary, server-side admin read helper and Vehicle
   Catalog read model
-- n8n automation, Telegram notification routing and future AI extension points
+- n8n automation, Telegram notification routing/status callbacks and future AI extension
+  points
 
 ## Architecture decisions
 
@@ -109,11 +115,20 @@ to be a production customs calculator.
   updates.
 - Admin lead status changes and manager comments are persisted through server-side
   service-role helpers.
+- Open admin lead detail pages poll `/admin/leads/[id]/snapshot` every 5 seconds for
+  status/comment updates after password-gate access.
 - Human-readable lead numbers are implemented as `AIC-000001` while UUID remains the
   technical id and URL key.
 - n8n lead intake is live: successful Supabase leads call the n8n webhook, append to
-  Google Sheets, notify the employee Telegram group, run reminder/RED ALERT checks and
-  send a daily owner report.
+  Google Sheets, notify the employee Telegram group with status buttons, run
+  reminder/RED ALERT checks, process Telegram status callbacks and send a daily owner
+  report.
+
+## Deployment policy
+
+Production releases should go through GitHub push/Actions. Direct local production
+deploys with commands such as `vercel deploy --prod` are intentionally avoided so release
+history and CI checks remain visible.
 
 ## Roadmap
 

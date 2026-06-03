@@ -28,8 +28,10 @@
 - Admin Vehicle Catalog management на уровне вариантов: просмотр, фильтры, поиск,
   экспорт CSV, редактирование цены/источника/даты проверки и активация/деактивация.
 - Persisted admin lead statuses and manager comments.
+- Admin lead detail updates status/comment state without reload through protected polling.
 - n8n automation for production lead intake: Google Sheets append, Telegram routing,
-  employee reminders, owner RED ALERT and daily owner status report.
+  employee reminders, Telegram status buttons/callbacks, owner RED ALERT and daily owner
+  status report.
 - Supabase-backed структура без реальных ключей в репозитории.
 - Архитектурные точки расширения для будущих AI-интеграций без реальных AI-запросов.
 
@@ -43,7 +45,7 @@
   обновления цен.
 - Реальные AI-запросы.
 - Full production CRM workflows beyond the current n8n lead intake/reminder/report
-  automation.
+  automation and Telegram status callbacks.
 
 ## Текущий MVP-статус
 
@@ -66,9 +68,13 @@
   `is_active`.
 - Admin status/comment persistence уже входит в текущий MVP: статус заявки сохраняется
   в `public.leads.status`, а комментарии менеджера сохраняются в `public.lead_comments`.
+- Admin lead detail polling уже входит в текущий MVP: открытая карточка заявки
+  обновляет статус и комментарии через защищенный compact snapshot без ручного reload.
 - n8n automation уже входит в текущий MVP: новая заявка передается в n8n после
-  Supabase insert, пишется в Google Sheet, отправляет Telegram-сообщение в группу
-  сотрудников, делает reminders, RED ALERT владельцу и ежедневный owner report.
+  Supabase insert, пишется в Google Sheet, отправляет Telegram-сообщение с кнопками в
+  группу сотрудников, делает reminders, обрабатывает Telegram status callbacks, убирает
+  использованные кнопки, отправляет group confirmation, RED ALERT владельцу и ежедневный
+  owner report.
 - Structural editing для brand/model/year/engine fields остается next phase.
 
 ## Acceptance Criteria для следующих фаз
@@ -105,8 +111,11 @@ Status/comment persistence считается готовым, когда:
 - Изменение статуса заявки сохраняется в Supabase и видно после reload.
 - Комментарий менеджера сохраняется в Supabase и связан с lead UUID.
 - Admin UI показывает persisted status/comment state без временных обещаний.
+- Внешние изменения статуса/комментариев, например из Telegram callback, появляются в
+  открытой карточке заявки без ручного reload.
 
-Текущий MVP покрывает эти критерии для CRM-minimum.
+Текущий MVP покрывает эти критерии для CRM-minimum через server actions и protected
+polling endpoint.
 
 n8n automation считается готовой для текущего MVP, когда:
 
@@ -115,6 +124,8 @@ n8n automation считается готовой для текущего MVP, к
 - Новая заявка и reminders уходят в employee Telegram group.
 - RED ALERT и ежедневный owner report уходят в owner Telegram chat.
 - `/api/n8n/leads` защищен shared secret и возвращает status/count data для n8n.
+- Telegram status buttons update lead status through protected `POST /api/n8n/leads`,
+  remove the clicked message buttons and post a group status-change confirmation.
 
 Текущий MVP покрывает эти критерии, но настройки reminder/report пока hardcoded в n8n
 workflow и требуют отдельной editable settings phase.

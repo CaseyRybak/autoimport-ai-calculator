@@ -1,6 +1,7 @@
 # Review Checklist
 
-Use this checklist before portfolio review, Vercel deploys or major handoffs.
+Use this checklist before portfolio review, GitHub/Actions production releases or major
+handoffs.
 
 For release-oriented QA, use [`docs/QA_CHECKLIST.md`](QA_CHECKLIST.md) alongside this
 manual review checklist.
@@ -51,6 +52,8 @@ manual review checklist.
 - [ ] `/admin/leads/1` opens a demo lead detail page in fallback/demo mode.
 - [ ] `/admin/leads/unknown` returns 404.
 - [ ] Status changes persist and remain visible after reload.
+- [ ] Status changes made outside the open lead detail page, including Telegram buttons,
+      appear in `/admin/leads/[id]` without a manual browser reload.
 - [ ] Manager comments save to history and are shown newest first.
 - [ ] `/admin/settings` opens demo calculation settings.
 - [ ] Settings save action is disabled.
@@ -98,6 +101,8 @@ manual review checklist.
       `N8N_NEW_LEAD_WEBHOOK_URL` and `N8N_SHARED_SECRET`.
 - [ ] Vercel env changes are followed by a production redeploy when they affect runtime
       server behavior.
+- [ ] Production deploys go through GitHub push/Actions; direct local
+      `vercel deploy --prod` is not used.
 
 ## Security
 
@@ -107,4 +112,6 @@ manual review checklist.
       permission in that turn.
 - [ ] No client component imports a service-role key or server-only secret.
 - [ ] `/api/n8n/leads` returns 401 without the `x-n8n-shared-secret` header.
+- [ ] `POST /api/n8n/leads` updates lead status only with the shared secret and records
+      the Telegram/internal status-change comment.
 - [ ] Git remote points to the intended GitHub repository.

@@ -33,6 +33,10 @@ business/legal rules.
   admin editing.
 - n8n automation became live: new Supabase leads call n8n, append to Google Sheets,
   notify Telegram, run reminders/RED ALERT and send owner status reports.
+- Telegram employee status buttons became live through a callback workflow that updates
+  CRM status, removes used buttons and posts group confirmations.
+- Admin lead detail gained protected lightweight polling so external status/comment
+  changes appear without a browser reload.
 - Repository handoff docs were consolidated around `SESSION_BRIEF`, `QUALITY`,
   `REVIEW_CHECKLIST`, `SUPABASE_SETUP`, `VEHICLE_CATALOG` and `N8N_WORKFLOW_PLAN`.
 
@@ -51,9 +55,12 @@ business/legal rules.
 
 - New Lead Intake workflow id: `5qXRyji4Yv3bbFMo`.
 - Owner Status Report workflow id: `rLze04ap1PeGahCf`.
+- Telegram Status Callback workflow id: `I4djkKQ5BeTPkFpp`.
 - Google Sheet: `AutoImport Leads`, sheet `Leads`.
 - New lead and reminder messages route to the employee Telegram group.
 - RED ALERT and daily status report route to the owner Telegram chat.
+- Telegram status callbacks update the app through protected `POST /api/n8n/leads`,
+  remove clicked-message buttons and post group confirmations.
 - Current reminder behavior: 10-minute interval, RED ALERT immediately after the third
   reminder while the lead remains `new`.
 - Owner report schedule: daily at 20:20 Moscow time target.
@@ -63,6 +70,9 @@ business/legal rules.
 - Do not commit real secrets.
 - Do not edit, overwrite, regenerate or run `vercel env pull` into `.env.local` unless
   the user explicitly permits that exact action in the current turn.
+- Do not run direct local production deploys such as `vercel deploy --prod`; production
+  releases should go through GitHub push/Actions unless the user explicitly changes this
+  rule in the current turn.
 - Keep `SUPABASE_SERVICE_ROLE_KEY` server-side only.
 - Do not grant anon `SELECT` on `public.leads`.
 - Keep catalog prices honest: demo seed prices are placeholders, not market prices.

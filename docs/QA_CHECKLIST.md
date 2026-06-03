@@ -38,10 +38,15 @@ affect runtime behavior.
       calculation breakdown, selected services and client comment.
 - [ ] Change lead status and verify the saved status remains after reload.
 - [ ] Add a manager comment and verify it appears in newest-first history after reload.
+- [ ] With a lead detail page open, change the same lead status from Telegram or another
+      admin view and verify the status/comments update within about 5 seconds without a
+      manual reload.
 
 ## Production smoke test
 
 - [ ] After Vercel deploy, open `/` on the production URL.
+- [ ] Confirm the deployment came from the intended GitHub/Actions release path, not a
+      direct local `vercel deploy --prod`.
 - [ ] Verify the deployed UI reflects the new commit, not an older build.
 - [ ] Complete the main calculator flow in production.
 - [ ] Submit a production smoke-test lead.
@@ -73,6 +78,9 @@ affect runtime behavior.
 - [ ] Telegram routing is correct when automation is enabled: new lead and reminders go
       to `TELEGRAM_LEADS_CHAT_ID`; RED ALERT and owner report go to
       `TELEGRAM_OWNER_CHAT_ID`.
+- [ ] Telegram status buttons update the lead through `POST /api/n8n/leads`, remove the
+      clicked-message buttons and post a group confirmation with the `AIC-` number and
+      new status label.
 - [ ] Direct Telegram lead notification works only as fallback when n8n is not configured
       or the n8n webhook fails.
 - [ ] Lead submission still succeeds when Telegram env vars are missing or Telegram API

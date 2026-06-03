@@ -1,5 +1,5 @@
 import type { CalculationBreakdown, CalculationInput } from "@/lib/calculate";
-import { formatLeadDisplayNumber } from "@/lib/leads";
+import { formatLeadDisplayNumber, type LeadStatus } from "@/lib/leads";
 
 export type LeadCreatedNotificationLead = {
   id: string | null;
@@ -25,6 +25,15 @@ export type TelegramNotificationResult =
       ok: false;
       error: string;
     };
+
+export type LeadStatusTelegramButton = {
+  text: string;
+  callback_data: string;
+};
+
+export type LeadStatusTelegramReplyMarkup = {
+  inline_keyboard: LeadStatusTelegramButton[][];
+};
 
 const countryLabels: Record<CalculationInput["country"], string> = {
   korea: "Корея",
@@ -53,6 +62,16 @@ const serviceLabels: Array<{
   { key: "includeCertificates", label: "СБКТС/ЭПТС" },
   { key: "includeBroker", label: "Брокер" },
   { key: "includeDelivery", label: "Доставка до города" },
+];
+
+const leadStatusActionLabels: Array<{
+  status: Extract<LeadStatus, "in_progress" | "waiting_client" | "closed" | "rejected">;
+  label: string;
+}> = [
+  { status: "in_progress", label: "В работу" },
+  { status: "waiting_client", label: "Ждем клиента" },
+  { status: "closed", label: "Закрыта" },
+  { status: "rejected", label: "Отказ" },
 ];
 
 const formatRub = (value: number) =>
@@ -125,6 +144,30 @@ export const buildAdminLeadUrl = (leadId: string | null, baseUrl = getAppBaseUrl
   return `${normalizedBaseUrl}/admin/leads/${encodeURIComponent(leadId)}`;
 };
 
+export const buildLeadStatusCallbackData = (leadId: string, status: LeadStatus) =>
+  `lead_status:${status}:${leadId}`;
+
+export const buildLeadStatusReplyMarkup = (
+  leadId: string | null,
+): LeadStatusTelegramReplyMarkup | null => {
+  if (!leadId) {
+    return null;
+  }
+
+  return {
+    inline_keyboard: [
+      leadStatusActionLabels.slice(0, 2).map(({ status, label }) => ({
+        text: label,
+        callback_data: buildLeadStatusCallbackData(leadId, status),
+      })),
+      leadStatusActionLabels.slice(2).map(({ status, label }) => ({
+        text: label,
+        callback_data: buildLeadStatusCallbackData(leadId, status),
+      })),
+    ],
+  };
+};
+
 export const formatLeadCreatedMessage = (
   lead: LeadCreatedNotificationLead,
   adminLeadUrl = buildAdminLeadUrl(lead.id),
@@ -170,17 +213,21 @@ export async function sendLeadCreatedNotification(
   }
 
   try {
+    const replyMarkup = buildLeadStatusReplyMarkup(lead.id);
+    const body = {
+      chat_id: chatId,
+      text: formatLeadCreatedMessage(lead),
+      disable_web_page_preview: true,
+      ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
+    };
+
     const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
       },
       signal: AbortSignal.timeout(5_000),
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: formatLeadCreatedMessage(lead),
-        disable_web_page_preview: true,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {

@@ -42,7 +42,8 @@ N8N_SHARED_SECRET=
 - `N8N_NEW_LEAD_WEBHOOK_URL`: optional n8n production webhook URL called after a
   successful Supabase lead insert.
 - `N8N_SHARED_SECRET`: server-only shared secret used for outgoing n8n webhook headers
-  and for protected n8n status/count reads at `/api/n8n/leads`.
+  and for protected n8n status/count reads plus automation status updates at
+  `/api/n8n/leads`.
 
 `SUPABASE_SERVICE_ROLE_KEY`, Telegram secrets and n8n shared secrets must never be
 exposed to client components and must not use a `NEXT_PUBLIC_` prefix.
@@ -62,7 +63,9 @@ Production env must define:
   automation should be enabled.
 
 After changing Vercel environment variables, redeploy the project so Next.js receives the
-new values.
+new values. Production redeploys should go through GitHub push/Actions; direct local
+`vercel deploy --prod` is intentionally avoided unless the user explicitly changes that
+rule in the current turn.
 
 Do not run `vercel env pull` into `.env.local` or overwrite `.env.local` unless the user
 explicitly permits that exact action. For inspection, pull to a separate temporary file.
@@ -308,13 +311,19 @@ Recommended lead table posture:
    server-side admin read.
 4. Open `/admin/leads/[id]` for the submitted lead and verify lead detail, status changes
    and manager comments load through server-side service-role helpers.
-5. If n8n env vars are configured, verify lead submission calls the n8n webhook and the
+5. Keep `/admin/leads/[id]` open, change the same lead status externally and verify the
+   page updates status/comments through the protected snapshot polling endpoint.
+6. With `N8N_SHARED_SECRET`, verify `POST /api/n8n/leads` can update a submitted lead
+   status and writes a Telegram/internal status-change comment.
+7. If n8n env vars are configured, verify lead submission calls the n8n webhook and the
    n8n workflow sends new lead/reminder messages to the employee group while RED ALERT
    and owner report messages go to the owner chat.
-6. If n8n is not configured but Telegram env vars are configured, verify the direct
+8. Verify Telegram status buttons update the lead, remove the clicked-message buttons and
+   post a group confirmation message.
+9. If n8n is not configured but Telegram env vars are configured, verify the direct
    Telegram fallback notification is delivered. If Telegram env vars are not configured,
    verify lead submission still succeeds.
-7. Verify Vehicle Catalog counts:
+10. Verify Vehicle Catalog counts:
 
 ```sql
 select count(*) from public.vehicle_brands;

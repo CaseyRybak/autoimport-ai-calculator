@@ -40,6 +40,16 @@ const initialLeadCrmActionState: LeadCrmActionState = {
   comment: null,
 };
 
+type LeadCrmSnapshot = {
+  ok: boolean;
+  lead?: {
+    id: string;
+    status: LeadStatus;
+    updatedAt: string;
+  };
+  comments?: LeadManagerComment[];
+};
+
 export function LeadCrmPanel({
   leadId,
   status,
@@ -81,6 +91,63 @@ export function LeadCrmPanel({
       message: statusState.message,
     });
   }, [statusState]);
+
+  useEffect(() => {
+    setCurrentStatus(status);
+    setCurrentComments(comments);
+  }, [comments, status]);
+
+  useEffect(() => {
+    if (!isManagementEnabled) {
+      return;
+    }
+
+    let isMounted = true;
+    let activeRequest: AbortController | null = null;
+
+    const refreshSnapshot = async () => {
+      activeRequest?.abort();
+      activeRequest = new AbortController();
+
+      try {
+        const response = await fetch(
+          `/admin/leads/${encodeURIComponent(leadId)}/snapshot`,
+          {
+            cache: "no-store",
+            signal: activeRequest.signal,
+          },
+        );
+
+        if (!response.ok || !isMounted) {
+          return;
+        }
+
+        const snapshot = (await response.json()) as LeadCrmSnapshot;
+
+        if (!snapshot.ok || !snapshot.lead || !(snapshot.lead.status in statusLabels)) {
+          return;
+        }
+
+        setCurrentStatus(snapshot.lead.status);
+
+        if (snapshot.comments) {
+          setCurrentComments(snapshot.comments);
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+      }
+    };
+
+    const interval = window.setInterval(refreshSnapshot, 5000);
+
+    return () => {
+      isMounted = false;
+      activeRequest?.abort();
+      window.clearInterval(interval);
+    };
+  }, [isManagementEnabled, leadId, statusLabels]);
 
   useEffect(() => {
     if (!commentState.message) {

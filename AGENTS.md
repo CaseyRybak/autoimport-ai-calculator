@@ -24,6 +24,9 @@ AutoImport AI Calculator.
 - Do not touch `/mnt/c` or other Windows disk paths.
 - Do not use `sudo` without explicit user permission.
 - Do not change Git remotes or force push unless explicitly requested.
+- Do not run direct production deploy commands such as `vercel deploy --prod`.
+  Production releases must go through GitHub push/Actions unless the user explicitly
+  changes this rule in the current turn.
 - Do not add real API keys or secrets.
 - Use `.env.example` for environment variable names only.
 - Do not edit, overwrite, regenerate, truncate, or run `vercel env pull` into
@@ -36,6 +39,8 @@ AutoImport AI Calculator.
 - `app/` - Next.js App Router routes.
 - `app/actions.ts` - public server actions, including lead submission.
 - `app/admin/actions.ts` - admin password-gate server actions.
+- `app/admin/leads/[id]/snapshot/route.ts` - protected compact lead CRM snapshot used
+  by admin detail polling.
 - `app/admin/catalog/` - admin Vehicle Catalog list, filters and row update actions.
 - `app/admin/catalog/import/` - CSV upload, validation, preview and import flow.
 - `app/admin/catalog/export/route.ts` - filtered Vehicle Catalog CSV export.
@@ -72,8 +77,10 @@ AutoImport AI Calculator.
 - Admin catalog reads, updates, imports and exports should route through
   `lib/vehicle-catalog-admin.ts` and server actions/routes, never through client-side
   Supabase access.
-- Lead form submissions save to `public.leads` through anon insert when Supabase env and
-  permissions are configured; otherwise the app uses demo/mock fallback.
+- Lead form submissions save to `public.leads` through the server-side lead data
+  boundary. Preferred production path uses `SUPABASE_SERVICE_ROLE_KEY` so the app can
+  receive `id` and `lead_number`; anon insert remains only an insert-only fallback.
+  Otherwise the app uses demo/mock fallback.
 - `/admin` reads `public.leads` server-side through `SUPABASE_SERVICE_ROLE_KEY` after
   `ADMIN_DEMO_PASSWORD`.
 - Never grant anon `SELECT` on `public.leads`; anon only needs lead insert and active
@@ -90,6 +97,8 @@ AutoImport AI Calculator.
   admin number displayed as `AIC-000001`.
 - Admin status changes and manager comments persist server-side through service_role:
   `public.leads.status` and `public.lead_comments`.
+- Open admin lead detail pages poll a protected admin snapshot endpoint for status and
+  comment updates; client components must not read Supabase directly.
 - Real customs formulas are not implemented. Current formulas are demo-only.
 - Demo-mode UX must be honest when mock fallback is used or a planned control is not
   connected yet.

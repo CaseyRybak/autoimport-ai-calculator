@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { CalculationBreakdown, CalculationInput } from "./calculate";
-import { buildAdminLeadUrl, formatLeadCreatedMessage } from "./telegram";
+import {
+  buildAdminLeadUrl,
+  buildLeadStatusCallbackData,
+  buildLeadStatusReplyMarkup,
+  formatLeadCreatedMessage,
+} from "./telegram";
 
 const calculationInput: CalculationInput = {
   country: "korea",
@@ -111,5 +116,50 @@ describe("buildAdminLeadUrl", () => {
       buildAdminLeadUrl("lead id", "https://example.com/"),
       "https://example.com/admin/leads/lead%20id",
     );
+  });
+});
+
+describe("buildLeadStatusReplyMarkup", () => {
+  it("builds Telegram status buttons for a persisted lead", () => {
+    const leadId = "123e4567-e89b-12d3-a456-426614174000";
+    const markup = buildLeadStatusReplyMarkup(leadId);
+
+    assert.deepEqual(markup, {
+      inline_keyboard: [
+        [
+          {
+            text: "В работу",
+            callback_data: `lead_status:in_progress:${leadId}`,
+          },
+          {
+            text: "Ждем клиента",
+            callback_data: `lead_status:waiting_client:${leadId}`,
+          },
+        ],
+        [
+          {
+            text: "Закрыта",
+            callback_data: `lead_status:closed:${leadId}`,
+          },
+          {
+            text: "Отказ",
+            callback_data: `lead_status:rejected:${leadId}`,
+          },
+        ],
+      ],
+    });
+  });
+
+  it("keeps callback data inside the Telegram 64-byte limit", () => {
+    const callbackData = buildLeadStatusCallbackData(
+      "123e4567-e89b-12d3-a456-426614174000",
+      "waiting_client",
+    );
+
+    assert.equal(Buffer.byteLength(callbackData, "utf8") <= 64, true);
+  });
+
+  it("omits buttons when the lead is not persisted", () => {
+    assert.equal(buildLeadStatusReplyMarkup(null), null);
   });
 });

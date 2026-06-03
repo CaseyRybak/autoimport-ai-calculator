@@ -1,0 +1,264 @@
+{
+  "name": "AutoImport - Telegram Status Callback",
+  "active": false,
+  "settings": {
+    "timezone": "Europe/Moscow",
+    "executionTimeout": 120
+  },
+  "nodes": [
+    {
+      "id": "webhook-telegram-status-callback",
+      "name": "Telegram Status Callback Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "autoimport/telegram-status-callback",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "normalize-callback",
+      "name": "Normalize Callback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const body = items[0].json.body ?? items[0].json;\nconst callback = body.callback_query ?? {};\nconst data = String(callback.data ?? '');\nconst match = data.match(/^lead_status:(new|in_progress|waiting_client|closed|rejected):(.+)$/);\n\nif (!match) {\n  return [{ json: { valid: false, callback_query_id: callback.id ?? null, error: 'Unsupported callback data' } }];\n}\n\nconst from = callback.from ?? {};\nconst actor = [from.username ? '@' + from.username : null, from.first_name, from.last_name]\n  .filter(Boolean)\n  .join(' ')\n  .trim();\nconst message = callback.message ?? {};\nconst text = String(message.text ?? '');\nconst leadNumberMatch = text.match(/(?:заявка|заявки)\\s+(AIC-\\d+)/i);\n\nreturn [{\n  json: {\n    valid: true,\n    callback_query_id: callback.id ?? null,\n    lead_id: match[2],\n    status: match[1],\n    actor,\n    chat_id: message.chat?.id ?? null,\n    message_id: message.message_id ?? null,\n    lead_number: leadNumberMatch?.[1] ?? null,\n  },\n}];"
+      }
+    },
+    {
+      "id": "if-valid-callback",
+      "name": "If Valid Callback",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        560,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "callback-valid",
+              "leftValue": "={{$json.valid}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "update-app-lead-status",
+      "name": "Update App Lead Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        840,
+        -100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{($env.AUTOIMPORT_APP_BASE_URL || 'https://autoimport-ai-calculator.vercel.app') + '/api/n8n/leads'}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-n8n-shared-secret",
+              "value": "={{$env.AUTOIMPORT_N8N_SHARED_SECRET || $env.N8N_SHARED_SECRET}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { leadId: $json.lead_id, status: $json.status, actor: $json.actor } }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "answer-success",
+      "name": "Answer Success",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        -100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://api.telegram.org/bot' + $env.TELEGRAM_BOT_TOKEN + '/answerCallbackQuery'}}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { callback_query_id: $('Normalize Callback').first().json.callback_query_id, text: 'Статус изменен: ' + ($json.label || $json.status), show_alert: false } }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "remove-status-buttons",
+      "name": "Remove Status Buttons",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1400,
+        -100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://api.telegram.org/bot' + $env.TELEGRAM_BOT_TOKEN + '/editMessageReplyMarkup'}}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { chat_id: $('Normalize Callback').first().json.chat_id, message_id: $('Normalize Callback').first().json.message_id, reply_markup: { inline_keyboard: [] } } }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "send-status-changed-message",
+      "name": "Send Status Changed Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1680,
+        -100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://api.telegram.org/bot' + $env.TELEGRAM_BOT_TOKEN + '/sendMessage'}}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { chat_id: $('Normalize Callback').first().json.chat_id, text: 'Статус заявки ' + ($('Normalize Callback').first().json.lead_number || $('Normalize Callback').first().json.lead_id) + ' изменен на ' + ($('Update App Lead Status').first().json.label || $('Normalize Callback').first().json.status), disable_web_page_preview: true } }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "answer-invalid",
+      "name": "Answer Invalid",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        840,
+        120
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{'https://api.telegram.org/bot' + $env.TELEGRAM_BOT_TOKEN + '/answerCallbackQuery'}}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { callback_query_id: $json.callback_query_id, text: 'Не удалось распознать действие', show_alert: true } }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Status Callback Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Callback": {
+      "main": [
+        [
+          {
+            "node": "If Valid Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Valid Callback": {
+      "main": [
+        [
+          {
+            "node": "Update App Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Answer Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update App Lead Status": {
+      "main": [
+        [
+          {
+            "node": "Answer Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer Success": {
+      "main": [
+        [
+          {
+            "node": "Remove Status Buttons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Status Buttons": {
+      "main": [
+        [
+          {
+            "node": "Send Status Changed Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

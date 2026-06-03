@@ -16,6 +16,8 @@
 ## Key Directories
 
 - `app/` - маршруты Next.js.
+- `app/admin/leads/[id]/snapshot/route.ts` - protected compact CRM snapshot for admin
+  detail polling.
 - `components/calculator/` - публичный калькулятор.
 - `components/result/` - отображение результата и breakdown.
 - `components/lead-form/` - форма заявки.
@@ -110,6 +112,10 @@ service-role helpers:
   и `is_internal = true`.
 - Lead detail читает persisted comments на сервере через `lib/leads.ts` или связанную
   `lib/` data boundary, но не напрямую из client component.
+- Open lead detail pages poll `/admin/leads/[id]/snapshot` every 5 seconds after
+  admin access. The endpoint returns only compact CRM state (`status`, `updatedAt`,
+  comments) through server-side helpers so Telegram/button changes can appear without a
+  full page reload.
 - Validation должна отклонять unknown lead ids, unsupported statuses и empty comments.
 
 ## Harness
@@ -124,11 +130,15 @@ service-role helpers:
 Supabase подключен для lead creation, admin lead read, Vehicle Catalog read/write и
 CRM-minimum persistence при наличии переменных окружения и нужных grants/policies.
 n8n automation подключена для новых заявок, Google Sheets append, Telegram routing,
-reminders, RED ALERT и owner status report. Telegram напрямую из приложения используется
-как fallback, чтобы не дублировать сообщения при рабочем n8n. AI-assisted flows остаются
-roadmap-пунктом; runtime OpenAI env vars и реальные OpenAI-запросы сейчас не подключены.
+reminders, Telegram status callbacks, RED ALERT и owner status report. Telegram напрямую
+из приложения используется как fallback, чтобы не дублировать сообщения при рабочем n8n.
+AI-assisted flows остаются roadmap-пунктом; runtime OpenAI env vars и реальные
+OpenAI-запросы сейчас не подключены.
 
 Переменные окружения описаны в `.env.example` и `docs/SUPABASE_SETUP.md`. Реальные
 секреты нельзя коммитить в репозиторий. `.env.local` содержит реальные локальные
 секреты и не должен редактироваться или перезаписываться агентом без отдельного явного
 разрешения пользователя.
+
+Production deploys should go through GitHub push/Actions. Direct local production deploys
+with `vercel deploy --prod` are intentionally avoided so CI remains the release gate.

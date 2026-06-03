@@ -20,6 +20,7 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Unit tests cover demo fallback for the lead persistence boundary in `lib/leads.ts`.
 - Unit tests cover n8n lead webhook payload construction and skip paths.
 - Unit tests cover Telegram lead message formatting and admin link generation.
+- Unit tests cover Telegram status button reply markup and callback data length.
 - Unit tests cover Vehicle Catalog dependent selectors and USD-to-display-currency
   conversion.
 - Unit tests cover Vehicle Catalog CSV import parsing, required columns, row validation,
@@ -53,6 +54,8 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Do not add anon `SELECT` policy for `public.leads`.
 - Settings are read-only controls backed by demo calculation settings.
 - Admin lead status and manager comments persist through server-side service-role helpers.
+- Open admin lead detail pages poll a protected snapshot endpoint for status/comment
+  updates; this is intentionally lightweight polling, not Supabase Realtime.
 - AI-assisted text generation is roadmap-only; runtime OpenAI env vars and requests are not
   connected.
 - Calculation formulas are demo-only and not real customs formulas.
@@ -74,6 +77,10 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
   June 2, 2026: webhook intake, Google Sheets append and Telegram notification passed.
 - Telegram routing is split: new lead/reminder messages go to the employee group, while
   RED ALERT and owner status reports go to the owner chat.
+- Telegram employee status buttons use protected automation callbacks and persist status
+  changes through server-side service-role helpers.
+- Telegram status callbacks remove clicked-message buttons and post group confirmation
+  messages after successful CRM updates.
 - Main calculator updates result from user input.
 - Public copy stays commercial and does not expose demo/mock/Supabase-ready implementation
   details.
@@ -84,6 +91,8 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 - Unknown admin lead ids return 404.
 - Settings save action is disabled.
 - Admin status changes and manager comments persist and remain visible after reload.
+- Status/comment changes made outside an open lead detail page appear through protected
+  polling without a manual browser reload.
 - `npm test`, `npm run typecheck` and `npm run build` pass locally or in CI.
 
 ## Quality Bar For Supabase Changes
@@ -100,9 +109,14 @@ GitHub Actions runs the same checks on pushes and pull requests to `main`.
 ## Quality Bar For Automation Changes
 
 - Do not edit `.env.local` without explicit user permission in that turn.
+- Do not use direct local production deploy commands such as `vercel deploy --prod`;
+  production releases should go through GitHub push/Actions unless the user explicitly
+  changes this rule in the current turn.
 - Keep production n8n workflows active only after test execution or targeted read-only
   verification.
 - Keep new lead/reminder Telegram routes pointed at `TELEGRAM_LEADS_CHAT_ID`.
+- Keep Telegram employee status callbacks routed through protected app endpoints, not
+  direct client-side Supabase access.
 - Keep RED ALERT and owner report routes pointed at `TELEGRAM_OWNER_CHAT_ID`.
 - Avoid duplicate new-lead Telegram sends: app direct Telegram is fallback only when n8n
   is not configured or fails.

@@ -21,9 +21,15 @@ unless the task needs them or the user explicitly asks.
   statuses/comments and catalog management when env vars and grants are configured.
 - Optional Telegram lead notifications are available when Telegram env vars are
   configured.
-- n8n workflows `AutoImport - New Lead Intake` and `AutoImport - Owner Status Report`
-  are active. The new-lead workflow writes to Google Sheet `AutoImport Leads`, sends
-  Telegram notifications and performs reminder/status checks through `/api/n8n/leads`.
+- n8n workflows `AutoImport - New Lead Intake`, `AutoImport - Owner Status Report` and
+  `AutoImport - Telegram Status Callback` are active. The new-lead workflow writes to
+  Google Sheet `AutoImport Leads`, sends Telegram notifications and performs
+  reminder/status checks through `/api/n8n/leads`.
+- Telegram employee status buttons are implemented in the app/n8n templates through
+  protected `POST /api/n8n/leads`; the callback workflow removes clicked-message
+  buttons and posts a group confirmation after successful status changes.
+- Admin lead detail includes protected 5-second polling for status/comment updates so
+  Telegram changes can appear without a manual page reload after deployment.
 - Admin pages cover leads, lead detail, settings, catalog management, and catalog
   CSV import/export.
 - Demo/mock fallback remains when env vars or permissions are missing.
@@ -45,6 +51,9 @@ unless the task needs them or the user explicitly asks.
 - UI should not import Supabase directly. Use `lib/leads.ts`,
   `lib/vehicle-catalog.ts`, server actions, or admin data boundaries.
 - Do not commit or push unless the user explicitly asks.
+- Do not run direct production deploy commands such as `vercel deploy --prod`;
+  production releases should go through GitHub push/Actions unless the user explicitly
+  changes this in the current turn.
 - For simple read-only checks, run only the requested command/file read and avoid
   loading skills or long docs.
 
@@ -69,6 +78,7 @@ Optional integrations:
 - Production site: `https://autoimport-ai-calculator.vercel.app/`
 - n8n new-lead workflow id: `5qXRyji4Yv3bbFMo`
 - n8n owner-report workflow id: `rLze04ap1PeGahCf`
+- n8n Telegram status callback workflow id: `I4djkKQ5BeTPkFpp`
 - Google Sheet: `https://docs.google.com/spreadsheets/d/130cZrwdQwiW2-56mwHxZamxAqTkb2A_Yr4jGpyx1vjY/edit`
 - A production UI test lead submitted on June 2, 2026 verified webhook receipt,
   Google Sheets append and Telegram notification.
@@ -85,9 +95,10 @@ Optional integrations:
 
 ## Recommended Next Step
 
-- Current automation is live. Next likely implementation steps are production admin
-  authentication, real catalog price enrichment, or converting n8n reminder/report
-  settings from hardcoded workflow values into editable settings.
+- Current automation is live. Next likely implementation steps are deploying the current
+  pending app changes through GitHub/Actions, production admin authentication, real
+  catalog price enrichment, or converting n8n reminder/report settings from hardcoded
+  workflow values into editable settings.
 
 ## Startup
 

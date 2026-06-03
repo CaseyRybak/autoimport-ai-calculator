@@ -42,7 +42,8 @@ does not contain secrets, API keys or real credential values.
   values need inspection, write to a separate temporary file first.
 - The one-time helper workflow `AutoImport - Create Leads Sheet`, id
   `arCdkkC7u1Yu49mq`, was archived after creating the spreadsheet.
-- Both n8n workflows were published on June 2, 2026 and are active.
+- New Lead Intake and Owner Status Report were published on June 2, 2026 and are active.
+- Telegram Status Callback workflow was created on June 3, 2026 and is active.
 - The live production flow was verified from the Vercel site on June 2, 2026 with a
   test lead. n8n execution `9` reached the reminder wait state, and these nodes reported
   `ok`: webhook receive, payload normalization, Google Sheets append and Telegram
@@ -54,6 +55,7 @@ does not contain secrets, API keys or real credential values.
 - Sanitized workflow export templates now live in:
   - `docs/n8n/new-lead-intake.workflow.json`
   - `docs/n8n/owner-status-report.workflow.json`
+  - `docs/n8n/telegram-status-callback.workflow.json`
 - The app now has optional n8n integration env names:
   - `N8N_NEW_LEAD_WEBHOOK_URL`
   - `N8N_SHARED_SECRET`
@@ -64,6 +66,9 @@ does not contain secrets, API keys or real credential values.
     (`TELEGRAM_OWNER_CHAT_ID`).
 - The app exposes a protected server route for n8n status checks and report counts:
   `/api/n8n/leads`, authorized by `x-n8n-shared-secret`.
+- The app also exposes a protected admin snapshot route
+  `/admin/leads/[id]/snapshot` for open lead-detail polling. This route is admin-cookie
+  protected and is not used by n8n.
 - Recommended temporary setup before starting Codex:
 
 ```bash
@@ -114,7 +119,12 @@ Main path:
    - admin lead URL if available
 3. Append the lead to owner Google Sheets.
 4. Send new-lead notification to the employee Telegram group.
-5. Start reminder tracking for this specific lead.
+5. Include employee action buttons:
+   - `В работу` -> `in_progress`
+   - `Ждем клиента` -> `waiting_client`
+   - `Закрыта` -> `closed`
+   - `Отказ` -> `rejected`
+6. Start reminder tracking for this specific lead.
 
 Each incoming lead must run independently. If several leads arrive close together, each
 lead gets its own execution path and reminder loop keyed by `lead_id`.
@@ -235,7 +245,39 @@ Current implementation uses option 1:
 
 - `GET /api/n8n/leads?leadId=<uuid>` returns current lead status/detail for reminders.
 - `GET /api/n8n/leads` returns status counts for owner reports.
+- `POST /api/n8n/leads` updates a lead status from automation callbacks. JSON body:
+  `{ "leadId": "<uuid>", "status": "in_progress", "actor": "@manager optional" }`.
+  The endpoint writes `public.leads.status`, adds an internal manager comment and returns
+  the updated status label.
 - Both require `x-n8n-shared-secret` matching `N8N_SHARED_SECRET`.
+
+## Telegram Status Callback Workflow
+
+Purpose: let employees change CRM status directly from Telegram group buttons.
+
+Current template/live workflow:
+
+- Name: `AutoImport - Telegram Status Callback`
+- Template: `docs/n8n/telegram-status-callback.workflow.json`
+- Live workflow id: `I4djkKQ5BeTPkFpp`
+- Status: active in n8n.
+- On a successful button click, the workflow updates the app lead status, answers the
+  Telegram callback, removes the original inline keyboard and posts a group message
+  like `Статус заявки AIC-000020 изменен на В работе`.
+
+Fresh import setup:
+
+1. Import the callback workflow.
+2. Configure the workflow with the same Telegram bot token and shared app secret as the
+   existing lead workflows.
+3. Point Telegram bot webhook updates to the workflow production webhook path:
+   `/webhook/autoimport/telegram-status-callback`.
+4. Send new lead/reminder group messages with `reply_markup.inline_keyboard` as shown in
+   `docs/n8n/new-lead-intake.workflow.json`.
+
+The callback data format is `lead_status:<status>:<uuid>`. It fits Telegram's 64-byte
+callback limit for UUID lead ids, including the longest current status
+`waiting_client`.
 
 Do not expose `SUPABASE_SERVICE_ROLE_KEY` to browser code. If used in n8n, store it only
 as an n8n credential/secret.
@@ -271,6 +313,9 @@ Current production state:
 2. Vercel production env includes `N8N_NEW_LEAD_WEBHOOK_URL` and `N8N_SHARED_SECRET`.
 3. New Lead Intake has been tested through the production site and writes to Google
    Sheets plus Telegram successfully.
+4. Telegram Status Callback is active and has passed n8n pin-data validation. A live
+   protected `POST /api/n8n/leads` update was verified after production had the POST
+   route deployed.
 
 ## After Restart Checklist
 
