@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { AdminAutoRefresh } from "@/components/admin/admin-auto-refresh";
 import { AdminPasswordGate } from "@/components/admin/admin-password-gate";
 import { AdminShell } from "@/components/admin/admin-shell";
 import {
@@ -126,6 +127,8 @@ export default async function AdminPage({ searchParams }: Props) {
 
   return (
     <AdminShell title="Заявки">
+      {isPasswordConfigured ? <AdminAutoRefresh /> : null}
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <Metric label="Всего заявок" value={summary.total} />
         <Metric label="Новые" value={summary.new} />

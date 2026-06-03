@@ -114,6 +114,7 @@ export function LeadCrmPanel({
           `/admin/leads/${encodeURIComponent(leadId)}/snapshot`,
           {
             cache: "no-store",
+            credentials: "same-origin",
             signal: activeRequest.signal,
           },
         );
@@ -139,6 +140,8 @@ export function LeadCrmPanel({
         }
       }
     };
+
+    refreshSnapshot();
 
     const interval = window.setInterval(refreshSnapshot, 5000);
 
