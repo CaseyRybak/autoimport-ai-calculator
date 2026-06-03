@@ -42,16 +42,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: true, lead });
   }
 
-  const counts = await getLeadStatusCounts();
+  const statusCounts = await getLeadStatusCounts();
 
-  if (!counts) {
+  if (!statusCounts) {
     return NextResponse.json(
       { ok: false, error: "Lead status counts unavailable" },
       { status: 503 },
     );
   }
 
-  return NextResponse.json({ ok: true, counts });
+  return NextResponse.json({ ok: true, ...statusCounts });
 }
 
 export async function POST(request: NextRequest) {

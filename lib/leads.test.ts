@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { CalculationBreakdown, CalculationInput } from "./calculate";
-import { createLead } from "./leads";
+import { createLead, getLeadStatusCountsWindow } from "./leads";
 
 const calculationInput: CalculationInput = {
   country: "korea",
@@ -49,6 +49,16 @@ describe("createLead", () => {
       mode: "demo",
       id: null,
       lead: null,
+    });
+  });
+});
+
+describe("getLeadStatusCountsWindow", () => {
+  it("uses a rolling 24 hour window ending at the report time", () => {
+    assert.deepEqual(getLeadStatusCountsWindow(new Date("2026-06-03T17:20:00.000Z")), {
+      periodHours: 24,
+      periodStartedAt: "2026-06-02T17:20:00.000Z",
+      periodEndedAt: "2026-06-03T17:20:00.000Z",
     });
   });
 });

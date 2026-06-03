@@ -34,6 +34,11 @@ does not contain secrets, API keys or real credential values.
 - n8n pin-data tests passed on June 2, 2026:
   - `AutoImport - New Lead Intake`, execution id `8`, status `success`
   - `AutoImport - Owner Status Report`, execution id `7`, status `success`
+- On June 3, 2026, the active `AutoImport - Owner Status Report` workflow was patched
+  through the authenticated n8n MCP endpoint: the `Format Owner Report` Code node was
+  synchronized with `docs/n8n/owner-status-report.workflow.json`, so the Telegram message
+  explicitly shows `Период: последние 24 часа`. Live pin-data test execution `31`
+  finished with status `success`, and the workflow remained active.
 - Local `.env.local` was updated with:
   - `N8N_NEW_LEAD_WEBHOOK_URL`
   - `N8N_SHARED_SECRET`
@@ -180,11 +185,16 @@ Current n8n workflow:
 - Status: active
 - Schedule: daily at `20:20` Moscow time target. The active Schedule Trigger currently
   stores `daysInterval: 1`, `triggerAtHour: 20` and `triggerAtMinute: 20`.
+- The active n8n `Format Owner Report` Code node is synchronized with the sanitized
+  export in `docs/n8n/owner-status-report.workflow.json`. The Telegram message explicitly
+  shows `Период: последние 24 часа`, and `/api/n8n/leads` returns the matching rolling
+  24-hour count window with `periodStartedAt` and `periodEndedAt`.
 
 Keep this separate from New Lead Intake. It is a scheduled/status workflow, not an event
 workflow.
 
-Report should include counts by current lead status:
+Report should include counts by current lead status for the rolling 24-hour period ending
+at report generation time:
 
 - `new`
 - `in_progress`
@@ -244,7 +254,8 @@ Preferred options:
 Current implementation uses option 1:
 
 - `GET /api/n8n/leads?leadId=<uuid>` returns current lead status/detail for reminders.
-- `GET /api/n8n/leads` returns status counts for owner reports.
+- `GET /api/n8n/leads` returns rolling 24-hour status counts for owner reports plus
+  `periodHours`, `periodStartedAt` and `periodEndedAt`.
 - `POST /api/n8n/leads` updates a lead status from automation callbacks. JSON body:
   `{ "leadId": "<uuid>", "status": "in_progress", "actor": "@manager optional" }`.
   The endpoint writes `public.leads.status`, adds an internal manager comment and returns

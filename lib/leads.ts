@@ -173,6 +173,13 @@ export type LeadAutomationStatus = {
 
 export type LeadStatusCounts = Record<LeadStatus, number>;
 
+export type LeadStatusCountsResult = {
+  counts: LeadStatusCounts;
+  periodHours: number;
+  periodStartedAt: string;
+  periodEndedAt: string;
+};
+
 export type LeadDetailService = {
   key:
     | "includeCarrier"
@@ -271,6 +278,20 @@ const emptyLeadStatusCounts = (): LeadStatusCounts => ({
   closed: 0,
   rejected: 0,
 });
+
+export const getLeadStatusCountsWindow = (
+  now = new Date(),
+  periodHours = 24,
+) => {
+  const periodEndedAt = new Date(now);
+  const periodStartedAt = new Date(periodEndedAt.getTime() - periodHours * 60 * 60 * 1000);
+
+  return {
+    periodHours,
+    periodStartedAt: periodStartedAt.toISOString(),
+    periodEndedAt: periodEndedAt.toISOString(),
+  };
+};
 
 const mapLeadAutomationStatusRow = (row: LeadAutomationStatusRow): LeadAutomationStatus => {
   const leadNumber = toNumberOrNull(row.lead_number);
@@ -556,26 +577,36 @@ export async function getLeadAutomationStatus(
   return mapLeadAutomationStatusRow(data as LeadAutomationStatusRow);
 }
 
-export async function getLeadStatusCounts(): Promise<LeadStatusCounts | null> {
+export async function getLeadStatusCounts(): Promise<LeadStatusCountsResult | null> {
   const { client: supabase } = await createAdminClient();
+  const window = getLeadStatusCountsWindow();
 
   if (!supabase) {
     return null;
   }
 
-  const { data, error } = await supabase.from("leads").select("status");
+  const { data, error } = await supabase
+    .from("leads")
+    .select("status")
+    .gte("created_at", window.periodStartedAt)
+    .lt("created_at", window.periodEndedAt);
 
   if (error) {
     console.error(`n8n lead status counts failed: ${error.message}`);
     return null;
   }
 
-  return (data ?? []).reduce((counts, row) => {
+  const counts = (data ?? []).reduce((counts, row) => {
     const status = toLeadStatus((row as LeadStatusCountRow).status);
     counts[status] += 1;
 
     return counts;
   }, emptyLeadStatusCounts());
+
+  return {
+    counts,
+    ...window,
+  };
 }
 
 export async function listLeads(): Promise<DemoLead[]> {

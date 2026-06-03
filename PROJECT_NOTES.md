@@ -63,7 +63,10 @@ business/legal rules.
   remove clicked-message buttons and post group confirmations.
 - Current reminder behavior: 10-minute interval, RED ALERT immediately after the third
   reminder while the lead remains `new`.
-- Owner report schedule: daily at 20:20 Moscow time target.
+- Owner report schedule: daily at 20:20 Moscow time target. The report uses
+  `/api/n8n/leads` rolling 24-hour counts and the live n8n `Format Owner Report` node now
+  shows `Период: последние 24 часа`; MCP pin-data test execution `31` passed on June 3,
+  2026.
 
 ## Non-Negotiable Rules
 

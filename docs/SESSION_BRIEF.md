@@ -25,6 +25,9 @@ unless the task needs them or the user explicitly asks.
   `AutoImport - Telegram Status Callback` are active. The new-lead workflow writes to
   Google Sheet `AutoImport Leads`, sends Telegram notifications and performs
   reminder/status checks through `/api/n8n/leads`.
+- Owner Status Report is synchronized with the app's rolling 24-hour report API: the
+  Telegram message shows `Период: последние 24 часа`, and the active live workflow was
+  verified with n8n pin-data test execution `31` on June 3, 2026.
 - Telegram employee status buttons are implemented in the app/n8n templates through
   protected `POST /api/n8n/leads`; the callback workflow removes clicked-message
   buttons and posts a group confirmation after successful status changes.
@@ -85,6 +88,8 @@ Optional integrations:
 - Telegram routing: new lead and reminder messages go to the employee group through
   `TELEGRAM_LEADS_CHAT_ID`; RED ALERT and daily owner reports go to
   `TELEGRAM_OWNER_CHAT_ID`.
+- Owner reports use `GET /api/n8n/leads` counts for the rolling 24-hour period ending at
+  report generation time.
 
 ## Known Limitations
 
